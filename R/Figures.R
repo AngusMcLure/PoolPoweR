@@ -49,7 +49,7 @@ de.fig.corr <- de.data.corr %>%
   theme(text = element_text(size = 12))
 de.fig.corr
 
-ggsave('./FigDesignEffectCorr.png',de.fig.corr, width = 6, height = 5, unit = 'in',dpi = 'retina')
+ggsave('./Figures/FigDesignEffectCorr.png',de.fig.corr, width = 6, height = 5, unit = 'in',dpi = 'retina')
 
 unitcost.fig.corr <- de.data.corr %>%
   mutate(across(c(`Pool Size`,catch,correlation), as.factor)) %>%
@@ -117,7 +117,7 @@ FigDesignEffect <- plot_data %>%
   guides(color = guide_legend(title = 'Group/pool size: s',nrow = 1)) +
   theme(legend.position = 'bottom')
 FigDesignEffect
-ggsave("FigDesignEffect.png",FigDesignEffect)
+ggsave("./Figures/FigDesignEffect.png",FigDesignEffect)
 
 FigDesignEffectSupp <- plot_data %>%
   mutate(sensitivity = paste0("'Sensitivity: ' *varphi*' = ",sensitivity,"'"),
@@ -135,7 +135,7 @@ FigDesignEffectSupp <- plot_data %>%
   guides(color = guide_legend(title = 'Group/pool size: s', nrow = 1)) +
   theme(legend.position = 'bottom')
 FigDesignEffectSupp
-ggsave("FigDesignEffectSupp.png",FigDesignEffectSupp)
+ggsave("./Figures/FigDesignEffectSupp.png",FigDesignEffectSupp)
 
 #Optimal s for simple random sampling
 
@@ -169,7 +169,7 @@ fig_optimal_s <- optimal_s_data %>%
   guides(color = guide_legend(title = latex2exp::TeX(r"(Cost ratio: $c_p/c_u$)"))) +
   theme(legend.position = 'bottom')
 fig_optimal_s
-ggsave("FigOptimals.png",fig_optimal_s,height = 24, width= 24, unit = 'cm')
+ggsave("./Figures/FigOptimals.png",fig_optimal_s,height = 24, width= 24, unit = 'cm')
 
 
 plot_data_interval <- expand.grid(prevalence = seq(0.001,0.1,by = 0.001),
@@ -212,7 +212,7 @@ FigOptimalsInterval <- plot_data_interval %>%
   xlab(latex2exp::TeX(r"(Prevalence: $\theta$)")) +
   coord_cartesian(ylim = c(1, 320))
 FigOptimalsInterval
-ggsave("FigOptimalsInterval.png",FigOptimalsInterval, height = 11.66, width= 24, unit = 'cm')
+ggsave("./Figures/FigOptimalsInterval.png",FigOptimalsInterval, height = 11.66, width= 24, unit = 'cm')
 
 ## Demonstrate that Fisher information for cluster sample sometimes but not always converges towards simple random for small rho
 

@@ -228,8 +228,7 @@ For a perfectly specific test, positive predictive value is always 1. For an imp
 Design effect increases with $\theta$ but most rapidly when sensitivity is low and pools/groups are large.
 
 
-
-![](./FigDesignEffectSupp.png) 
+![](./Figures/FigDesignEffectSupp.png) 
 
 #### Optimising simple random surveys with pooled testing
 
@@ -307,7 +306,7 @@ However the optimal pool size does not increase without bound for increasing $c_
 
 While specificity has a dramatic effect on the optimal $s$ especially for low $\theta$, there is no matching dramatic effect for sensitivity. If sensitivity were to decline substantially with increasing pool size it may have a greater effect of choice of pool/group size but we do not consider this case. However, reducing sensitivity does decrease Fisher information 
 
-![](./FigOptimals.png) 
+![](./Figures/FigOptimals.png) 
 
 
 
@@ -619,11 +618,11 @@ One way to have an intuitive understanding of these surprising results comes fro
 
 While this behaviour is counter-intuitive and suggest major problems with using cluster surveys with pooled testing to estimate prevalence, it should be noted that the most pathological behaviour is restricted to the case where prevalence is reasonably high — i.e. when one would generally not be considering using pooled testing. While it is possible to have this odd behaviour at low prevalence it only occurs with very large pools, far larger than what would be a sensible even for a non-cluster survey (see Figure []).
 
-![](./FisherMatrixbeta.png)
+![](./Figures/FisherMatrixbeta.png)
 
 **Figure []**. Fisher information matrix for $\theta$ and $\rho$ in a cluster sample design with pooled testing with ten units per pool ($s = 10$) and five pools per cluster ($N = 5$). Cluster-level prevalence ($\Theta_j$) is assumed to be beta distributed with mean $\theta = \frac{\alpha}{\alpha + \beta}$ and resultant intra-cluster correlation $\rho = \frac{1}{\alpha + \beta + 1}$. Dotted lines in upper left panel is Fisher information for $\theta$ for a simple random survey with the same pool size and total pools, $I(\theta)$. Dotted lines in the upper right panel is $\frac{1}{I(\theta)}$.  
 
-![](./Variancebeta.png)
+![](./Figures/Variancebeta.png)
 
 **Figure []** Upper left element of inverse Fisher information matrix for $\theta$ and $\rho$ in a cluster sample design with pooled testing with large pools ($50 \leq s\leq 2000$) and two pools per cluster ($N = 2$). Cluster-level prevalence ($\Theta_j$) is assumed to be beta distributed with mean $\theta = \frac{\alpha}{\alpha + \beta}$ and resultant intra-cluster correlation $\rho = \frac{1}{\alpha + \beta + 1}$. Dotted lines is inverse of Fisher information for $\theta$ for a simple random survey with the same pool size and total pools, $\frac{1}{I(\theta)}$.  
 
@@ -664,7 +663,7 @@ The logit-normal distribution arises naturally in random effect and mixed effect
 
 The Fisher information matrix and its inverse display similar quantitative and qualitative results for logit-normal distributed $\Theta_j$ as for beta distributed $\Theta_j$ (compare below with figure from previous section).
 
-![](./FisherMatrixlogitnorm.png)
+![](./Figures/FisherMatrixlogitnorm.png)
 
 
 
@@ -676,11 +675,11 @@ $$
 \frac{(c_l + N c_p + Ns c_v)}{\Sigma_{1,1}}.
 $$
 
-![](.\FigDesignEffectCorr.png)
+![](./Figures/FigDesignEffectCorr.png)
 
-![](.\optimal cluster.png)
+![](./Figures/optimal cluster.png)
 
-![](.\unit info cluster.png)
+![](./Figures/unit info cluster.png)
 
 ### Power size calculations based on Fisher information
 
