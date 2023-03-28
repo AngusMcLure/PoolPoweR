@@ -106,26 +106,26 @@ Vectorize(optimise_s_prevalence)(theta,cu,ct,cl,rho, N = 2:10,max.s = 50)
 Vectorize(optimise_s_prevalence)(prevalence = c(0.0001,0.001,0.002,0.005,0.01),
                                  sensitivity = 1, specificity = 1,
                                  cost.unit = 3.3 + 0.68 + 0.45,
-                                 cost.test = 4.66 + 2.73, max.s = 200)
+                                 cost.pool = 4.66 + 2.73, max.s = 200)
 
 Vectorize(optimise_s_prevalence)(prevalence = c(0.0001,0.001,0.002,0.005,0.01),
                                  sensitivity = 1, specificity = 1,
                                  cost.unit = 3.3 + 0.68 + 0.45,
-                                 cost.test = 4.66 + 2.73,
+                                 cost.pool = 4.66 + 2.73,
                                  cost.location = 8.93, correlation = 0.01, N = 5,
                                  max.s = 200)
 
 Vectorize(optimise_sN_prevalence)(prevalence = c(0.0001,0.001,0.002,0.005,0.01),
                                   sensitivity = 1, specificity = 1,
                                   cost.unit = 3.3 + 0.68 + 0.45,
-                                  cost.test = 4.66 + 2.73,
+                                  cost.pool = 4.66 + 2.73,
                                   cost.location = 8.93, correlation = 0.01,
                                   max.s = 200)
 
 Vectorize(optimise_sN_prevalence)(prevalence = 0.01,
                                   sensitivity = 1, specificity = 1,
                                   cost.unit = 3.3 + 0.68 + 0.45,
-                                  cost.test = 4.66 + 2.73,
+                                  cost.pool = 4.66 + 2.73,
                                   cost.location = 8.93,
                                   correlation = c(0,0.01,0.1,0.3),
                                   max.s = 20)
@@ -134,7 +134,7 @@ Vectorize(optimise_sN_prevalence)(prevalence = 0.01,
 Vectorize(unit_fi_cost_clustered)(s = 1:20, N = 1,prevalence = 0.01, correlation = 0.001,
                                   sensitivity = 1, specificity = 1,
                                   cost.unit =  3.3 + 0.68 + 0.45,
-                                  cost.test = 4.66 + 2.73,
+                                  cost.pool = 4.66 + 2.73,
                                   cost.location = 8.93, form = 'beta')
 
 N <- 10; Vectorize(optimise_s_prevalence)(0.01, 0.9, 0.9, 1, 2, 4, 0.1,N,max.s = 30)
@@ -152,13 +152,13 @@ plot_data_alt <- expand.grid(prevalence = c(0.001,0.003,0.01,0.03),
                              sensitivity = c(0.9,0.99,0.999,1),
                              specificity = seq(0.9,1,by = 0.001),
                              cost.unit = 1,
-                             cost.test = c(0,0.1,1,10,Inf)) %>%
-  mutate(s = Vectorize(optimise_s_prevalence)(prevalence,sensitivity, specificity, cost.unit,cost.test, max.s = 1000))
+                             cost.pool = c(0,0.1,1,10,Inf)) %>%
+  mutate(s = Vectorize(optimise_s_prevalence)(prevalence,sensitivity, specificity, cost.unit,cost.pool, max.s = 1000))
 
 FigOptimals_alt <- plot_data_alt %>%
   subset(sensitivity == 1 ) %>%
   mutate(prevalence = factor(paste0(prevalence*100,'%'))) %>%
-  ggplot(aes(x = specificity, y = s, color = factor(cost.test))) +
+  ggplot(aes(x = specificity, y = s, color = factor(cost.pool))) +
   geom_line() + facet_grid(
     . ~ prevalence,
     labeller = label_both) +
@@ -172,69 +172,14 @@ plot_data_PPV <- expand.grid(prevalence = seq(0.001,0.1,by = 0.001),
                              specificity = seq(0.9,1,by = 0.001),
                              sensitivity = 1,
                              cost.unit = 1,
-                             cost.test = c(0,0.1,1,10,Inf)) %>%
+                             cost.pool = c(0,0.1,1,10,Inf)) %>%
   mutate(PPV = (1 + (1 - specificity)/(prevalence * sensitivity))^-1,
-         s = Vectorize(optimise_s_prevalence)(prevalence,sensitivity, specificity, cost.unit,cost.test, max.s = 300))
+         s = Vectorize(optimise_s_prevalence)(prevalence,sensitivity, specificity, cost.unit,cost.pool, max.s = 300))
 
 plot_data_PPV %>%
   subset(sensitivity == 1) %>%
   ggplot(aes(x= PPV, y = s,color = prevalence)) +
   geom_point() +
-  facet_grid(.~cost.test)
+  facet_grid(.~cost.pool)
 
-
-plot_data_clustered <- expand.grid(prevalence = seq(0.01,0.1,by = 0.01),
-                                   #cost.unit = c(3.3 + 0.68 + 0.45)/10,
-                                   cost.unit = 1.2,
-                                   #cost.test = c(4.66 + 2.73),
-                                   cost.test = 4.33,
-                                   #cost.location = 8.93,
-                                   cost.location = 40,
-                                   correlation = c(0,0.1,0.3),
-                                   N = 2:10) %>%
-  mutate(out = Vectorize(optimise_s_prevalence)(prevalence, cost.unit, cost.test, cost.location, correlation, N = N, form = 'beta', max.s = 200, interval = 0.1) %>% t %>% as.data.frame()) %>%
-  mutate(s = unlist(out$s),
-         min_s = unlist(map(out$s_interval, ~.x[1])),
-         max_s = unlist(map(out$s_interval, ~.x[2])))
-
-
-optimal_cluster <- plot_data_clustered %>%
-  ggplot(aes(x = prevalence, y = s, ymax = max_s,
-             ymin = min_s,
-             fill = as.factor(correlation))) +
-  geom_line(aes(color = as.factor(correlation))) +
-  geom_ribbon(alpha = 0.3) +
-  facet_wrap(N~.)
-optimal_cluster
-ggsave('optimal cluster.png',optimal_cluster, width = 6.5, height = 6.5, unit = 'in')
-
-
-
-plot_data_clustered_alt <- expand.grid(prevalence = seq(0.01,0.1,by = 0.03),
-                                       sensitivity = 1,
-                                       specificity = 1,
-                                       cost.unit = 1.2,
-                                       cost.test = 4.33,
-                                       cost.location = 40,
-                                       correlation = c(0,0.01,0.1,0.3),
-                                       N = c(2,5,10),
-                                       s = 1:50) %>%
-  mutate(unitcost = Vectorize(unit_fi_cost_clustered)(s = s, N = N, prevalence = prevalence,
-                                                      correlation = correlation,
-                                                      sensitivity = sensitivity, specificity = specificity,
-                                                      cost.unit =  cost.unit,
-                                                      cost.test = cost.test,
-                                                      cost.location = cost.location, form = 'logitnorm'))
-
-unit_info_cluster <- plot_data_clustered_alt %>%
-  ggplot(aes(x = s, y = unitcost, color = as.factor(N))) +
-  geom_line() +
-  facet_grid(prevalence~correlation,labeller = label_both) +
-  scale_y_log10() +
-  xlab('pool size') + ylab('unit cost of information') +
-  theme(text = element_text(size = 12)) +
-  guides(guide_legend('Pools per location'))
-
-unit_info_cluster
-ggsave('unit info cluster.png',unit_info_cluster, width = 6.5, height = 6.5, unit = 'in')
 

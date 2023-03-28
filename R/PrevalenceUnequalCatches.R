@@ -3,7 +3,7 @@
 
 #simple example:
 # Design prevalence was 1% and design correlation was 0.1.
-# cost.location:cost.test:cost.unit = 40:4:1.4
+# cost.location:cost.pool:cost.unit = 40:4:1.4
 # Therefore plan was to do 4 pools of 4 mozzies each per location
 # But 10 locations caught 8 mosquitoes and 10 locations caught 24 mosquitoes each (total catch is expected, but unevenly distributed)
 # compare fisher information for:

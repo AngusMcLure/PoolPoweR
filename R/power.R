@@ -108,7 +108,7 @@ sample_size_prevalence <- function(s, N, prevalence.null, prevalence.alternative
 
 #THIS WHOLE FUNCTION COULD PROBABLY BE SIMPLIFIED TO A SPECIAL CASE OF optimise_s_prevalence
 optimise_s_prevalence_power <- function(prevalence.null, prevalence.alternative,
-                                        cost.unit, cost.test, cost.location = 0,
+                                        cost.unit, cost.pool, cost.location = 0,
                                         sig.level = 0.05,  power = 0.8,
                                         alternative = 'less', link = 'logit',
                                         correlation = 0, N = 1, form = 'beta',
@@ -125,7 +125,7 @@ optimise_s_prevalence_power <- function(prevalence.null, prevalence.alternative,
 
   cost <- function(s){
     n <- ss(s)
-    out <- n * (cost.unit + cost.test/s + cost.location/(s*N))
+    out <- n * (cost.unit + cost.pool/s + cost.location/(s*N))
     out
   }
 
@@ -197,22 +197,6 @@ ss.pool.asympt <- sample_size_prevalence(s,N,theta.null,theta.alt,0.8,sig.level 
 ss.pool.asympt
 ss.indi.arcsin$n * de
 
-sample.size.data <- expand.grid(theta.null = 0.01, rho = 0.1,
-                                theta.alt  = c(seq(0.001, 0.02,0.0005)),
-                                s = c(1,4,16,32), N = c(2,4,8,16),
-                                power = 0.8, sig.level = 0.05) %>% #with(theta.null - theta.alt)
-  rowwise() %>%
-  mutate(ss.indi.arcsin = ifelse(abs(theta.alt - theta.null) < .Machine$double.eps, NA, pwr::pwr.p.test(h = pwr::ES.h(theta.alt,theta.null), power = power, sig.level = sig.level, alternative = ifelse(theta.alt < theta.null, 'less', 'greater'))$n),
-         ss.pool.asympt = ifelse(abs(theta.alt - theta.null) < .Machine$double.eps, NA, sample_size_prevalence(s,N,theta.null,theta.alt,power,sig.level = sig.level,alternative = ifelse(theta.alt < theta.null, 'less', 'greater'),correlation = rho)),
-         de = design_effect_cluster_fisher(s,N,theta.null,1,1,rho, form = 'logitnorm'),
-         ss.de = ss.indi.arcsin * de)
-
-sample.size.data %>%
-  pivot_longer(cols = starts_with('ss'), names_to = 'method',values_to = "n") %>%
-  ggplot(aes(x = theta.alt, y = n, color = method)) +
-  geom_line() +
-  facet_grid(vars(s),vars(N)) +
-  scale_y_log10()
 
 
 

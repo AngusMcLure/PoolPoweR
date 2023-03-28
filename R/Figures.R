@@ -259,18 +259,18 @@ data_rho_limit %>%
       theme(strip.placement = "outside",
             strip.background = element_rect(fill='white'),
             text = element_text(size = 12))
-      ggsave(paste0('FisherMatrix',.y,'.png'),fisherplot,width = 6, height = 5)
-})
+    ggsave(paste0('FisherMatrix',.y,'.png'),fisherplot,width = 6, height = 5)
+  })
 
 #Just the top left element of inverse Fisher information for a range of s and N
 
 data_rho_limit_alt <- expand.grid(rho = c(-1,10^(seq(-0.01,-2.2,-0.01))),
-                              theta = c(0.01,0.02,0.05,0.1),
-                              #theta = seq(0.01,0.5,0.01),
-                              s = c(50,100,200,400,1000,2000),
-                              N = 2,
-                              form = c('beta'),
-                              stringsAsFactors = FALSE) %>%
+                                  theta = c(0.01,0.02,0.05,0.1),
+                                  #theta = seq(0.01,0.5,0.01),
+                                  s = c(50,100,200,400,1000,2000),
+                                  N = 2,
+                                  form = c('beta'),
+                                  stringsAsFactors = FALSE) %>%
   subset(!(theta > 0.01 & s >= 1000)) %>%
   rowwise() %>%
   mutate(fi = ifelse(rho == -1,

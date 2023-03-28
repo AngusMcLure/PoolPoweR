@@ -6,50 +6,53 @@ design_effect_cluster_fisher <- function(s,N,prevalence,sensitivity,specificity,
 
 #optimising the pool size for estimating prevalence
 
-unit_fi_cost <- function(s,prevalence,sensitivity,specificity, cost.unit, cost.test){
-  (cost.unit * s + cost.test)/fi_pool_imperfect(s,prevalence,sensitivity,specificity)
+unit_fi_cost <- function(s,prevalence,sensitivity,specificity, cost.unit, cost.pool){
+  (sum(cost.unit * s) + cost.pool)/fi_pool_imperfect(s,prevalence,sensitivity,specificity)
 }
 
-unit_fi_cost_clustered <- function(s,N,prevalence,correlation,sensitivity,specificity, cost.unit, cost.test, cost.location,form = 'beta'){
+unit_fi_cost_clustered <- function(s,N,prevalence,correlation,sensitivity,specificity, cost.unit, cost.pool, cost.location,form = 'beta'){
   fi <- fi_pool_imperfect_cluster(s,N,prevalence,sensitivity,specificity,correlation, form = form)
-  cost <- cost.unit * s * N + cost.test * N + cost.location
+  cost <- sum(cost.unit * s * N) + sum(cost.pool * N) + cost.location
   #print(c(cost = cost, information = fi))
   cost * solve(fi)[1,1]
 }
 
 # unit_fi_cost_clustered_alt <- function(s,N,prevalence,correlation,sensitivity,specificity,
-#                                       cost.unit, cost.test, cost.location, cost.collect, catch.collect, form = 'beta'){
+#                                       cost.unit, cost.pool, cost.location, cost.collect, catch.collect, form = 'beta'){
 #
 #   fi <- fi_pool_imperfect_cluster(s,N,prevalence,sensitivity,specificity,correlation, form = form)
 #
 #   ##   expected number of sampling periods required to get N pools of size s.
 #   ##   tmight not be an integer!!
 #   #t <- N * s/catch.collect
-#   #cost <- cost.unit * s * N +  cost.test * N + cost.location + cost.collect * t
+#   #cost <- cost.unit * s * N +  cost.pool * N + cost.location + cost.collect * t
 #
-#   cost <- (cost.collect/catch.collect + cost.unit) * s * N + cost.test * N + cost.location + cost.collect * t
+#   cost <- (cost.collect/catch.collect + cost.unit) * s * N + cost.pool * N + cost.location + cost.collect * t
 #   cost * solve(fi)[1,1]
 # }
 
 
-optimise_s_prevalence <- function(prevalence, cost.unit, cost.test,
-                                  cost.location = 0, correlation = 0,
+optimise_s_prevalence <- function(prevalence, cost.unit, cost.pool,
+                                  cost.location = NA, correlation = NA,
                                   N = 1, form = 'beta',
                                   sensitivity = 1,specificity = 1,
                                   max.s = 50, interval = 0){
+  if(form == 'discrete'){
+    stop('When form = "discrete" the cost of unit information function with respect to s often has mulitple minima and therefore the discrete distribution is not currently supported for optimisation')
+  }
   invalid.cost <- FALSE #trigger for when costs are infinite to ensure that there's no cost output in these cases
-  #print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost.unit, test = cost.test, location = cost.location , rho = correlation, N = N, form = form, max.s = max.s))
+  #print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost.unit, test = cost.pool, location = cost.location , rho = correlation, N = N, form = form, max.s = max.s))
   theta <- prevalence
-  ## The case cost.test == Inf (or equivalently cost.unit = 0) is helpful because
+  ## The case cost.pool == Inf (or equivalently cost.unit = 0) is helpful because
   ## the s in this case (s_opt) is the largest you would ever want
   ## to make a pool. If you can only do N tests and have more than N*s_opt
   ## vectors you should just do N tests of size s_opt and not test the remaining
   ## vectors. In practice this upper limit is usually really high (especially if
   ## prevalence is low and/or specificity is not perfect), so you can assume in
   ## most designs that you want to test all vectors
-  if(cost.test == Inf){
+  if(cost.pool == Inf){
     cost.unit <- 0
-    cost.test <- 1
+    cost.pool <- 1
     invalid.cost <- TRUE
   }
 
@@ -61,14 +64,14 @@ optimise_s_prevalence <- function(prevalence, cost.unit, cost.test,
   ## have budget to test them all individually you're actually better off
   ## testing them in pools of this size
   if(cost.unit == Inf){
-    cost.test <- 0
+    cost.pool <- 0
     cost.unit <- 1
     invalid.cost <- TRUE
 
   }
-  if(correlation == 0){
+  if(is.na(correlation)){
     cost <- function(x){
-      ufc <- unit_fi_cost(x,theta,sensitivity,specificity, cost.unit, cost.test)
+      ufc <- unit_fi_cost(x,theta,sensitivity,specificity, cost.unit, cost.pool)
       ufc}
   }else{
     cost <- function(x){
@@ -76,7 +79,7 @@ optimise_s_prevalence <- function(prevalence, cost.unit, cost.test,
                                     correlation = correlation,
                                     sensitivity = sensitivity,
                                     specificity = specificity,
-                                    cost.unit = cost.unit, cost.test = cost.test,
+                                    cost.unit = cost.unit, cost.pool = cost.pool,
                                     cost.location = cost.location, form = form)
       ufc}
   }
@@ -123,34 +126,35 @@ optimise_s_prevalence <- function(prevalence, cost.unit, cost.test,
                 s_interval = c(lower, upper),
                 cost_interval = cost_interval,
                 catch_interval = N * c(lower, upper))
-    return(out)
   }else{
-    stop('interval must be 0 (for no interval) or greater than zero.')
+    stop('interval must be between 0 and 1.')
   }
+  out
 }
 
-optimise_sN_prevalence <- function(prevalence, cost.unit, cost.test,
+optimise_sN_prevalence <- function(prevalence, cost.unit, cost.pool,
                                    cost.location, correlation, form = 'beta',
                                    sensitivity = 1, specificity = 1,
                                    max.s = 50, max.N = 20){
-  #print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost.unit, test = cost.test, location = cost.location , rho = correlation, N = N, form = form, max.s = max.s))
+  #print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost.unit, test = cost.pool, location = cost.location , rho = correlation, N = N, form = form, max.s = max.s))
   theta <- prevalence
 
-  if(correlation == 0){
-    warning('If there is no correlation between units at locations, then this means sampling at a single random location is a identical to sampling from the whole population. This is assumption unlikely to be true in most settings, but would mean that sampling at a single site is the most cost-effective strategy')
-    opt <- c(optimise_s_prevalence(prevalence, cost.unit, cost.test,
-                                   cost.location, correlation,
-                                   N = 1, form = 'beta',
+  if(is.na(correlation) || correlation == 0){ #for simple random sampling there is no optimal N and for no correlation cluster survey the optimal approach is to infinite pools at one site (i.e. a simple random survey)
+    opt <- optimise_s_prevalence(prevalence, cost.unit, cost.pool,
+                                   cost.location, correlation = NA,
+                                   N = 1, form = form,
                                    sensitivity,specificity,
-                                   max.s = max.s),
-             list(N = Inf))
+                                   max.s = max.s)
+
+    opt$N <- ifelse(is.na(correlation), NA, Inf)
+    opt$catch <- opt$N
 
   }else{
     Nopt <- 1
     opt <- list(cost = Inf)
     while(Nopt < max.N){
       opt_new <- optimise_s_prevalence(prevalence,
-                                       cost.unit, cost.test, cost.location,
+                                       cost.unit, cost.pool, cost.location,
                                        correlation, Nopt+1, form,
                                        sensitivity,specificity, max.s)
       #print(opt_new)
@@ -162,11 +166,18 @@ optimise_sN_prevalence <- function(prevalence, cost.unit, cost.test,
       }
     }
     opt$N <- Nopt
+    if(opt$N == max.N){
+      warning('Maximum cost effectivness is achieved at or above the maximum number of pools allowed. Consider increasing max.N')
+    }
+    if(opt$s == max.s){
+      warning('Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max.s')
+    }
   }
+
   opt
 }
 
-optimise_N_prevalence <- function(prevalence, cost.unit, cost.test,
+optimise_N_prevalence <- function(prevalence, cost.unit, cost.pool,
                                    cost.location, cost.collect, catch.collect,
                                    correlation, P, form = 'beta',
                                    sensitivity = 1, specificity = 1,
@@ -180,7 +191,7 @@ optimise_N_prevalence <- function(prevalence, cost.unit, cost.test,
     cost.new <- unit_fi_cost_clustered(n/(N.opt+1),N.opt+1,prevalence,correlation,
                                        sensitivity,specificity,
                                        cost.unit + cost.collect/catch.collect,
-                                       cost.test,cost.location,form)
+                                       cost.pool,cost.location,form)
     if(cost.new > cost.opt){
       break
     }
@@ -193,18 +204,18 @@ optimise_N_prevalence <- function(prevalence, cost.unit, cost.test,
   out
 }
 
-optimise_NP_prevalence <- function(prevalence, cost.unit, cost.test,
+optimise_NP_prevalence <- function(prevalence, cost.unit, cost.pool,
                                    cost.location, cost.collect, catch.collect,
                                    correlation, form = 'beta',
                                    sensitivity = 1, specificity = 1,
                                    max.s = 50, max.P = 20){
-  #print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost.unit, test = cost.test, location = cost.location , rho = correlation, N = N, form = form, max.s = max.s))
+  #print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost.unit, test = cost.pool, location = cost.location , rho = correlation, N = N, form = form, max.s = max.s))
   theta <- prevalence
 
   if(correlation == 0){
     stop('If there is no correlation between units at locations, then this means sampling at a single random location is a identical to sampling from the whole population. This is assumption unlikely to be true in most settings, but would mean that sampling at a single site is the most cost-effective strategy')
     # opt <- c(optimise_s_prevalence(prevalence, cost.unit + cost.collect/catch.collect,
-    #                                cost.test, cost.location, correlation,
+    #                                cost.pool, cost.location, correlation,
     #                                N = 1, form = 'beta',
     #                                sensitivity,specificity,
     #                                max.s = max.s),
@@ -214,7 +225,7 @@ optimise_NP_prevalence <- function(prevalence, cost.unit, cost.test,
     P.opt <- 0
     opt <- list(cost = Inf)
     while(P.opt < max.P){
-      opt.new <- optimise_N_prevalence(prevalence, cost.unit, cost.test,
+      opt.new <- optimise_N_prevalence(prevalence, cost.unit, cost.pool,
                                        cost.location, cost.collect, catch.collect,
                                        correlation, P.opt+1, form = 'beta',
                                        sensitivity, specificity,

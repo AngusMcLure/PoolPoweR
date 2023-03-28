@@ -2,7 +2,7 @@
 
 
 optimise_detection_fixedn <- function(n,design.prevalence, max.typeI, max.typeII, sensitivity, specificity, sigma,
-                                          cost.unit, cost.test, cost.location){
+                                          cost.unit, cost.pool, cost.location){
   #if we assume that typeI error is 1 - specificity^(N*M) then this can be
   #translated into a simple constraint on N and M
   maxtests <- if(specificity <1){log1p(- max.typeI)/log(specificity)}else{Inf}
@@ -24,7 +24,7 @@ optimise_detection_fixedn <- function(n,design.prevalence, max.typeI, max.typeII
   cost <- function(pars){
     NM <- pars[1];
     M <- 1/pars[2];
-    cost.unit * n*NM + cost.test * NM + cost.location * M
+    cost.unit * n*NM + cost.pool * NM + cost.location * M
   }
 
   errors <- function(pars){
@@ -61,21 +61,21 @@ optimise_detection_fixedn(n = 10,
                           sensitivity = 0.9,
                           specificity = 0.99,
                           cost.unit = 1,
-                          cost.test = 1,
+                          cost.pool = 1,
                           cost.location = 1,
                           sigma = 1)
 
 cost.unit <- 1
-cost.test <- 1
+cost.pool <- 1
 cost.location <- 1
-n <- 10; NM <- 35; M <- 5; detection_errors(p = 0.01, group_size = n, group_num = NM/M,location_num = M, sensitivity = 0.9, specificity = 0.99, sigma = 1);     cost.unit * n*NM + cost.test * NM + cost.location * M
+n <- 10; NM <- 35; M <- 5; detection_errors(p = 0.01, group_size = n, group_num = NM/M,location_num = M, sensitivity = 0.9, specificity = 0.99, sigma = 1);     cost.unit * n*NM + cost.pool * NM + cost.location * M
 
 
 
 
 
 optimise_detection_fixedsites <- function(design.prevalence, max.typeI, max.typeII, sensitivity, specificity, sigma,
-                                          cost.unit, cost.test, M){
+                                          cost.unit, cost.pool, M){
   #if we assume that typeI error is 1 - specificity^(N*M) then this can be
   #translated into a simple constraint on N and M
   maxtests <- if(specificity <1){log1p(- max.typeI)/log(specificity)}else{Inf}
@@ -90,7 +90,7 @@ optimise_detection_fixedsites <- function(design.prevalence, max.typeI, max.type
   cost <- function(pars){
     n <- pars[1];
     N <- pars[2];
-    cost.unit * n*N*M + cost.test * N*M
+    cost.unit * n*N*M + cost.pool * N*M
   }
 
   errors <- function(pars){
@@ -125,7 +125,7 @@ optimise_detection_fixedsites(design.prevalence = 0.001,
                               sensitivity = 0.9,
                               specificity = 0.999,
                               cost.unit = 1,
-                              cost.test = 1,
+                              cost.pool = 1,
                               sigma = 0,
                               M = 10)
 
@@ -133,7 +133,7 @@ optimise_detection_fixedsites(design.prevalence = 0.001,
 
 
 optimise_detection <- function(design.prevalence, max.typeI, max.typeII, sensitivity, specificity, sigma,
-                               cost.unit, cost.test, cost.location, init = NULL, init_M = 30,
+                               cost.unit, cost.pool, cost.location, init = NULL, init_M = 30,
                                LB = c(1,1,1), UB = c(Inf,Inf,Inf), int.step = 3, int.search.only = F){
 
 
@@ -146,7 +146,7 @@ optimise_detection <- function(design.prevalence, max.typeI, max.typeII, sensiti
 
   cost <- function(par){
     n <- par[1]; N <- par[2]; M <- par[3]
-    cost.unit * n*N*M + cost.test * N*M + cost.location * M
+    cost.unit * n*N*M + cost.pool * N*M + cost.location * M
   }
 
   errors <- function(par){
@@ -220,7 +220,7 @@ sensitivity <- 0.99
 specificity <- 1
 sigma <- 10
 cost.unit <- 1
-cost.test <- 5
+cost.pool <- 5
 cost.location <- 100
 ICC <-  sigma^2/(sigma^2 + pi^2/3); ICC
 
@@ -229,7 +229,7 @@ a <- optimise_detection(design.prevalence = design.prevalence,
                         max.typeI = 0.05, max.typeII = 0.01,
                         sensitivity = sensitivity, specificity = specificity,
                         sigma = sigma,
-                        cost.unit = cost.unit, cost.test = cost.test, cost.location = cost.location,
+                        cost.unit = cost.unit, cost.pool = cost.pool, cost.location = cost.location,
                         int.step = 30, int.search.only = F,
                         LB = c(0,10,30),
                         UB = c(Inf, 10, 30))
@@ -238,7 +238,7 @@ detection_errors(design.prevalence,
                  n = 10,sigma = sigma, sensitivity = sensitivity, specificity = specificity)
 
 optimise_detection <- function(design.prevalence, max.typeI, max.typeII, sensitivity, specificity, sigma,
-                               cost.unit, cost.test, cost.location, init = NULL,
+                               cost.unit, cost.pool, cost.location, init = NULL,
                                LB = c(1,1,1), UB = c(Inf,Inf,Inf), int.step = 3, int.search.only = F){
 
 
@@ -257,11 +257,11 @@ optimise_detection <- function(design.prevalence, max.typeI, max.typeII, sensiti
 
   cost <- function(par){
     n <- par[1]; N <- par[2]; M <- par[3]
-    cost.unit * n*N*M + cost.test * N*M + cost.location * M
+    cost.unit * n*N*M + cost.pool * N*M + cost.location * M
   }
 
   cost_totals <- function(par){
-    cost.unit * par[1] + cost.test * par[2] + cost.location * par[3]
+    cost.unit * par[1] + cost.pool * par[2] + cost.location * par[3]
   }
 
   errors <- function(par){
