@@ -2,7 +2,7 @@
 power_fi <- function(n, s, N, prevalence.null, prevalence.alternative,
                      sig.level = 0.05, alternative = 'greater',
                      sensitivity = 1, specificity = 1,
-                     correlation = 0, form = 'logitnorm',
+                     correlation = 0, form = 'beta',
                      link = 'identity'){
   thetaa <- prevalence.alternative
   theta0 <- prevalence.null
@@ -59,7 +59,7 @@ power_fi <- function(n, s, N, prevalence.null, prevalence.alternative,
 sample_size_prevalence <- function(s, N, prevalence.null, prevalence.alternative,
                                    power = 0.8, sig.level = 0.05, alternative = 'greater',
                                    sensitivity = 1, specificity = 1,
-                                   correlation = 0, form = 'logitnorm',
+                                   correlation = 0, form = 'beta',
                                    link = 'identity'){
   thetaa <- prevalence.alternative
   theta0 <- prevalence.null

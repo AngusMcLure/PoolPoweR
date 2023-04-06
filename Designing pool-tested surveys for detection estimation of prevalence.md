@@ -488,7 +488,9 @@ Care must be taken however in calculating the sums as the alternating sign can c
 
 One way to have an intuitive understanding of these surprising results comes from noting that for any given pool size $s$ prevalence can be sufficiently high such there is a very high probability that all pools will return a positive result. All positive pools provide very little information about either prevalence or intra-cluster correlation. However, if there is substantial intra-cluster correlation, this increases the probability that *some* clusters in a survey will return all positive pools, but reduces the probability that all clusters in a survey return all positive pools.
 
-While this behaviour is counter-intuitive and suggest major problems with using cluster surveys with pooled testing to estimate prevalence, it should be noted that the most pathological behaviour is restricted to the case where prevalence is reasonably high — i.e. when one would generally not be considering using pooled testing. While it is possible to have this behaviour at low prevalence it only occurs with very large pools, far larger than what would be a sensible even for a non-cluster survey (see Figure []).
+While this behaviour is counter-intuitive and suggest major problems with using cluster surveys with pooled testing to estimate prevalence, it should be noted that the most pathological behaviour is restricted to the case where prevalence is reasonably high — i.e. when one would generally not be considering using pooled testing. While it is possible to have this behaviour at low prevalence it only occurs with very large pools, far larger than what would be a sensible even for a non-cluster survey (see Figure []). Reducing the pool size avoids the pathological behaviour.
+
+[Note also that you don't get this weird behaviour for the simple discrete distribution. Instead it behaves very nicely with $\lim_{\rho \to 1}\Sigma_{1,1}$ appearing to converge to $1/I(\theta)$, i.e. reduces to the simple random sampling case. But the discrete distribution is strange in its own way as will be seen later]
 
 ![](./Figures/FisherMatrixbeta.png)
 
@@ -584,7 +586,7 @@ The final figure in this section shows the design effect as a function of correl
 
 ***Figure []*** The pool sizes ($s$), number of pools per sampling site ($N$), and units per location ($N \cdot s$) that minimises cost of information in prevalence estimation surveys. Survey designs considered are simple random sampling ($\rho =$ NA) and cluster surveys with known zero clustering at site level ($\rho = 0$) or unknown degree of clustering ($\rho = 0.01, 0.1$). Tests are assumed to be perfectly specific and sensitive. The cost per pool ($c_p$) and cost per location ($c_l$) vary across columns. Fisher information calculations for cluster surveys with non-zero clustering assume prevalence is beta-distributed across sampling locations. Note: optimal $N$ is infinite for for $\rho = 0$ at which point the cost information and optimal $s$ reduce to that of simple random survey.
 
- ![](./Figures/FigDesignEffectCorr.png)
+ ![](./Figures/FigDesignEffectCorrbeta.png)
 
 ***Figure []*** Design effect as a function of prevalence, within-site correlation, pool size and number of units per site. The dotted horizontal line indicates the reference design effect: simple random sampling with individual testing. All tests are assumed to be perfectly sensitive and specific. In each column the total units per site ($sN$) is fixed so $N$ is inversely proportional to $s$.  Variation of prevalence across sampling locations is modelled with the beta distribution. Note the different y-axis scales in each row. 
 
@@ -643,14 +645,21 @@ $$
 
 
 
+The figures below compare the two approaches for a range of parameters. Generally the agreement is good when the target and design prevalence are both low which is the typical case for pool-tested surveys, however the computed minimum sample size is typically larger when using the design 
 
-***The figures below compare the two approaches for a range of parameters. Generally the agreement is good when the target and design prevalence are both low which is the typical case for pool-tested surveys***.
+![](.\Figures\SampleSizebeta.png)
 
- 
+***Figure[]*** Minimum sample size to achieve 80% power and 95% that true prevalence is greater/less than 1%, using a one-sided test and pooled testing. The top row is the case for simple random sampling (or cluster sampling where correlation at sites is known to be 0). Other rows are for cluster sampling with very low and modest correlation but where correlation needs to be estimated. Different line types indicate the size of pools, while each columns indicates the number of units collected per site. The colours indicate how sample sizes are calculates. Blue uses the arcsine method and assumes simple random sampling and individual tests. Red multiplies the arcsine method by the design effect. Green uses the Fisher information matrix directly to determine sample sizes. Correlation model assumed beta distributed site prevalence.
+
+![](.\Figures\SampleSizediscrete.png)
+
+***Figure[]*** Minimum sample size to achieve 80% power and 95% that true prevalence is greater/less than 1%, using a one-sided test and pooled testing. Same as previous figure but correlation model assumes the simple discrete distribution of site prevalence.
+
+[Rather than optimising the unit cost of information as we have in the previous sections, we could also choose a design which meets minimum power and confidence requirements while minimising cost direct. This turns out to have a slightly different optimum designs in numerical experiments, but I haven't played around with this too much]
 
 ### Surveys with random catch sizes
 
-Surveys using pooled testing do not always use fixed sample sizes. In molecular xenomonitoring surveys, it is common instead to place traps to catch disease vectors for set period of time and analyse however many vectors were caught at the end of the time period. Consequently in these surveys neither $\underline{N}$ nor $\underline{s}$ are predetermined but random. They may often be some predetermined rules about how the units caught are split into pools. Example rules might be to divide the units, however many are caught, into the pools of size 25, with any remainder assigned to a final pool. Another example might be to divide the units into four pools of approximately equal size. To model this, let the number of units sampled at each site $j$, $V_j$, be iid random variables with probability mass function $f_V(v|\underline{\xi})$ defined by (known) parameters $\underline{\xi}$. Let $r_N$ and $r_s$ be functions $\mathbb{N} \to \mathbb{N}^\infty$ describing the pooling rules such that $\underline{N}_j = r_N(V_j)$ and $\underline{s}_j = r_s(V_j)$. Noting that each unit is placed in at most one group but some rules may choose to discard some units (say if the catch size is much larger that expected) the pooling rules must satisfy $r_s(v)\cdot r_N(v) \leq v$. We assume the same pooled rules apply for each sampling location and only determine the number and size of the pools; units are randomly assigned to pools to make up the required size. We also assume catch sizes at a location are independent of the testing results of individual units.
+Surveys using pooled testing do not always use fixed sample sizes. In molecular xenomonitoring surveys, it is common instead to place traps to catch disease vectors for set period of time and analyse however many vectors were caught at the end of the time period. Consequently in these surveys neither $\underline{N}$ nor $\underline{s}$ are predetermined but random. They may often be some predetermined rules about how the units caught are split into pools. Example rules might be to divide the units, however many are caught, into the pools of size 25, with any remainder assigned to an additional, smaller pool. Another example might be to divide the units into four pools of approximately equal size. To provide a notation for possible rules, let the number of units sampled at each site $j$, $V_j$, be iid random variables with probability mass function $f_V(v|\underline{\xi})$ defined by (known) parameters $\underline{\xi}$. Let $r_N$ and $r_s$ be functions $\mathbb{N} \to \mathbb{N}^\infty$ describing the pooling rules such that $\underline{N}_j = r_N(V_j)$ and $\underline{s}_j = r_s(V_j)$. Noting that each unit is placed in at most one group but some rules may choose to discard some units (say if the catch size is much larger that expected) the pooling rules must satisfy $r_s(v)\cdot r_N(v) \leq v$. We assume the same pooled rules apply for each sampling location and that number and size of the pools are deterministic given $v$; however we assume that units are randomly assigned to pools to make up the required size. We also assume catch sizes at a location are independent of the testing results of individual units.
 
 Under this setup the Fisher information from a site is the Fisher information averaged over possible catch sizes. [I probably don't have to write the below up since it seems very general, obvious, and not specific to pooled testing in any way, but it might be helpful to spell it out?]
 
@@ -667,7 +676,7 @@ where have suppressed the dependence on pooling rules, catch distribution parame
 $$
 \begin{align*}
 I(\theta, \rho|\xi,r_N,r_s,\psi, \varphi)
-&=\sum_{v = 0}^{\infty}\sum_{\underline{y} \in \Xi_{s_\underline{N}(v)}}
+&=\sum_{v = 0}^{\infty}\sum_{\underline{y} \in \Xi_{r_N(v)}}
 L(\theta, \rho|\underline{y},v)^{-1}
 \begin{bmatrix}
  L_\theta(\theta, \rho|\underline{y},v) ^2 &
@@ -675,7 +684,7 @@ L(\theta, \rho|\underline{y},v)^{-1}
  L_\theta(\theta, \rho|\underline{y},v) L_\rho(\theta, \rho|\underline{y},v) &
  L_\rho(\theta, \rho|\underline{y},v) ^2\\
 \end{bmatrix}\\
-&=\sum_{v = 0}^{\infty}\sum_{\underline{y} \in \Xi_{s_\underline{N}(v)}}
+&=\sum_{v = 0}^{\infty}\sum_{\underline{y} \in \Xi_{r_N(v)}}
  f_V(v|\xi) L(\theta, \rho|\underline{y})^{-1}
 \begin{bmatrix}
  L_\theta(\theta, \rho|\underline{y}) ^2 &
@@ -684,15 +693,18 @@ L(\theta, \rho|\underline{y},v)^{-1}
  L_\rho(\theta, \rho|\underline{y}) ^2\\
 \end{bmatrix} \\
 &= \sum_{v = 0}^{\infty} f_V(v|\xi)
-  I(\theta, \rho|r_N(v), r_s(v),\psi, \varphi).
+  I(\theta, \rho|r_N(v), r_s(v),\psi, \varphi)\\
+&= E_V[I(\theta, \rho|r_N(V), r_s(V),\psi, \varphi)].
  \end{align*}
 $$
 
-[I have code which is set up to do these calculations for negative binomially distributed catch sizes. The calculations aren't particularly hard numerically since you just do finite sums until the sum converges. I don't really want to go into it any more than this here. Early experiments suggest that if Fisher information calculations based on the *expected* catch tend to overestimate Fisher information based on random catches in the cluster randomised setup. ]
+[I have code which is set up to do these calculations for negative binomially distributed catch sizes. The calculations aren't particularly hard numerically since you just do finite sums until the sum converges. I'm not we would really want to go into it any more than this here. Early experiments suggest that if Fisher information calculations based on the *expected* catch tend to overestimate Fisher information based on random catches in the cluster randomised setup, i.e. $E[I(\theta, \rho| r_N(V),r_s(V))] \leq I(\theta, \rho|r_N(E[V]), r_s(E[V]))$. One could probably prove this (or give conditions when this happens) if one could show that (or when) Fisher information increases sub-linearly with catch size. This should be an equality in the case with individual testing and simple random sampling]
 
 
 
 ## Designing surveys for the detection of disease markers
+
+[Note that I actually wrote out this section first, but it is — I think — less interesting. I have used slightly different notation in this section that in the previous and rely more heavily on the language and examples of molecular xenomonitoring rather than using more generic language. I will correct once I know the right direction/format for this section.]
 
 We consider the case where the aim the survey is to correctly identify whether locations do or do not have units that are positive for the disease marker. There are four outcomes of a survey
 
@@ -736,7 +748,7 @@ In other words, for a given number of units to be tested with a perfect test, th
 
 ### Type II error using a simple random survey with a random sample size
 
-In the previous section we calculated the type II errors assuming the number of groups ($\underline{N}$) and the number of vectors per group ($\underline{s}$) were fixed by design. This might happen if the survey design involves continuing sampling until a fixed number of units, $U = \underline{N}\cdot\underline{s}$, have been sampled. However, in many practical MX designs involving traps, the total number of vectors captured at a site is not known ahead of time. Rather, traps are set out for a fixed length of time $t$ and the catch total catch of units is a random variable, as are the number of size of pools/groups. If the size of pools/groups are fixed to be mostly to a single size ($s$), then the number of groups is $N_{tot} \approx V/s$. The exact relationship between catch size and number of pools, depends on what is done with vectors left over after distribution into groups of size $s$; however, we use the above approximation for mathematical convenience. We model the number of vectors trapped in time $t$ as a negative binomial distributed random variable with mean $t \mu$ and dispersion $tk$. Then the type II error is approximately
+In the previous section we calculated the type II errors assuming the number of groups ($\underline{N}$) and the number of vectors per group ($\underline{s}$) were fixed by design. This might happen if the survey design involves continuing sampling until a fixed number of units, $n = \underline{N}\cdot\underline{s}$, have been sampled. However, in many practical MX designs involving traps, the total number of vectors captured at a site is not known ahead of time. Rather, traps are set out for a fixed length of time $t$ and the catch total catch of units is a random variable, as are the number of size of pools/groups. If the size of pools/groups are fixed to be mostly to a single size ($s$), then the number of groups is $N_{tot} \approx V/s$. The exact relationship between catch size and number of pools, depends on what is done with vectors left over after distribution into groups of size $s$; however, we use the above approximation for mathematical convenience. We model the number of vectors trapped in time $t$ as a negative binomial distributed random variable with mean $t \mu$ and dispersion $tk$. Then the type II error is approximately
 
 $$
 \begin{align*}
@@ -766,7 +778,7 @@ The previous two sections we have assumed simple random sample from the populati
 
 If the prevalence of the marker of interest is clustered within sampling units (e.g. around households in a two-level survey or in villages and households in a three-level survey), a clustered survey will generally have a lower probability of detection than a simple random survey of vectors. To calculate the probability of detection for a survey, we need to have information (or make assumptions) about the kind and degree of clustering that exists at each level of sampling. We will model clustering in a manner analogous to random-effect logistic regression model, as this is the most common means of estimating modelling hierarchical survey data. This allows estimates of clustering from previous surveys to be used in the design of future surveys.
 
-For a two-level survey we model the prevalence of the marker at each locations $\theta_1,...,\theta_J$ as identical and independently distributed logit-normal variables with mean $\theta$ and variance on the logit-scale of $\sigma^2$. i.e.
+For a two-level survey we model the prevalence of the marker at each locations $\theta_1,...,\theta_M$ as identical and independently distributed logit-normal variables with mean $\theta$ and variance on the logit-scale of $\sigma^2$. i.e.
 
 $logit(\theta_m) = log\left(\frac{\theta_m}{1- \theta_m}\right)\sim Normal(\theta', \sigma^2)$
 
@@ -822,44 +834,3 @@ $$
 1 - \left(\dfrac{k}{\mu + k - \psi^{\frac{1}{n}}}\right)^{t_{tot}k}.
 $$
 For all the above designs, increasing specificity decreases the probability of a type I error while increasing the number of pools/groups increases the probability of a type II error. Therefore for a given sampling effort (i.e. either given $t_{tot}$ or $N_{tot}$), using larger pools/groups decreases the probability of a type I error. For survey designs with random catch sizes, the probability of a type I error increases as the dispersion parameters $k$ decreases i.e. as the variance of the catch size increases.
-
-
-
-
-
-
-## Old notes
-
-
-For a two-level cluster survey $N_{tot} \approx \frac{1}{n} \sum_{m=1}^M V_m$. The sum over $V_m$ is also negative binomially distributed, but with mean $tM\mu$ and dispersion $tMk$, so the type II error is approximately
-$$
-1 - \left(\dfrac{k}{\mu + k - \psi^{\frac{1}{n}}}\right)^{tMk}.
-$$
-By the same argument the type II error for a three-level cluster survey is approximately
-$$
-1 - \left(\dfrac{k}{\mu + k - \psi^{\frac{1}{n}}}\right)^{tM_1M_2k}.
-$$
-
-
-
-
-
-$$
-\begin{align*}
-\rho_s
-&= \frac{E[X_{1j} X_{2j}] - E[X_{1j}] E[X_{2j}]}{\sqrt{Var[X_{1j}] Var[X_{2j}]}} \\
-&= \frac{P(X_{1j} =  X_{2j} = 1) - \theta_s^2}{\theta_s(1-\theta_s)} \\
-&= \frac{\int_0^1 f_\Theta(p) (1-(1-p)^s)^2 dp - \theta_s^2}{\theta_s(1-\theta_s)} \\
-\end{align*}
-$$
-
-
-
-
-For many molecular xenomonitoring surveys, the aim is to not only attempt to detect disease markers in the vector population, but to estimate the prevalence of the marker. This data may be used to map the disease, identify hotspots, or inform decisions as to the type or extent of interventions applied in the sampling areas. If surveys are repeated over time the data be used to determine whether prevalence has changed following an intervention, or determine seasonal or long-term trends.
-
-Where the primary aim of a survey is to estimate prevalence, the design considerations are somewhat different than for detection surveys. While pool/group testing designs may still offer advantages, using pools/groups that are too large will reduce the amount of information that can be gathered from the sample because a single positive test result from any number of the constituent vectors harbouring the disease marker.  To take a simple case if a single pool of 25 vectors tested positive, it is not possible to discern (without further testing) whether only one vector had the marker (crude prevalence 4%) or all 25 vectors had the marker (crude prevalence 100%). If two pools of 25 vectors both have opposite results, this indicates that at least 1/50 vectors harboured the marker and at most 25/50. However, since it is very unlikely that in the case where 25 of vectors were positive that they should all be randomly assigned to only one of the pools and not the other, in practice point and interval estimates for the prevalence will be well below 50%. However, if both pools return positive results then anywhere from 2-50 of the vectors may have harboured the marker and interval estimates are very wide (1%-100%). Broadly speaking, a pool with $s$ vectors returns a negative result, it provides similar amount of information as negative $s$ tests on individual samples, but if a pool with $s$ vectors returns a positive result, it provides far less information that $s$ tests on individual samples. Therefore increasing $s$ increases the information gathered from negative test results, but decreases the probability that pools will return a negative result, leading to a trade-off.
-
-
-
- --->
