@@ -97,8 +97,7 @@ For a perfectly specific test, positive predictive value is always 1. For an imp
 
 Design effect increases with $\theta$ but most rapidly when sensitivity is low and pools/groups are large.
 
-
-![](./Figures/FigDesignEffectSupp.png) 
+<img src="./Figures/FigDesignEffectSupp.png" style="zoom:50%;" /> 
 
 ***Figure []*** Design effect comparing pool-testing to individual testing for different sized pools, different prevalence, and a range of test sensitivity and specificity. Note that in comparing pooled and individual testing, both the pooled and individual tests are assumed to have the same sensitivity and specificity.
 

@@ -25,6 +25,18 @@ FigDesignEffectSupp
 ggsave("./Figures/FigDesignEffectSupp.png",FigDesignEffectSupp,
        height = 7, width= 7, unit = 'in')
 
+FigDesignEffectSimple <- FigDesignEffectSupp
+FigDesignEffectSimple$data <- FigDesignEffectSimple$data %>%
+  subset(sensitivity == 1 & specificity == 1 & s !=50)
+
+(FigDesignEffectSimple +
+  labs(x = 'Prevalence',
+       y = 'Design Effect') +
+    facet_null() +
+    scale_y_continuous()+
+    guides(color = guide_legend(title = 'Pool Size', nrow = 1))) %>%
+  ggsave("./Figures/FigDesignEffectSimple.png",.,
+         height = 4, width= 4, unit = 'in')
 
 
 #Optimal s for simple random sampling
@@ -57,6 +69,12 @@ fig_optimal_s <- optimal_s_data %>%
   theme(legend.position = 'bottom', text = element_text(size = 12))
 fig_optimal_s
 ggsave("./Figures/FigOptimals.png",fig_optimal_s,
+       height = 7, width= 7, unit = 'in')
+
+fig_optimal_s_simple <- fig_optimal_s
+fig_optimal_s_simple$data <- fig_optimal_s_simple$data %>% subset(sensitivity == 1 & specificity == 1)
+fig_optimal_s_simple + facet_null()
+ggsave("./Figures/FigOptimalsSimple.png",fig_optimal_s_simple,
        height = 7, width= 7, unit = 'in')
 
 ## Demonstrate that Fisher information for cluster sample sometimes but not always converges towards simple random for small rho
@@ -247,6 +265,19 @@ optimal_cluster <- plot_data_clustered %>%
 optimal_cluster
 ggsave('./Figures/optimal cluster.png',optimal_cluster, width = 6.5, height = 4.5, unit = 'in')
 
+fig_opmital_s_simple <-
+  plot_data_clustered %>% subset(is.na(correlation)) %>%
+  ggplot(aes(x = prevalence, y = s, ymin = min_s, ymax = max_s))+
+  geom_line()+
+  geom_ribbon(alpha = 0.3,show.legend = FALSE, linetype = 2)+
+  labs(x = 'Prevalence', y = 'Pool Size') +
+  theme(text = element_text(size = 12)) +
+  scale_x_continuous(labels = scales::percent_format(1))
+
+
+ggsave('./Figures/optimal s simple.png',fig_opmital_s_simple, width = 4, height = 4, unit = 'in')
+
+
 
 ## Optimal s, N and catch (sN)
 
@@ -303,7 +334,30 @@ optimal_cluster_sN <- plot_data_clustered_sN %>%
 optimal_cluster_sN
 ggsave('./Figures/optimal cluster sN.png',optimal_cluster_sN, width = 6.5, height = 4.5, unit = 'in')
 
+optimal_cluster_sN_simple <- optimal_cluster_sN
 
+optimal_cluster_sN_simple$data <- optimal_cluster_sN$data  %>%
+  subset(cost.pool == 4 &
+           correlation !='NA (simple random survey)'&
+           correlation != '0.01') %>%
+  mutate(outcome = recode(outcome,
+                          `Optimal s` = 'Optimal\nPool Size',
+                          `Optimal N` = 'Optimal\nPool Number',
+                          `Optimal sN` = 'Optimal\nCatch'))
+
+optimal_cluster_sN_simple <- optimal_cluster_sN_simple +
+  labs(x = 'Prevalence',
+       color = 'ICC')+
+  facet_grid(outcome ~ cost.pool + cost.location, scales = 'free',
+             labeller = label_bquote(rows = .(outcome),
+                                     cols = c[u] * {phantom() == phantom()} * 1 * ';' *
+                                       c[t] * {phantom() == phantom()} * .(cost.pool) * ';' *
+                                       c[s] * {phantom() == phantom()} * .(cost.location)),
+             switch = 'y'
+  )
+
+ggsave('./Figures/optimal cluster sN simple.png',
+       optimal_cluster_sN_simple, width = 6.5, height = 4.5, unit = 'in')
 
 ### Design effect
 
@@ -344,6 +398,17 @@ de.data.corr %>%
     de.fig.corr %>%
       ggsave(paste0('./Figures/FigDesignEffectCorr',.y,'.png'),.,
              width = 6.5, height = 5, unit = 'in',dpi = 'retina')
+
+    de.fig.corr$data <- de.fig.corr$data %>% subset(catch %in% c(16,64) & correlation != '0.01')
+    (de.fig.corr +
+        coord_cartesian(ylim = c(1,NA)) +
+        scale_y_log10() +
+        labs(x = 'Prevalence',
+             color = 'Pool Size') +
+        facet_grid(cols = vars(catch), rows = vars(correlation),
+                   labeller = label_bquote(rows = ICC == .(correlation), cols = Catch == .(catch)))) %>%
+      ggsave(paste0('./Figures/FigDesignEffectCorr',.y,'Simple.png'),.,
+             width = 4, height = 4, unit = 'in',dpi = 'retina')
 
   })
 
