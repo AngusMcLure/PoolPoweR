@@ -181,7 +181,7 @@ While specificity has a dramatic effect on the optimal $s$ especially for low $\
 
 ***Figure []*** Pool size that optimises unit cost of Fisher information as a function of prevalence (x-axis), sensitivity (rows), specificity (columns) and the relative cost of testing a pool ($c_p$) and collecting a unit ($c_u$). $c_p/c_u = 0$ and $c_p/c_u =$ Inf indicate the two extreme scenarios where testing pools or collecting units are free (or a sunk cost).   
 
-### Cluster surveys
+### Cluster surveys - single level of clustering
 If prevalence survey that will used pooled testing adopts a clustered or hierarchical sampling frame, this needs to be taken into account when determining sampling size and target pooling strategy. Correlation of the presence/absence of the marker in units at a location induces correlation of the outcomes of pools, changing the effective sample size and information to obtained from a given number of units. With positively correlated outcomes the total number of units required to achieve a certain level of power or Fisher information increases. For individually tested prevalence surveys a common approach is to calculate a design effect, which gives a multiplicative factor for the sample size that is required to achieve a given level of power or information with a clustered survey vs a simple random survey. Consider the survey where a total of $n$ units are sampled from $J$ locations, with $n/J$ units tested per location. Let $V_{ij}$ be correlated Bernoulli random variables indicating the presence of the marker in unit $i$ from location $j$, where units are correlated only with other units from the same location i.e.
 $$
 Corr(V_{ij},V_{i'j'}) = \begin{cases}
@@ -265,13 +265,15 @@ $$
 
 We can use any two-parameter family with support on $[0,1]$ to model the distribution of prevalences across sites. We consider three examples: the beta distribution, the logit-normal distribution, and a simple discrete distribution. However we first consider some general results.
 
+Note that $\rho$ follows the general definition of the correlation of two random variables. This should not be confused with the related concept of the intra-cluster (intraclass) correlation coefficient (ICC) which has been calculated in many many ways (see for instance Chakraborty and Hossain (2018) or Goldstein et al (2002)). Notably, the *estat icc* command for estimation of ICCs from mixed and random effects generalised linear models in STATA takes the approach of partitioning variance on the real/propensity scale rather than the probability/prevalence scale. When prevalence is close to 50% and correlation is low, then the ICC calculated in STATA is similar to the definition of $\rho$. However, if prevalence is low (as is usually the case when using pooled testing) the estimate of the ICC will be much larger (possibly by more than an order of magnitude) that $\rho$. 
+
 #### General properties of the likelihood function and Fisher information
 
 ##### Likelihood
 
 Recall that $X_{ij}$ are correlated Bernoulli random variables indicating the presence of marker in pool/group $i$ from location $j$. As infection status of vectors sampled from different locations are independent, the outcome of test on pools from different locations are also independent. Therefore we can focus our attention on defining the joint distribution of pools from the same location, dropping references to location $j$ for notational simplicity. Consider first the case where there are $N$ pools at a location each with same number of units $s$. Let $Y$ be the number of positive pools i.e. $Y = \sum_i X_{i}$, and recall that the pool positivity function  is $\phi_s(p) = (1-\varphi - \psi) (1-p)^s + \varphi$. Then
 $$
-L(\theta, \rho|y,N,s,\varphi,\psi) = P(Y = y) = {N \choose y} \int_0^1 f_\Theta(p) {\phi_s(p)}^y (1-\phi_s(p))^{N-y} dp
+L(\theta, \rho|y,N,s,\varphi,\psi) = {N \choose y} \int_0^1 f_\Theta(p) {\phi_s(p)}^y (1-\phi_s(p))^{N-y} dp
 $$
 
 In the case where pools/groups from a single location are different sizes, the expressions for the likelihood are similar. Consider a sample with $K$ unique pool/group sizes $\underline{s} = [s_1,\dots,s_K]$. Let $\underline{N} = [N_1,\dots, N_K]$ be the number of pools/groups of each size and  $\underline{Y}=[Y_1,\dots,Y_K]$ be the number of positive pools of each size. Then the likelihood is
@@ -501,12 +503,12 @@ While this behaviour is counter-intuitive and suggest major problems with using 
 
 ##### Logit-normal distributed $\Theta_j$
 
-If we model $\Theta_j$ as logit-normal, i.e. $g(\Theta_j) \sim Normal(\mu,\sigma)$ where $g$ is the logit function, the likelihood is
+If we model $\Theta_j$ as logit-normal, i.e. $h(\Theta_j) \sim Normal(\mu,\sigma)$ where $h$ is the logit function, the likelihood is
 $$
 \begin{align*}
 L(\theta, \rho, \psi, \varphi|y,N, s)
-&= {N \choose y} \int_0^1 Normal(g(p)|\mu,\sigma)g'(p) {\phi_s(p)}^y (1-\phi_s(p))^{N-y} dp \\
-&= {N \choose y} \int_0^1 \frac{Normal(g(p)|\mu,\sigma)}{p(1-p)} {\phi_s(p)}^y (1-\phi_s(p))^{N-y} dp. \\
+&= {N \choose y} \int_0^1 Normal(h(p)|\mu,\sigma)h'(p) {\phi_s(p)}^y (1-\phi_s(p))^{N-y} dp \\
+&= {N \choose y} \int_0^1 \frac{Normal(h(p)|\mu,\sigma)}{p(1-p)} {\phi_s(p)}^y (1-\phi_s(p))^{N-y} dp. \\
 \end{align*}
 $$
 There is no analytic expression for the mean and variance of a logit-normal distribution, therefore calculation of $\mu$ and $\sigma$ from $\theta$ and $\rho$ requires numerical inversion of the integral equations defining the moments.
@@ -522,13 +524,13 @@ $$
 where
 $$
 \begin{align*}
-\frac{\part\theta}{\part \mu} &= \int_0^1 Normal(g(p)|\mu,\sigma) \frac{g(p) - \mu}{\sigma} p dp\\
+\frac{\part\theta}{\part \mu} &= \int_0^1 Normal(h(p)|\mu,\sigma) \frac{h(p) - \mu}{\sigma} p dp\\
 
-\frac{\part\theta}{\part \sigma} &= \int_0^1 Normal(g(p)|\mu,\sigma) \frac{(g(p) - \mu)^2 - \sigma^2}{\sigma^3} p dp\\
+\frac{\part\theta}{\part \sigma} &= \int_0^1 Normal(h(p)|\mu,\sigma) \frac{(h(p) - \mu)^2 - \sigma^2}{\sigma^3} p dp\\
 
-\frac{\part\rho}{\part \mu} &= \left[\int_0^1 Normal(g(p)|\mu,\sigma) \frac{g(p) - \mu}{\sigma} p^2 dp - \frac{\part\theta}{\part \mu}(2\theta + \rho(1-2\theta))\right]\left[\theta(1-\theta)\right]^{-1}\\
+\frac{\part\rho}{\part \mu} &= \left[\int_0^1 Normal(h(p)|\mu,\sigma) \frac{h(p) - \mu}{\sigma} p^2 dp - \frac{\part\theta}{\part \mu}(2\theta + \rho(1-2\theta))\right]\left[\theta(1-\theta)\right]^{-1}\\
 
-\frac{\part\rho}{\part \sigma} &= \left[\int_0^1 Normal(g(p)|\mu,\sigma) \frac{(g(p) - \mu)^2 - \sigma^2}{\sigma^3}  p^2 dp - \frac{\part\theta}{\part \sigma}(2\theta + \rho(1-2\theta))\right]\left[\theta(1-\theta)\right]^{-1}.
+\frac{\part\rho}{\part \sigma} &= \left[\int_0^1 Normal(h(p)|\mu,\sigma) \frac{(h(p) - \mu)^2 - \sigma^2}{\sigma^3}  p^2 dp - \frac{\part\theta}{\part \sigma}(2\theta + \rho(1-2\theta))\right]\left[\theta(1-\theta)\right]^{-1}.
 \end{align*}
 $$
 
@@ -699,7 +701,116 @@ $$
 
 [I have code which is set up to do these calculations for negative binomially distributed catch sizes. The calculations aren't particularly hard numerically since you just do finite sums until the sum converges. I'm not we would really want to go into it any more than this here. Early experiments suggest that if Fisher information calculations based on the *expected* catch tend to overestimate Fisher information based on random catches in the cluster randomised setup, i.e. $E[I(\theta, \rho| r_N(V),r_s(V))] \leq I(\theta, \rho|r_N(E[V]), r_s(E[V]))$. One could probably prove this (or give conditions when this happens) if one could show that (or when) Fisher information increases sub-linearly with catch size. This should be an equality in the case with individual testing and simple random sampling]
 
+### Cluster surveys — multiple levels of clustering
 
+Many MX surveys designs adopt designs with multiple levels of clustering. For instance sampling my proceed by first selecting random areas, then selecting random trapping sites from within these areas. One might analyse the results of such surveys with spatially correlated random effects for each sampling site. However, in analogy to the results in previous sections, we might also use multiple levels of nested random effects.
+
+Let $V_{ijk}$ be the state (0 or 1) of unit $i$ selected from sampling site $j$ within sampling area $k$. In analogy to before we say that two units from different areas and sites are independent, however there is some degree of correlation between units from the same site and another degree of correlation from different sites but the same area:
+
+$$
+Corr(V_{ijk},V_{i'j'k'}) = \begin{cases}
+1, & i = i', j = j', k = k' \\
+\rho_1, & i \neq i', j = j', k = k' \\
+\rho_2, & i \neq i', j \neq j', k = k' \\
+0, &  k \neq k' \\
+\end{cases}
+$$
+
+As before there are many different correlation structures which have this property, but as before we consider a general approach to specify the joint distribution of $\{V_{ijk}\}$ where we model the prevalence as variable across sites and areas, with units being independent conditioned on the site.  Let $\Theta_{jk}$ represent the prevalence at site $j$ in area $k$ 
+$$
+V_{ijk}|\Theta_{jk} \sim Bern(\Theta_{jk}),
+$$
+where $\{V_{ijk}|\Theta_{jk}\}$ are independent.
+
+We model the prevalence in each area $k$ $\{\Theta_{k}\}$ as i.i.d. random variables with mean $\theta$ and support on $[0,1]$ and density $f_\Theta (p)$. We model the prevalence in each site in each location $\{\Theta_{jk}\}$ as identically distributed random variables with mean $\theta$ and conditional mean $E[\Theta_{jk}|\Theta_k] = \Theta_k$, support on $[0,1]$, and conditional densities $g(p|\Theta_k)$. We assume that prevalence at each site $\Theta_{jk}$ is independent from prevalence at sites in distinct areas, and assume that two site prevalences from the same area are independent when conditioned on area level prevalence.
+
+Then, if $n_{jk}$ is the number of units from site $j$ in area $k$ then
+$$
+\sum_{i=1}^{n_{jk}} V_{ijk} |\Theta_{jk} \sim Bin(\Theta_{jk},n_{jk}).
+$$
+This set up preserves $E[V_{ijk}] = \theta$. Units from different sites and areas are independent and therefore uncorrelated. Correlation between two distinct units from the same site (and therefore same area), $\rho_1$, is
+$$
+\begin{align*}
+\rho_1 := Corr(V_{ijk},V_{i'jk}) &= \frac{E[V_{ijk}V_{i'jk}] - E[V_{ijk}][V_{i'jk}]}{\sqrt{Var[V_{ijk}]Var[V_{i'jk}]}} \\
+&=  \frac{P(V_{ijk} = V_{i'jk} = 1) - E[V_{ijk}]^2}{Var[V_{ijk}]} \\
+&=  \frac{E[\Theta_{jk}^2] - E[\Theta_{jk}]^2}{Var[V_{ijk}]} \\
+&= \frac{Var[\Theta_{jk}]}{\theta (1-\theta)}.
+\end{align*}
+$$
+
+Correlation between two distinct units from the same area $k$ but distinct sites $j$ and $j'$, $\rho_2$, is
+$$
+\begin{align*}
+\rho_2 := Corr(V_{ijk},V_{i'j'k}) &= \frac{E[V_{ijk}V_{i'j'k}] - E[V_{ijk}][V_{i'j'k}]}{\sqrt{Var[V_{ijk}]Var[V_{i'j'k}]}} \\
+&=  \frac{P(V_{ijk} = V_{i'j'k} = 1) - E[V_{ijk}]^2}{Var[V_{ijk}]} \\
+&=  \frac{E[\Theta_{k}^2] - E[\Theta_{k}]^2}{Var[V_{ijk}]} \\
+&= \frac{Var[\Theta_{k}]}{\theta (1-\theta)}.
+\end{align*}
+$$
+
+$$
+\begin{align*}
+P(V_{ijk} = V_{i'j'k} = 1)
+
+& = \int_0^1 f_\Theta(p) E[\Theta_{jk}|\Theta_k = p] E[\Theta_{j'k}|\Theta_k = p] dp \\
+& = \int_0^1 f_\Theta(p) E[\Theta_{jk}|\Theta_k = p]^2 dp \\
+& = \int_0^1 f_\Theta(p) p^2 dp \\
+& = E[\Theta_k^2]
+\end{align*}
+$$
+
+Note the while the above setup has the same degree of correlation $\rho_1$ between units from a single site for every pair of sites across all areas, if you condition on area-level prevalence, $\Theta_k$ then intra-site correlations become zero, and inter-site correlations depend on $\Theta_k$
+$$
+Corr(V_{ijk}, V_{i'j'k})|\Theta_k =
+\begin{cases}
+1, & i = i', j = j'\\
+\frac{Var[\Theta_{jk}|\Theta_k]}{\Theta_k(1-\Theta_k)}, & i \neq i', j = j' \\
+0, &j \neq j'\\
+
+\end{cases}
+$$
+We can use any two-parameter families with support on $[0,1]$ to model the distribution of prevalences across sites. The most common way to analyse data from nested cluster surveys like this would be to use a generalised linear model with two levels of random effects which are normally distributed on the link scale. If $\sigma_1$ and $\sigma_2$ are the standard deviations of the site-level and area-level random effects, and $h$ is the link function, then in this framework
+
+$h^{-1}(\Theta_{jk}) \sim Normal(\mu, \sigma_1^2 + \sigma_2^2)$
+
+However the distribution of $\Theta_k$ is more complicated. It does **not** follow
+
+$h^{-1}(\Theta_k) \sim Normal(\mu, \sigma_2^2)$
+
+as one might expect. To see this note that this would **not** preserve $E[\Theta_k] = E[\Theta_{jk}]$.
+
+Instead if have $W_k \sim Normal(0, \sigma_2^2)$ i.i.d. and $W_{jk} \sim Normal(0, \sigma^2_1)$ i.i.d. then
+
+$$
+\begin{align*}
+\Theta_{jk}
+& \sim h(\mu + W_k + W_{jk})\\
+\Theta_k
+& \sim  E[h(\mu + W_k + W_{jk})|W_k]\\
+&   =   \int_{-\infty}^\infty h(w) f_N(w|\mu + W_k, \sigma_1^2) dw
+\end{align*}
+$$
+
+This can be generalised to three or more levels of clustering.
+
+### Alternative parameterisations for Fisher information calculations
+
+The complicated form of the correlation structures presented in the previous section is unfortunate and perhaps could be avoided by parameterising our distributions (and calculating Fisher information) with an alternate parameterisation.
+
+For this class of random effect models considered in the previous section, the commonly used STATA software calculates an ICC of the following form
+$$
+ICC_1 = \frac{\sigma_1^2 + \sigma_2^2}{\gamma + \sigma_1^2 + \sigma_2^2}
+$$
+
+$$
+ICC_2 = \frac{\sigma_2^2}{\gamma + \sigma_1^2 + \sigma_2^2}
+$$
+
+where $\gamma$ is the variance of standard logistic random variable (i.e. $\pi^2/3$). (See Goldstein et al 2002)
+
+The advantage of this version of the ICC, in addition to ease of computation, is independence of $\theta$. Therefore in a mixed effect model, the ICCs are the same for every combination of fixed effects. The major downside is that while their names would suggest that ICCs should approximate $\rho_1$ and $\rho_2$, when prevalence is low (or high) the ICCs are potentially orders of magnitude larger than the latter. Nevertheless, if the 'correlation coefficients' reported in the literature are going to be of the type calculated by STATA, and these are going to be used as a starting point for sample size calculations, then it is worth considering parameterising our Fisher information calculations in terms of $\theta$ and $ICC$.
+
+This can be done fairly straightforwardly as we have in the previous sections with a change of variables.
 
 ## Designing surveys for the detection of disease markers
 

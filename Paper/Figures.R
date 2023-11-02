@@ -4,7 +4,7 @@ plot_data <- expand.grid(prevalence = seq(0,0.1,by = 0.001),
                          sensitivity = c(0.9,0.99,0.999,1),
                          specificity = c(0.9,0.99,0.999,1),
                          s = c(50, 20,10, 5, 2, 1)) %>%
-  mutate(ratio = fi_ratio_imperfect(s, prevalence, sensitivity, specificity, FALSE))
+  mutate(ratio = fi_ratio(s, prevalence, sensitivity, specificity, FALSE))
 
 FigDesignEffectSupp <- plot_data %>%
   mutate(s = factor(s),
@@ -285,7 +285,7 @@ plot_data_clustered_sN <- expand.grid(prevalence = seq(0.005,0.1,by = 0.001),
                                       cost.unit = 1,
                                       cost.pool = c(4,40),
                                       cost.location = c(4,40),
-                                      correlation = c(NA,0,0.01,0.1),
+                                      correlation = c(NA,0,0.01,0.1,0.3),
                                       N = c(2,4,8)) %>%
   rowwise() %>%
   mutate(out = optimise_sN_prevalence(prevalence,
@@ -304,12 +304,12 @@ optimal_cluster_sN <- plot_data_clustered_sN %>%
                               ifelse(correlation == 0,
                                      "0 (known)" ,
                                      as.character(correlation)))) %>%
-  mutate(correlation = factor(correlation, levels = c('0.1','0.01',"0 (known)",'NA (simple random survey)'))) %>%
+  mutate(correlation = factor(correlation, levels = c('0.3','0.1','0.01',"0 (known)",'NA (simple random survey)'))) %>%
   pivot_longer(c(s, N,catch),names_to = 'outcome') %>%
   mutate(outcome = paste('Optimal', recode(outcome,
                                            catch = 'sN')),
          outcome = fct_relevel(outcome,'Optimal s', 'Optimal N')) %>%
-  subset(value != Inf) %>%
+  subset(value != Inf & !is.na(correlation)) %>%
   ggplot(aes(x = prevalence, y = value,
              color = correlation,
              linetype = simplerandom)) +
@@ -318,7 +318,7 @@ optimal_cluster_sN <- plot_data_clustered_sN %>%
              labeller = label_bquote(rows = .(outcome),
                                      cols = c[u] * {phantom() == phantom()} * 1 * ';' *
                                        c[p] * {phantom() == phantom()} * .(cost.pool) * ';' *
-                                       c[l] * {phantom() == phantom()} * .(cost.location)),
+                                       c[s] * {phantom() == phantom()} * .(cost.location)),
              switch = 'y'
   ) +
   coord_cartesian(xlim = c(0, NA), ylim = c(0,NA)) +
@@ -355,7 +355,7 @@ optimal_cluster_sN_simple <- optimal_cluster_sN_simple +
                                        c[s] * {phantom() == phantom()} * .(cost.location)),
              switch = 'y'
   )
-
+optimal_cluster_sN_simple
 ggsave('./Figures/optimal cluster sN simple.png',
        optimal_cluster_sN_simple, width = 6.5, height = 4.5, unit = 'in')
 

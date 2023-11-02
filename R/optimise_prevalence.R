@@ -3,7 +3,6 @@ design_effect_cluster_fisher <- function(s,N,prevalence,sensitivity,specificity,
       solve(fi_pool_imperfect_cluster(s,N,prevalence,sensitivity,specificity, correlation,form))[1,1]
 }
 
-
 #optimising the pool size for estimating prevalence
 
 unit_fi_cost <- function(s,prevalence,sensitivity,specificity, cost.unit, cost.pool){
@@ -17,19 +16,6 @@ unit_fi_cost_clustered <- function(s,N,prevalence,correlation,sensitivity,specif
   cost * solve(fi)[1,1]
 }
 
-# unit_fi_cost_clustered_alt <- function(s,N,prevalence,correlation,sensitivity,specificity,
-#                                       cost.unit, cost.pool, cost.location, cost.collect, catch.collect, form = 'beta'){
-#
-#   fi <- fi_pool_imperfect_cluster(s,N,prevalence,sensitivity,specificity,correlation, form = form)
-#
-#   ##   expected number of sampling periods required to get N pools of size s.
-#   ##   tmight not be an integer!!
-#   #t <- N * s/catch.collect
-#   #cost <- cost.unit * s * N +  cost.pool * N + cost.location + cost.collect * t
-#
-#   cost <- (cost.collect/catch.collect + cost.unit) * s * N + cost.pool * N + cost.location + cost.collect * t
-#   cost * solve(fi)[1,1]
-# }
 
 
 optimise_s_prevalence <- function(prevalence, cost.unit, cost.pool,

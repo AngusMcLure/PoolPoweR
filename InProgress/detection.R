@@ -15,10 +15,10 @@
 
 
 detection_errors <- function(theta,s,N,M,sensitivity, specificity, correlation,
-                             periods_per_location, periods_total, catch.mean, catch.dispersion,
-                             form){ # these parameters don't do anything yet, but the idea is to generalise this for different random effect distributions and links. E.g. cloglog link with normal random effects, or beta distribution with identity link (to get the beta-binomial model)
+                             periods_per_location, periods_total,
+                             catch.mean, catch.dispersion,
+                             form = 'beta', link = NULL){
   rho <- correlation
-
 
   link <- switch(form, logitnorm = qlogis, cloglognorm = cloglog, beta = function(x){x})
   invlink <- switch(form, logitnorm = plogis, cloglognorm = cloglog_inv, beta = function(x){x})
@@ -32,7 +32,6 @@ detection_errors <- function(theta,s,N,M,sensitivity, specificity, correlation,
   if(form == 'beta'){
     Alpha <- theta * (rho^-1 -1)
     Beta <- (1-theta) * (rho^-1 -1)
-    print(Alpha);print(Beta)
     density <- function(x){dbeta(x,Alpha, Beta)}
   }
 
@@ -83,11 +82,10 @@ detection_errors <- function(theta,s,N,M,sensitivity, specificity, correlation,
   if(form == 'beta'){
     if(missing(N)){stop('Have not implemented negative binomial sample size with form = beta. It has a nice closed form solution in terms of hypergeometric functions for the case with a perfec test. See paper notes')}
     if(sensitivity ==1){
-      typeII <- (specificity ^ N * beta(Alpha, Beta + s * N)/ beta(Alpha, Beta)) ^ M
+      typeII <- exp((log(specificity) * N + lbeta(Alpha, Beta + s * N) -  lbeta(Alpha, Beta)) * M)
     }else{
       z <- 0:N
       summand <- (1-sensitivity)^N/beta(Alpha, Beta) * choose(N,z) * ((1-sensitivity - specificity)/(sensitivity - 1))^z * beta(Alpha, Beta + z * s)
-      print(summand)
       typeII <- sum(summand) ^ M
     }
   }else{
@@ -148,15 +146,15 @@ detection_errors_three_levels <- function(theta,s,N,M1,M2,sensitivity, specifici
   list(typeI = typeI, typeII = typeII)
 }
 
-detection_error_plots <- function(theta,s,N,M,
-                                  sensitivity, specificity, sigma,
+detection_error_plots <- function(theta,s,N,M,sensitivity, specificity, correlation,
                                   periods_per_location, periods_total,
-                                  catch.mean, catch.dispersion){
+                                  catch.mean, catch.dispersion,
+                                  form){
   argg <- as.list(environment())
   argg <- argg[!sapply(argg,is.name)]
   long_arggs <- map(argg,length) %>% unlist %>% sort(decreasing = TRUE) %>% `[`(.,.>1) %>% names
 
-  argg <- do.call(expand.grid,argg)
+  argg <- do.call(expand_grid,argg)
   errors <- data.frame()
   for(.n in 1:nrow(argg)){
     errors[.n,c('typeI','typeII')] <- do.call(detection_errors, argg[.n,])
@@ -178,14 +176,69 @@ detection_error_plots <- function(theta,s,N,M,
 
 }
 
-ICC1 <- 0.3
+
+detection_data <- expand_grid(theta = c(0.01, 0.001), M = c(5,25,50),
+                              sensitivity = 1, specificity = 1,
+                              correlation = c(0.1,0.3), form = 'beta',
+                              catch = 100 * (1:10),
+                              cost.unit = 1, cost.pool = 4, cost.location = 10,
+                              max.pool = 25) %>%
+  mutate(s = min(catch/M,25),
+         N = catch/(M * s),
+         `total cost` = cost.unit * catch + cost.pool * N * M + cost.location * M) %>%
+  rowwise() %>%
+  mutate(typeIIerror = detection_errors(theta = theta,s = s,N = N, M = M,
+                                        sensitivity = sensitivity,
+                                        specificity = specificity,
+                                        correlation = correlation, form = form)$typeII,
+         `detection probability` = 1 - typeIIerror)
+
+dp <- detection_data %>%
+  mutate(ICC  = factor(correlation),
+         M = factor(M),
+         Prevalence = paste(theta * 100, '%')) %>%
+  ggplot(aes(x = catch,y = `detection probability`, color  = M)) +
+  geom_line() +
+  facet_grid(Prevalence~ICC, labeller = label_both) +
+  labs(x = 'Total catch at all sites',
+       y = 'Power\n(detection probability)',
+       color = 'Number of sampling sites') +
+  lims(x = c(0, NA)) +
+  theme(strip.placement = 'outside', legend.position = 'bottom',
+        text = element_text(size = 12)) +
+  scale_y_continuous(labels = scales::percent, limits = c(0,NA))
+dp
+ggsave('./Figures/DetectionPower.png', dp,
+       width = 4, height = 4, unit = 'in',dpi = 'retina')
+
+dp1 <- detection_data %>%
+  #pivot_longer(c(`detection probability`, `total cost`), names_to = 'measure', values_to = 'value') %>%
+  mutate(correlation  = factor(correlation),
+         `Total Catch` = factor(catch),
+         `Number of Sites` = factor(M)
+  ) %>%
+  ggplot(aes(x = theta,y = `detection probability`, color  = correlation)) +
+  geom_line() +
+  facet_grid(`Total Catch`~`Number of Sites`,labeller = label_both) +
+  labs(x = 'Prevalence',
+       y = 'Power\n(detection probability)',
+       color = 'correlation') +
+  lims(y = c(0,NA)) +
+  theme(strip.placement = 'outside', legend.position = 'bottom') +
+  scale_x_continuous(labels = scales::percent,limits = c(0, NA))
+dp1
+
+
+
+
+ICC1 <- 0.1
 sigma1 <- sqrt(pi^2/(1/ICC1 - 1)/3); sigma1
-ICC2 <- 0.3
+ICC2 <- 0.1
 sigma2 <- sqrt(pi^2/(1/ICC2 - 1)/3); sigma2
 theta <- 0.01
-s <- 50
-M1 <- 5
-M2 <- 5
+s <- 25
+M1 <- 15
+M2 <- 1
 periods_per_location <- 1
 catch.mean <- 100
 catch.cv <- 0.5
@@ -194,14 +247,14 @@ catch.disp <- catch.mean^2/(catch.var - catch.mean); catch.disp; qnbinom(c(0.025
 N <- catch.mean * periods_per_location / s; N
 MeanTests <- N * M1 * M2; MeanTests
 replicate <- 1 #the number of times each positive test is checked -- only taken as positive if all are positive
-sensitivity = 1
-specificity = 1
+sensitivity <- 1
+specificity <- 1
 
-detection_error_plots(theta = 0.01,s = seq(5, 30, by = 5),N = N, M = M1*M2,
+detection_error_plots(theta = 0.01,s = seq(5, 30, by = 5),
+                      N = 1, M = M1*M2,
                       sensitivity = 1,
-                      specificity = 1-(10^(-(3:5))),
-                      sigma = sqrt(sigma1^2+sigma2^2)) +
-  scale_y_log10()
+                      specificity = 1,
+                      correlation = c(0.1,0.2,0.5), form = 'beta')
 
 detection_error_plots(theta = 0.02,s = seq(25, 25, by = 5),
                       periods_total = 12,
@@ -213,7 +266,8 @@ detection_error_plots(theta = 0.02,s = seq(25, 25, by = 5),
 detection_errors(theta = theta,s = s,N = N, M = M1*M2,
                  sensitivity = sensitivity^replicate,
                  specificity = 1-(1-specificity)^replicate,
-                 sigma = sqrt(sigma1^2+sigma2^2))
+                 correlation = ICC1 + ICC2)
+
 
 detection_errors(theta = theta,s = s, M = M1*M2,
                  sensitivity = sensitivity^replicate,

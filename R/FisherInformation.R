@@ -23,12 +23,9 @@ fi_pool_imperfect <- function(s,p,sensitivity,specificity){
 
 }
 
-#ratio of unit information for pooled vs unpooled units
-fi_ratio <- function(s,p){
-  fi_pool(1,p)*s/fi_pool(s,p)
-}
 
-fi_ratio_imperfect <- function(s,p,sensitivity,specificity, perfect.reference = T){
+
+fi_ratio <- function(s,p,sensitivity = 1,specificity = 1, perfect.reference = T){
   if(perfect.reference) fi_pool(1,p)*s/fi_pool_imperfect(s,p,sensitivity,specificity)
   else fi_pool_imperfect(1,p,sensitivity,specificity)*s/fi_pool_imperfect(s,p,sensitivity,specificity)
 }

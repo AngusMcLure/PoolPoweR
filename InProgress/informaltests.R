@@ -5,18 +5,18 @@
 
 specificity <- 0.99
 for(N in c(100, 90, 50, 20,10, 5, 2, 1)){
-  plot.function(function(p)ifelse(fi_ratio_imperfect(N,p,sensitivity,specificity,F) <N,
-                                  fi_ratio_imperfect(N,p,sensitivity,specificity,F),
+  plot.function(function(p)ifelse(fi_ratio(N,p,sensitivity,specificity,F) <N,
+                                  fi_ratio(N,p,sensitivity,specificity,F),
                                   N),
                 to = 0.1,add = T, log = 'y')
 }
 
 for(N in c(2:10)){
-  plot.function(function(p)fi_ratio_imperfect(N,p,sensitivity,specificity,F),to = 0.1,add = T)
+  plot.function(function(p)fi_ratio(N,p,sensitivity,specificity,F),to = 0.1,add = T)
 }
 
 for(p in 10^((-3:0)/3)){
-  plot.function(function(s)fi_ratio_imperfect(s,p,sensitivity,specificity),to = 100,add = T,log = 'y')
+  plot.function(function(s)fi_ratio(s,p,sensitivity,specificity),to = 100,add = T,log = 'y')
 }
 
 
