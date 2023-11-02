@@ -369,50 +369,6 @@ fi_pool_imperfect_cluster <- function(s, N, prevalence, sensitivity, specificity
     }else {stop ('accepted forms of the site prevalence distribution (argument form) are logitnorm, cloglognorm, beta, and discrete.')}
 }
 
-fi_pool_imperfect_cluster_unequal <- function(catch.dist, pool.strat, prevalence, sensitivity, specificity,
-                                              correlation,form = 'beta', real.scale = FALSE, max.iter = 200){
-
-  catch <- max(catch.dist$min-1, 0)
-  terminate <- FALSE
-  FI <- matrix(0, 2,2)
-  rel.tol <- 1e-4
-  iter <- 0
-  FI.incr <- array(dim = c(2,2,max.iter))
-  catches <- c()
-  while(!terminate){
-    catch <- catch + 1
-    mass <- catch.dist$pmf(catch)
-    if(mass == 0) next #this avoids unnecessary calls to fi_pool_imperfect_cluster and prevents the early termination of the algorithm for distributions that may have 0 mass for some n but non-zero mass for m>n (e.g. if distribution only has mass on multiples of 10)
-    iter <- iter + 1 #only counts iteration if mass is non-zero
-    pooling <- pool.strat(catch)
-    catches[iter] <- catch
-    FI.incr[,,iter] <- mass *
-      fi_pool_imperfect_cluster(pooling$s, pooling$N, prevalence,
-                                sensitivity,specificity,correlation,
-                                form,real.scale)
-    FI <- FI +  FI.incr[,,iter]
-    # Stop if increment changes ALL elements of FI by less than fraction rel.tol or
-    # all elements by less than abs.tol
-    rel.incr <- abs(FI.incr[,,iter]/FI)
-    #print(rel.incr)
-    if(all(rel.incr <= rel.tol) | catch == catch.dist$max){
-      terminate <- TRUE
-    }
-    if(iter == max.iter){
-      terminate <- TRUE
-      warning('Algorithm reached max.iter without converging')
-    }
-  }
-  catches <- catches[1:iter]
-  FI.incr <- FI.incr[,,1:iter]
-  plot(catches, FI.incr[1,1,])
-  plot(catches, FI.incr[1,2,])
-  plot(catches, FI.incr[2,2,])
-
-  FI
-}
-
-
 
 
 

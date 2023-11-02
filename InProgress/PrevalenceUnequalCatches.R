@@ -43,10 +43,10 @@ FI.equal.Ns <- fi_pool_imperfect_cluster(opt$s,opt$N,
                                         theta, 1, 1,
                                         rho,form = 'beta')
 FI.equal.N <- fi_pool_imperfect_cluster_unequal(nb_catch(catch.mean, catch.var),
-                                  pool_equal_N(opt$N), theta, 1, 1,
+                                  pool_fixed_N(opt$N), theta, 1, 1,
                                   rho,form = 'beta',max.iter = 300)
 FI.equal.s <-fi_pool_imperfect_cluster_unequal(nb_catch(catch.mean, catch.var),
-                                  pool_equal_s(opt$s), theta, 1, 1,
+                                  pool_max_s(opt$s), theta, 1, 1,
                                   rho,form = 'beta',max.iter = 300)
 solve(FI.equal.Ns)
 solve(FI.equal.N)
