@@ -1,13 +1,13 @@
 ## Fisher information for population prevalence (and intra-cluster correlation
 ## where appropriate)
-fi_pool <- function(s,p){
-  #s poolsize
-  #p prevalence
-  #(s/(1-p))^2 * (1/(1-(1-p)^s) - 1)
-  q <- 1-p
-  s^2/(q^2*(q^-s -1))
-}
+fi_pool <- function(pool_size, prevalence) {
+  s <- pool_size
+  p <- prevalence
 
+  q <- 1 - p
+  fisher_information <- s^2 / (q^2 * (q^-s - 1))
+  return(fisher_information)
+}
 
 fi_pool_imperfect <- function(s,p,sensitivity,specificity){
   varphi <- sensitivity
