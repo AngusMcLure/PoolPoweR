@@ -4,4 +4,5 @@
 ^Presentations*
 ^InProgress*
 ^Figures*
-
+man/hello.Rd
+^LICENSE\.md$

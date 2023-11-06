@@ -1,11 +1,18 @@
-Package: powerpool
+Package: PoolPoweR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Power and Sample Size Calculations for Surveys Using Pool Testing
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: c(
+    person(given = "Angus", family = "McLure", role = c("aut", "cre"), 
+        email = "angus.mclure@anu.edu.au", 
+        comment = c(ORCID = "0000-0003-2551-3059")),
+    person(given = "Frederick", family = "Jaya", role = "aut",
+        comment = c(ORCID = "0000-0002-4019-7026"))
+    )
+Description: Power and Sample Size Calculations for Surveys Using Pool Testing.
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
