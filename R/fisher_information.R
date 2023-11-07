@@ -2,34 +2,30 @@
 ## where appropriate)
 fi_pool <- function(pool_size, prevalence) {
   s <- pool_size
-  p <- prevalence
+  theta <- prevalence
 
-  q <- 1 - p
-  fisher_information <- s^2 / (q^2 * (q^-s - 1))
-  return(fisher_information)
+  q <- 1 - theta
+  s^2 / (q^2 * (q^-s - 1))
 }
 
-fi_pool_imperfect <- function(s,p,sensitivity,specificity){
+fi_pool_imperfect <- function(pool_size, prevalence, sensitivity, specificity) {
+  s <- pool_size
+  theta <- prevalence
   varphi <- sensitivity
   psi <- specificity
 
-  #probpos <- (1-p)^s * (1- varphi - psi) + varphi
-
-  #(s * (1-p)^(s -1) * (1- varphi - psi))^2/ (probpos * (1-probpos))
-
-  q <- 1-p
-  s^2 * (1 - psi - varphi)^2 /
-    (q^(2 - 2*s)*(varphi + q^s * (1 - psi - varphi))*(1 - varphi - q^s*(1 - psi - varphi)))
-
+  q <- 1 - theta
+  s^2 * (1 - psi - varphi)^2 /(q^(2 - 2 * s) *
+       (varphi + q^s * (1 - psi - varphi)) * (1 - varphi - q^s * (1 - psi - varphi)))
 }
 
-
-
-fi_ratio <- function(s,p,sensitivity = 1,specificity = 1, perfect.reference = T){
-  if(perfect.reference) fi_pool(1,p)*s/fi_pool_imperfect(s,p,sensitivity,specificity)
-  else fi_pool_imperfect(1,p,sensitivity,specificity)*s/fi_pool_imperfect(s,p,sensitivity,specificity)
+fi_ratio <- function(s, p, sensitivity = 1, specificity = 1, perfect_reference = TRUE) {
+  if (perfect_reference) {
+    fi_pool(1, p) * s / fi_pool_imperfect(s, p, sensitivity, specificity)
+  } else {
+    fi_pool_imperfect(1, p, sensitivity, specificity) * s / fi_pool_imperfect(s, p, sensitivity, specificity)
+  }
 }
-
 
 fi_pool_imperfect_cluster <- function(s, N, prevalence, sensitivity, specificity,
                                       correlation, form = 'beta', real.scale = FALSE){
@@ -368,7 +364,3 @@ fi_pool_imperfect_cluster <- function(s, N, prevalence, sensitivity, specificity
 
     }else {stop ('accepted forms of the site prevalence distribution (argument form) are logitnorm, cloglognorm, beta, and discrete.')}
 }
-
-
-
-
