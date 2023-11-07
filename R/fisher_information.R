@@ -14,7 +14,7 @@ fi_pool <- function(pool_size, prevalence, sensitivity, specificity) {
   numerator / denominator
 }
 
-fi_pool_imperfect_cluster <- function(s, N, prevalence, sensitivity, specificity,
+fi_pool_cluster <- function(s, N, prevalence, sensitivity, specificity,
                                       correlation, form = 'beta', real.scale = FALSE){
   if(length(s) != length(N) || !all((N %% 1) == 0) || !all(c(N,s)>0)){
     stop('s and N must be vectors of positive numbers of common length. s can be non-integer, but N must be integer')
