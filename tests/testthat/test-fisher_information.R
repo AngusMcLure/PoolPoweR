@@ -1,8 +1,8 @@
 # Tolerance to address floating point precision errors
-test_that("fi_pool_imperfect() works with expected input ranges", {
+test_that("fi_pool() works with expected input ranges", {
   # Tests mainly to ensure same outputs when refactoring fi_pool internals
   expect_equal(
-    fi_pool_imperfect(
+    fi_pool(
       pool_size = 10,
       prevalence = 0.7,
       sensitivity = 0.8,
@@ -12,7 +12,7 @@ test_that("fi_pool_imperfect() works with expected input ranges", {
     tolerance = 1e-6
   )
   expect_equal(
-    fi_pool_imperfect(
+    fi_pool(
       pool_size = 20,
       prevalence = 0.55,
       sensitivity = 0.9,
@@ -21,7 +21,7 @@ test_that("fi_pool_imperfect() works with expected input ranges", {
     7.376202e-11,
     tolerance = 1e-6
   )
-  expect_true(is.nan(fi_pool_imperfect(
+  expect_true(is.nan(fi_pool(
     pool_size = 10,
     prevalence = 1,
     sensitivity = 1,
