@@ -36,17 +36,17 @@ fi_pool_cluster <- function(pool_size,
 
   if (rho == 0) {
     # warning('correlation = 0 (no correlation) would mean that random sampling from a single location is equivalent to simple random sampling from the whole population (i.e. any one location is representative of the whole population). If this is the case, do not use cluster survey. However, this is highly unlikely to be true. Instead choose a small correlation')
-    return(sum(fi_pool_imperfect(s, theta, varphi, psi) * N))
+    return(sum(fi_pool(s, theta, varphi, psi) * N))
   }
   if (rho == 1) {
     stop("correlation = 1 (perfect correlation) means that units from the same location are prefectly correlated. Do not use cluster surveys in this case.")
-    # return(fi_pool_imperfect(1,theta,varphi,psi))
+    # return(fi_pool(1,theta,varphi,psi))
   }
   if (K == 1 && N == 1 && s == 1) {
-    return(matrix(c(fi_pool_imperfect(s, theta, varphi, psi) * N, 0, 0, 0), nrow = 2))
+    return(matrix(c(fi_pool(s, theta, varphi, psi) * N, 0, 0, 0), nrow = 2))
   }
-  phi <- function(p) {
-    varphi + (1 - psi - varphi) * (1 - p)^s
+  phi <- function(theta) {
+    varphi + (1 - psi - varphi) * (1 - theta)^s
   }
 
   if (form %in% c("discrete", "beta")) {
