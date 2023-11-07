@@ -26,9 +26,9 @@ fi_pool_cluster <- function(pool_size,
   N <- pool_number
   K <- length(N)
   theta <- prevalence
+  varphi <- sensitivity
+  psi <- specificity
   rho <- correlation
-  sens <- sensitivity
-  spec <- specificity
 
   if (length(s) != length(N) || !all((N %% 1) == 0) || !all(c(N, s) > 0)) {
     stop("s and N must be vectors of positive numbers of common length. s can be non-integer, but N must be integer")
@@ -36,17 +36,17 @@ fi_pool_cluster <- function(pool_size,
 
   if (rho == 0) {
     # warning('correlation = 0 (no correlation) would mean that random sampling from a single location is equivalent to simple random sampling from the whole population (i.e. any one location is representative of the whole population). If this is the case, do not use cluster survey. However, this is highly unlikely to be true. Instead choose a small correlation')
-    return(sum(fi_pool_imperfect(s, prevalence, sensitivity, specificity) * N))
+    return(sum(fi_pool_imperfect(s, theta, varphi, psi) * N))
   }
   if (rho == 1) {
     stop("correlation = 1 (perfect correlation) means that units from the same location are prefectly correlated. Do not use cluster surveys in this case.")
-    # return(fi_pool_imperfect(1,prevalence,sensitivity,specificity))
+    # return(fi_pool_imperfect(1,theta,varphi,psi))
   }
   if (K == 1 && N == 1 && s == 1) {
-    return(matrix(c(fi_pool_imperfect(s, prevalence, sensitivity, specificity) * N, 0, 0, 0), nrow = 2))
+    return(matrix(c(fi_pool_imperfect(s, theta, varphi, psi) * N, 0, 0, 0), nrow = 2))
   }
   phi <- function(p) {
-    sens + (1 - spec - sens) * (1 - p)^s
+    varphi + (1 - psi - varphi) * (1 - p)^s
   }
 
   if (form %in% c("discrete", "beta")) {
@@ -68,19 +68,19 @@ fi_pool_cluster <- function(pool_size,
       phi. <- phi(theta)
 
       lik <- choose(N, y) * ((1 - rho) * phi.^y * (1 - phi.)^(N - y) +
-        rho * theta * sens^y * (1 - sens)^(N - y) +
-        rho * (1 - theta) * spec^(N - y) * (1 - spec)^y)
-      lik_theta <- choose(N, y) * ((1 - rho) * (1 - spec - sens) * s * (1 - theta)^(s - 1) * phi.^(y - 1) * (1 - phi.)^(N - y - 1) * (N * phi. - y) +
-        rho * sens^y * (1 - sens)^(N - y) -
-        rho * spec^(N - y) * (1 - spec)^y)
+        rho * theta * varphi^y * (1 - varphi)^(N - y) +
+        rho * (1 - theta) * psi^(N - y) * (1 - psi)^y)
+      lik_theta <- choose(N, y) * ((1 - rho) * (1 - psi - varphi) * s * (1 - theta)^(s - 1) * phi.^(y - 1) * (1 - phi.)^(N - y - 1) * (N * phi. - y) +
+        rho * varphi^y * (1 - varphi)^(N - y) -
+        rho * psi^(N - y) * (1 - psi)^y)
       lik_rho <- choose(N, y) * (-phi.^y * (1 - phi.)^(N - y) +
-        theta * sens^y * (1 - sens)^(N - y) +
-        (1 - theta) * spec^(N - y) * (1 - spec)^y)
+        theta * varphi^y * (1 - varphi)^(N - y) +
+        (1 - theta) * psi^(N - y) * (1 - psi)^y)
     } else if (form == "beta") {
       rho. <- rho^-1 - 1
       Alpha <- theta * rho.
       Beta <- (1 - theta) * rho.
-      if (sens == 1 & spec == 1 & length(s) == 1 && (s == 1 | N < 20)) { # Cases where we have solutions in terms of beta functions etc. However this method becomes numerically unstable for large N
+      if (varphi == 1 & psi == 1 & length(s) == 1 && (s == 1 | N < 20)) { # Cases where we have solutions in terms of beta functions etc. However this method becomes numerically unstable for large N
         y <- 0:N
         method <- "summation"
         if (s == 1) { # un-pooled case with a perfect test has simple exact solution
@@ -165,8 +165,8 @@ fi_pool_cluster <- function(pool_size,
         } else if (Alpha < 1 || Beta < 1) {
           integrand <- function(p, y) { # note that these functions need to be vectorised for p to be passed to integrate
             out <- dbeta(p, Alpha, Beta)
-            c0 <- prod((1 - spec)^y * spec^(N - y))
-            c1 <- prod(sens^y * (1 - sens)^(N - y))
+            c0 <- prod((1 - psi)^y * psi^(N - y))
+            c1 <- prod(varphi^y * (1 - varphi)^(N - y))
             for (j in 1:length(p)) {
               pj <- p[j]
               out[j] <- out[j] * (prod(phi(pj)^y * (1 - phi(pj))^(N - y)) - ifelse(pj < 0.5, c0, c1))
@@ -174,14 +174,14 @@ fi_pool_cluster <- function(pool_size,
             out
           }
           lik_correction <- function(y) {
-            pbeta(0.5, Alpha, Beta) * prod(spec^(N - y) * (1 - spec)^y) +
-              pbeta(0.5, Beta, Alpha) * prod((1 - sens)^(N - y) * (sens)^y)
+            pbeta(0.5, Alpha, Beta) * prod(psi^(N - y) * (1 - psi)^y) +
+              pbeta(0.5, Beta, Alpha) * prod((1 - varphi)^(N - y) * (varphi)^y)
           }
 
           integrand_theta <- function(p, y) { # note that this functions need to be vectorised for p
             out <- rho. * dbeta(p, Alpha, Beta)
-            c0 <- prod((1 - spec)^y * spec^(N - y))
-            c1 <- prod(sens^y * (1 - sens)^(N - y))
+            c0 <- prod((1 - psi)^y * psi^(N - y))
+            c1 <- prod(varphi^y * (1 - varphi)^(N - y))
             for (j in 1:length(p)) {
               pj <- p[j]
               out[j] <- out[j] *
@@ -197,16 +197,16 @@ fi_pool_cluster <- function(pool_size,
             (pbeta(0.5, Alpha, Beta) * (log(0.5) + digamma(Beta) - digamma(Alpha)) -
               0.5^Alpha / (Alpha^2 * beta(Alpha, Beta)) *
                 hypergeo::genhypergeo(c(Alpha, Alpha, 1 - Beta), c(Alpha + 1, Alpha + 1), 0.5)) *
-              prod((1 - spec)^y * spec^(N - y)) * rho. +
+              prod((1 - psi)^y * psi^(N - y)) * rho. +
               (pbeta(0.5, Beta, Alpha) * (-log(0.5) + digamma(Beta) - digamma(Alpha)) +
                 0.5^Beta / Beta^2 / beta(Beta, Alpha) * hypergeo::genhypergeo(c(Beta, Beta, 1 - Alpha), c(Beta + 1, Beta + 1), 0.5)) *
-                prod(sens^y * (1 - sens)^(N - y)) * rho.
+                prod(varphi^y * (1 - varphi)^(N - y)) * rho.
           }
 
           integrand_rho <- function(p, y) { # note that this functions need to be vectorised for p
             out <- rho^(-2) * dbeta(p, Alpha, Beta)
-            c0 <- prod((1 - spec)^y * spec^(N - y))
-            c1 <- prod(sens^y * (1 - sens)^(N - y))
+            c0 <- prod((1 - psi)^y * psi^(N - y))
+            c1 <- prod(varphi^y * (1 - varphi)^(N - y))
             for (j in 1:length(p)) {
               pj <- p[j]
               out[j] <- out[j] *
@@ -219,11 +219,11 @@ fi_pool_cluster <- function(pool_size,
             out
           }
           lik_rho_correction <- function(y) {
-            rho^(-2) * prod((1 - spec)^y * spec^(N - y)) *
+            rho^(-2) * prod((1 - psi)^y * psi^(N - y)) *
               ((theta * (digamma(Alpha) - log(0.5)) + (1 - theta) * digamma(Beta) - digamma(Alpha + Beta)) * pbeta(0.5, Alpha, Beta) +
                 theta * 0.5^Alpha / Alpha^2 / beta(Alpha, Beta) * hypergeo::genhypergeo(c(Alpha, Alpha, 1 - Beta), c(Alpha + 1, Alpha + 1), 0.5, series = TRUE)) +
 
-              rho^(-2) * prod(sens^y * (1 - sens)^(N - y)) *
+              rho^(-2) * prod(varphi^y * (1 - varphi)^(N - y)) *
                 ((theta * digamma(Alpha) + (1 - theta) * (digamma(Beta) - log(0.5)) - digamma(Alpha + Beta)) * pbeta(0.5, Beta, Alpha) +
                   (1 - theta) * 0.5^Beta / Beta^2 / beta(Beta, Alpha) * hypergeo::genhypergeo(c(Beta, Beta, 1 - Alpha), c(Beta + 1, Beta + 1), 0.5, series = TRUE))
           }
@@ -267,9 +267,9 @@ fi_pool_cluster <- function(pool_size,
       print(sum(lik_rho))
       print(s)
       print(N)
-      print(prevalence)
-      print(sensitivity)
-      print(specificity)
+      print(theta)
+      print(varphi)
+      print(psi)
       print(correlation)
       print(form)
       stop("Error in ", method, " of likelihoods. Likelihoods do not add to 1 or derivatives of likelihood with respect to parameters do not sum to 0")
@@ -352,9 +352,9 @@ fi_pool_cluster <- function(pool_size,
       print(sum(lik_sigma))
       print(s)
       print(N)
-      print(prevalence)
-      print(sensitivity)
-      print(specificity)
+      print(theta)
+      print(varphi)
+      print(psi)
       print(correlation)
       print(form)
       stop("Error in integration of likelihoods. Likelihoods do not add to 1 or derivatives of likelihood with respect to parameters do not sum to 0")
