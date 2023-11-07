@@ -3,11 +3,10 @@ test_that("fi_pool() works with expected ranges of pool_size and prevalence", {
   expect_equal(fi_pool(pool_size = 10, prevalence = 0.85), 2.562891e-05, tolerance = 1e-6)
   expect_equal(fi_pool(pool_size = 5, prevalence = 0.85), 0.08438141, tolerance = 1e-6)
   expect_equal(fi_pool(pool_size = 5, prevalence = 0.65), 1.077534, tolerance = 1e-6)
-  # Should NaN be returned when prevalence == 1?
-  expect_true(is.nan(fi_pool(pool_size = 10, prevalence = 1)))
 })
 
 test_that("fi_pool_imperfect() works with expected input ranges", {
+  # Tests mainly to ensure same outputs when refactoring fi_pool internals
   expect_equal(
     fi_pool_imperfect(
       pool_size = 10,
@@ -28,6 +27,12 @@ test_that("fi_pool_imperfect() works with expected input ranges", {
     7.376202e-11,
     tolerance = 1e-6
   )
+  expect_true(is.nan(fi_pool_imperfect(
+    pool_size = 10,
+    prevalence = 1,
+    sensitivity = 1,
+    specificity = 1
+  )))
 })
 
 test_that("fi_ratio() works with expected input ranges", {
