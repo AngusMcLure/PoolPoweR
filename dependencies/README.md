@@ -9,4 +9,4 @@ dep <- envirDependencies("package:PoolPoweR")
 plot(dep)
 ```
 
-![](https://github.com/AngusMcLure/PoolPoweR/dependencies/dep.png)
+![](https://raw.githubusercontent.com/AngusMcLure/PoolPoweR/main/dependencies/dep.png?token=GHSAT0AAAAAACICLPCIT5EJVC32Y7QQITYCZKJTYEA)
