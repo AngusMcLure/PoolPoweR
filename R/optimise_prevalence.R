@@ -1,16 +1,16 @@
 design_effect_cluster_fisher <- function(s,N,prevalence,sensitivity,specificity, correlation, form = 'beta'){
-   N * s * fi_pool_imperfect(1,prevalence,sensitivity,specificity) *
-      solve(fi_pool_imperfect_cluster(s,N,prevalence,sensitivity,specificity, correlation,form))[1,1]
+   N * s * fi_pool(1,prevalence,sensitivity,specificity) *
+      solve(fi_pool_cluster(s,N,prevalence,sensitivity,specificity, correlation,form))[1,1]
 }
 
 #optimising the pool size for estimating prevalence
 
 unit_fi_cost <- function(s,prevalence,sensitivity,specificity, cost.unit, cost.pool){
-  (sum(cost.unit * s) + cost.pool)/fi_pool_imperfect(s,prevalence,sensitivity,specificity)
+  (sum(cost.unit * s) + cost.pool)/fi_pool(s,prevalence,sensitivity,specificity)
 }
 
 unit_fi_cost_clustered <- function(s,N,prevalence,correlation,sensitivity,specificity, cost.unit, cost.pool, cost.location,form = 'beta'){
-  fi <- fi_pool_imperfect_cluster(s,N,prevalence,sensitivity,specificity,correlation, form = form)
+  fi <- fi_pool_cluster(s,N,prevalence,sensitivity,specificity,correlation, form = form)
   cost <- sum(cost.unit * s * N) + sum(cost.pool * N) + cost.location
   #print(c(cost = cost, information = fi))
   cost * solve(fi)[1,1]
