@@ -17,18 +17,18 @@ fi_pool <- function(pool_size, prevalence, sensitivity, specificity) {
 fi_pool_cluster <- function(pool_size,
                             pool_number,
                             prevalence,
+                            correlation,
                             sensitivity,
                             specificity,
-                            correlation,
                             form = "beta",
                             real.scale = FALSE) {
   s <- pool_size
   N <- pool_number
   K <- length(N)
   theta <- prevalence
+  rho <- correlation
   varphi <- sensitivity
   psi <- specificity
-  rho <- correlation
 
   if (length(s) != length(N) || !all((N %% 1) == 0) || !all(c(N, s) > 0)) {
     stop("s and N must be vectors of positive numbers of common length. s can be non-integer, but N must be integer")

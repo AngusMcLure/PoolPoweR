@@ -10,9 +10,9 @@ design_effect <- function(pool_size,
       pool_size,
       pool_number,
       prevalence,
+      correlation,
       sensitivity,
       specificity,
-      correlation,
       form
     ))[1, 1]
 }
@@ -24,7 +24,7 @@ cost_fi <- function(s,prevalence,sensitivity,specificity, cost.unit, cost.pool){
 }
 
 cost_fi_cluster <- function(s,N,prevalence,correlation,sensitivity,specificity, cost.unit, cost.pool, cost.location,form = 'beta'){
-  fi <- fi_pool_cluster(s,N,prevalence,sensitivity,specificity,correlation, form = form)
+  fi <- fi_pool_cluster(s,N,prevalence,correlation,sensitivity,specificity, form = form)
   cost <- sum(cost.unit * s * N) + sum(cost.pool * N) + cost.location
   #print(c(cost = cost, information = fi))
   cost * solve(fi)[1,1]
