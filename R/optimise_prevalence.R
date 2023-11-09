@@ -1,15 +1,15 @@
-design_effect_cluster_fisher <- function(s,N,prevalence,sensitivity,specificity, correlation, form = 'beta'){
+design_effect <- function(s,N,prevalence,sensitivity,specificity, correlation, form = 'beta'){
    N * s * fi_pool(1,prevalence,sensitivity,specificity) *
       solve(fi_pool_cluster(s,N,prevalence,sensitivity,specificity, correlation,form))[1,1]
 }
 
 #optimising the pool size for estimating prevalence
 
-unit_fi_cost <- function(s,prevalence,sensitivity,specificity, cost.unit, cost.pool){
+cost_fi <- function(s,prevalence,sensitivity,specificity, cost.unit, cost.pool){
   (sum(cost.unit * s) + cost.pool)/fi_pool(s,prevalence,sensitivity,specificity)
 }
 
-unit_fi_cost_clustered <- function(s,N,prevalence,correlation,sensitivity,specificity, cost.unit, cost.pool, cost.location,form = 'beta'){
+cost_fi_cluster <- function(s,N,prevalence,correlation,sensitivity,specificity, cost.unit, cost.pool, cost.location,form = 'beta'){
   fi <- fi_pool_cluster(s,N,prevalence,sensitivity,specificity,correlation, form = form)
   cost <- sum(cost.unit * s * N) + sum(cost.pool * N) + cost.location
   #print(c(cost = cost, information = fi))
@@ -57,11 +57,11 @@ optimise_s_prevalence <- function(prevalence, cost.unit, cost.pool,
   }
   if(is.na(correlation)){
     cost <- function(x){
-      ufc <- unit_fi_cost(x,theta,sensitivity,specificity, cost.unit, cost.pool)
+      ufc <- cost_fi(x,theta,sensitivity,specificity, cost.unit, cost.pool)
       ufc}
   }else{
     cost <- function(x){
-      ufc <- unit_fi_cost_clustered(s = x, N = N, prevalence = theta,
+      ufc <- cost_fi_cluster(s = x, N = N, prevalence = theta,
                                     correlation = correlation,
                                     sensitivity = sensitivity,
                                     specificity = specificity,
@@ -162,9 +162,3 @@ optimise_sN_prevalence <- function(prevalence, cost.unit, cost.pool,
 
   opt
 }
-
-
-
-
-
-
