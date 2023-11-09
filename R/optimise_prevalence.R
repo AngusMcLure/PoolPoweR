@@ -1,6 +1,20 @@
-design_effect <- function(s,N,prevalence,sensitivity,specificity, correlation, form = 'beta'){
-   N * s * fi_pool(1,prevalence,sensitivity,specificity) *
-      solve(fi_pool_cluster(s,N,prevalence,sensitivity,specificity, correlation,form))[1,1]
+design_effect <- function(pool_size,
+                          pool_number,
+                          prevalence,
+                          correlation,
+                          sensitivity,
+                          specificity,
+                          form = "beta") {
+  pool_number * pool_size * fi_pool(1, prevalence, sensitivity, specificity) *
+    solve(fi_pool_cluster(
+      pool_size,
+      pool_number,
+      prevalence,
+      sensitivity,
+      specificity,
+      correlation,
+      form
+    ))[1, 1]
 }
 
 #optimising the pool size for estimating prevalence
