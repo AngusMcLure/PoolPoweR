@@ -56,7 +56,6 @@ optimise_s_prevalence <- function(prevalence,
                                   specificity = 1,
                                   max_s = 50,
                                   interval = 0) {
-  theta <- prevalence
   N <- pool_number
 
   if (form == "discrete") {
@@ -94,13 +93,13 @@ optimise_s_prevalence <- function(prevalence,
   }
   if (is.na(correlation)) {
     cost <- function(s) {
-      ufc <- cost_fi(s, theta, sensitivity, specificity, cost_unit, cost_pool)
+      ufc <- cost_fi(s, prevalence, sensitivity, specificity, cost_unit, cost_pool)
       ufc
     }
   } else {
     cost <- function(s) {
       ufc <- cost_fi_cluster(
-        pool_size = s, pool_number = N, prevalence = theta,
+        pool_size = s, pool_number = N, prevalence = prevalence,
         correlation = correlation,
         sensitivity = sensitivity,
         specificity = specificity,
@@ -170,7 +169,6 @@ optimise_sN_prevalence <- function(prevalence, cost_unit, cost_pool,
                                    sensitivity = 1, specificity = 1,
                                    max_s = 50, max_N = 20) {
   # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max.s = max.s))
-  theta <- prevalence
 
   if (is.na(correlation) || correlation == 0) { # for simple random sampling there is no optimal N and for no correlation cluster survey the optimal approach is to infinite pools at one site (i.e. a simple random survey)
     opt <- optimise_s_prevalence(prevalence, cost_unit, cost_pool,

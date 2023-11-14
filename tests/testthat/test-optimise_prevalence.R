@@ -72,6 +72,16 @@ test_that("optimise_s_prevalence() gives consistent output for basic tests", {
   ))
 })
 
+test_that("optimise_s_prevalence() extremely bad integrand behaviour", {
+  expect_error(
+    optimise_s_prevalence(
+      prevalence = 0.2, cost_unit = 1, cost_pool = 200,
+      cost_cluster = 1, correlation = 0.6, pool_number = 10, form = "beta", sensitivity = 0.8,
+      specificity = 0.9, max_s = 500, interval = 2
+    ),
+    "extremely bad integrand behaviour"
+    )})
+
 test_that("design_effect() gives consistent output for basic tests", {
   expect_equal(
     design_effect(
