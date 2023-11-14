@@ -7,11 +7,9 @@ fi_pool <- function(pool_size, prevalence, sensitivity, specificity) {
   psi <- specificity
 
   q <- 1 - theta
-  numerator <- s^2 * (1 - psi - varphi)^2
-  denominator <- (q^(2 - 2 * s) * (varphi + q^s * (1 - psi - varphi)) *
-    (1 - varphi - q^s * (1 - psi - varphi)))
-
-  numerator / denominator
+  s^2 * (1 - psi - varphi)^2 /
+    (q^(2 - 2 * s) * (varphi + q^s * (1 - psi - varphi)) *
+       (1 - varphi - q^s * (1 - psi - varphi)))
 }
 
 fi_pool_cluster <- function(pool_size,
