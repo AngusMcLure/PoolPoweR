@@ -45,16 +45,17 @@ cost_fi_cluster <- function(pool_size,
   cost * solve(fi)[1, 1]
 }
 
-optimise_s_prevalence <- function(prevalence,
+
+optimise_s_prevalence <- function(pool_number = 1,
+                                  prevalence,
                                   cost_unit,
                                   cost_pool,
                                   cost_cluster = NA,
                                   correlation = NA,
-                                  pool_number = 1,
-                                  form = "beta",
                                   sensitivity = 1,
                                   specificity = 1,
                                   max_s = 50,
+                                  form = "beta",
                                   interval = 0) {
   N <- pool_number
 
@@ -178,9 +179,8 @@ optimise_sN_prevalence <- function(prevalence,
 
   if (is.na(correlation) || correlation == 0) { # for simple random sampling there is no optimal N and for no correlation cluster survey the optimal approach is to infinite pools at one site (i.e. a simple random survey)
     opt <- optimise_s_prevalence(
-      prevalence, cost_unit, cost_pool, cost_cluster,
-      correlation = NA, pool_number = 1, form,
-      sensitivity, specificity, max_s
+      pool_number = 1, prevalence, cost_unit, cost_pool, cost_cluster,
+      correlation = NA, sensitivity, specificity, max_s, form
     )
 
     opt$N <- ifelse(is.na(correlation), NA, Inf)
@@ -190,9 +190,8 @@ optimise_sN_prevalence <- function(prevalence,
     opt <- list(cost = Inf)
     while (Nopt < max_N) {
       opt_new <- optimise_s_prevalence(
-        prevalence, cost_unit, cost_pool, cost_cluster,
-        correlation, pool_number = Nopt + 1, form,
-        sensitivity, specificity, max_s
+        pool_number = Nopt + 1, prevalence, cost_unit, cost_pool, cost_cluster,
+        correlation, sensitivity, specificity, max_s, form
       )
       # print(opt_new)
       if (opt_new$cost > opt$cost) {
