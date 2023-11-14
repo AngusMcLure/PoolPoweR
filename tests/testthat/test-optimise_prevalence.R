@@ -9,8 +9,8 @@ test_that("optimise_sN_prevalence() gives consistent output for basic tests", {
       form = "beta",
       sensitivity = 1,
       specificity = 1,
-      max.s = 50,
-      max.N = 20
+      max_s = 50,
+      max_N = 20
     ),
     list(s = 1, cost = 3.591, catch = 2, N = 2)
   ))
@@ -24,10 +24,28 @@ test_that("optimise_sN_prevalence() gives consistent output for basic tests", {
       form = "beta",
       sensitivity = 1,
       specificity = 1,
-      max.s = 10,
-      max.N = 10
+      max_s = 10,
+      max_N = 10
     ),
     list(s = 1, cost = 33.3, catch = 2, N = 2)
+  ))
+})
+
+test_that("optimise_sN_prevalence() basic tests when correlation == 0 (flow control)", {
+  expect_true(all.equal(
+    optimise_sN_prevalence(
+      prevalence = 0.9,
+      cost_unit = 1,
+      cost_pool = 10,
+      cost_cluster = 20,
+      correlation = 0,
+      form = "beta",
+      sensitivity = 1,
+      specificity = 1,
+      max_s = 50,
+      max_N = 20
+    ),
+    list(s = 1, cost = 0.99, catch = Inf, N = Inf)
   ))
 })
 

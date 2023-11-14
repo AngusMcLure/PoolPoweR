@@ -19,13 +19,28 @@ design_effect <- function(pool_size,
 
 # optimising the pool size for estimating prevalence
 
-cost_fi <- function(pool_size, prevalence, sensitivity, specificity, cost_unit, cost_pool) {
-  (sum(cost_unit * pool_size) + cost_pool) / fi_pool(pool_size, prevalence, sensitivity, specificity)
+cost_fi <- function(
+    pool_size, prevalence, sensitivity, specificity, cost_unit, cost_pool) {
+  (sum(cost_unit * pool_size) + cost_pool) /
+    fi_pool(pool_size, prevalence, sensitivity, specificity)
 }
 
-cost_fi_cluster <- function(pool_size, pool_number, prevalence, correlation, sensitivity, specificity, cost_unit, cost_pool, cost_cluster, form = "beta") {
-  fi <- fi_pool_cluster(pool_size, pool_number, prevalence, correlation, sensitivity, specificity, form = form)
-  cost <- sum(cost_unit * pool_size * pool_number) + sum(cost_pool * pool_number) + cost_cluster
+cost_fi_cluster <- function(pool_size,
+                            pool_number,
+                            prevalence,
+                            correlation,
+                            sensitivity,
+                            specificity,
+                            cost_unit,
+                            cost_pool,
+                            cost_cluster,
+                            form = "beta") {
+  fi <- fi_pool_cluster(
+    pool_size, pool_number, prevalence, correlation,
+    sensitivity, specificity, form = form
+  )
+  cost <- sum(cost_unit * pool_size * pool_number) +
+    sum(cost_pool * pool_number) + cost_cluster
   # print(c(cost = cost, information = fi))
   cost * solve(fi)[1, 1]
 }
@@ -45,7 +60,9 @@ optimise_s_prevalence <- function(prevalence,
   N <- pool_number
 
   if (form == "discrete") {
-    stop('When form = "discrete" the cost of unit information function with respect to s often has mulitple minima and therefore the discrete distribution is not currently supported for optimisation')
+    stop('When form = "discrete" the cost of unit information function with
+         respect to s often has mulitple minima and therefore the discrete
+         distribution is not currently supported for optimisation')
   }
   invalid_cost <- FALSE # trigger for when costs are infinite to ensure that there's no cost output in these cases
   # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max_s = max_s))
@@ -151,7 +168,7 @@ optimise_s_prevalence <- function(prevalence,
 optimise_sN_prevalence <- function(prevalence, cost_unit, cost_pool,
                                    cost_cluster, correlation, form = "beta",
                                    sensitivity = 1, specificity = 1,
-                                   max.s = 50, max.N = 20) {
+                                   max_s = 50, max_N = 20) {
   # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max.s = max.s))
   theta <- prevalence
 
@@ -159,9 +176,9 @@ optimise_sN_prevalence <- function(prevalence, cost_unit, cost_pool,
     opt <- optimise_s_prevalence(prevalence, cost_unit, cost_pool,
       cost_cluster,
       correlation = NA,
-      N = 1, form = form,
+      pool_number = 1, form = form,
       sensitivity, specificity,
-      max.s = max.s
+      max_s = max_s
     )
 
     opt$N <- ifelse(is.na(correlation), NA, Inf)
@@ -169,12 +186,12 @@ optimise_sN_prevalence <- function(prevalence, cost_unit, cost_pool,
   } else {
     Nopt <- 1
     opt <- list(cost = Inf)
-    while (Nopt < max.N) {
+    while (Nopt < max_N) {
       opt_new <- optimise_s_prevalence(
         prevalence,
         cost_unit, cost_pool, cost_cluster,
         correlation, Nopt + 1, form,
-        sensitivity, specificity, max.s
+        sensitivity, specificity, max_s
       )
       # print(opt_new)
       if (opt_new$cost > opt$cost) {
@@ -185,10 +202,10 @@ optimise_sN_prevalence <- function(prevalence, cost_unit, cost_pool,
       }
     }
     opt$N <- Nopt
-    if (opt$N == max.N) {
+    if (opt$N == max_N) {
       warning("Maximum cost effectivness is achieved at or above the maximum number of pools allowed. Consider increasing max.N")
     }
-    if (opt$s == max.s) {
+    if (opt$s == max_s) {
       warning("Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max.s")
     }
   }
