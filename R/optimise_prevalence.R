@@ -30,17 +30,26 @@ cost_fi_cluster <- function(pool_size, pool_number, prevalence, correlation, sen
   cost * solve(fi)[1, 1]
 }
 
-optimise_s_prevalence <- function(prevalence, cost_unit, cost_pool,
-                                  cost_cluster = NA, correlation = NA,
-                                  N = 1, form = "beta",
-                                  sensitivity = 1, specificity = 1,
-                                  max.s = 50, interval = 0) {
+optimise_s_prevalence <- function(prevalence,
+                                  cost_unit,
+                                  cost_pool,
+                                  cost_cluster = NA,
+                                  correlation = NA,
+                                  pool_number = 1,
+                                  form = "beta",
+                                  sensitivity = 1,
+                                  specificity = 1,
+                                  max.s = 50,
+                                  interval = 0) {
+  theta <- prevalence
+  N <- pool_number
+
   if (form == "discrete") {
     stop('When form = "discrete" the cost of unit information function with respect to s often has mulitple minima and therefore the discrete distribution is not currently supported for optimisation')
   }
   invalid.cost <- FALSE # trigger for when costs are infinite to ensure that there's no cost output in these cases
   # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max.s = max.s))
-  theta <- prevalence
+
   ## The case cost_pool == Inf (or equivalently cost_unit = 0) is helpful because
   ## the s in this case (s_opt) is the largest you would ever want
   ## to make a pool. If you can only do N tests and have more than N*s_opt

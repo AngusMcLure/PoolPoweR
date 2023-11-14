@@ -35,7 +35,7 @@ test_that("optimise_s_prevalence() gives consistent output for basic tests", {
   expect_true(all.equal(
     optimise_s_prevalence(
       prevalence = 0.7, cost_unit = 10, cost_pool = 100,
-      cost_cluster = NA, correlation = NA, N = 1, form = "beta", sensitivity = 1,
+      cost_cluster = NA, correlation = NA, pool_number = 1, form = "beta", sensitivity = 1,
       specificity = 1, max.s = 50, interval = 0
     ),
     list(s = 1, cost = 23.1, catch = 1)
@@ -43,7 +43,7 @@ test_that("optimise_s_prevalence() gives consistent output for basic tests", {
   expect_true(all.equal(
     optimise_s_prevalence(
       prevalence = 0.2, cost_unit = 1, cost_pool = 200,
-      cost_cluster = NA, correlation = NA, N = 10, form = "beta", sensitivity = 0.8,
+      cost_cluster = NA, correlation = NA, pool_number = 10, form = "beta", sensitivity = 0.8,
       specificity = 0.9, max.s = 500, interval = 2
     ),
     list(
