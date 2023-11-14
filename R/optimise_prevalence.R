@@ -19,18 +19,16 @@ design_effect <- function(pool_size,
 
 # optimising the pool size for estimating prevalence
 
-cost_fi <- function(s, prevalence, sensitivity, specificity, cost_unit, cost_pool) {
-  (sum(cost_unit * s) + cost_pool) / fi_pool(s, prevalence, sensitivity, specificity)
+cost_fi <- function(pool_size, prevalence, sensitivity, specificity, cost_unit, cost_pool) {
+  (sum(cost_unit * pool_size) + cost_pool) / fi_pool(pool_size, prevalence, sensitivity, specificity)
 }
 
-cost_fi_cluster <- function(s, N, prevalence, correlation, sensitivity, specificity, cost_unit, cost_pool, cost_cluster, form = "beta") {
-  fi <- fi_pool_cluster(s, N, prevalence, correlation, sensitivity, specificity, form = form)
-  cost <- sum(cost_unit * s * N) + sum(cost_pool * N) + cost_cluster
+cost_fi_cluster <- function(pool_size, pool_number, prevalence, correlation, sensitivity, specificity, cost_unit, cost_pool, cost_cluster, form = "beta") {
+  fi <- fi_pool_cluster(pool_size, pool_number, prevalence, correlation, sensitivity, specificity, form = form)
+  cost <- sum(cost_unit * pool_size * pool_number) + sum(cost_pool * pool_number) + cost_cluster
   # print(c(cost = cost, information = fi))
   cost * solve(fi)[1, 1]
 }
-
-
 
 optimise_s_prevalence <- function(prevalence, cost_unit, cost_pool,
                                   cost_cluster = NA, correlation = NA,
@@ -69,14 +67,14 @@ optimise_s_prevalence <- function(prevalence, cost_unit, cost_pool,
     invalid.cost <- TRUE
   }
   if (is.na(correlation)) {
-    cost <- function(x) {
-      ufc <- cost_fi(x, theta, sensitivity, specificity, cost_unit, cost_pool)
+    cost <- function(s) {
+      ufc <- cost_fi(s, theta, sensitivity, specificity, cost_unit, cost_pool)
       ufc
     }
   } else {
-    cost <- function(x) {
+    cost <- function(s) {
       ufc <- cost_fi_cluster(
-        s = x, N = N, prevalence = theta,
+        pool_size = s, pool_number = N, prevalence = theta,
         correlation = correlation,
         sensitivity = sensitivity,
         specificity = specificity,
