@@ -164,19 +164,23 @@ optimise_s_prevalence <- function(prevalence,
   out
 }
 
-optimise_sN_prevalence <- function(prevalence, cost_unit, cost_pool,
-                                   cost_cluster, correlation, form = "beta",
-                                   sensitivity = 1, specificity = 1,
-                                   max_s = 50, max_N = 20) {
+optimise_sN_prevalence <- function(prevalence,
+                                   cost_unit,
+                                   cost_pool,
+                                   cost_cluster,
+                                   correlation,
+                                   sensitivity = 1,
+                                   specificity = 1,
+                                   max_s = 50,
+                                   max_N = 20,
+                                   form = "beta") {
   # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max.s = max.s))
 
   if (is.na(correlation) || correlation == 0) { # for simple random sampling there is no optimal N and for no correlation cluster survey the optimal approach is to infinite pools at one site (i.e. a simple random survey)
-    opt <- optimise_s_prevalence(prevalence, cost_unit, cost_pool,
-      cost_cluster,
-      correlation = NA,
-      pool_number = 1, form = form,
-      sensitivity, specificity,
-      max_s = max_s
+    opt <- optimise_s_prevalence(
+      prevalence, cost_unit, cost_pool, cost_cluster,
+      correlation = NA, pool_number = 1, form,
+      sensitivity, specificity, max_s
     )
 
     opt$N <- ifelse(is.na(correlation), NA, Inf)
@@ -186,9 +190,8 @@ optimise_sN_prevalence <- function(prevalence, cost_unit, cost_pool,
     opt <- list(cost = Inf)
     while (Nopt < max_N) {
       opt_new <- optimise_s_prevalence(
-        prevalence,
-        cost_unit, cost_pool, cost_cluster,
-        correlation, Nopt + 1, form,
+        prevalence, cost_unit, cost_pool, cost_cluster,
+        correlation, pool_number = Nopt + 1, form,
         sensitivity, specificity, max_s
       )
       # print(opt_new)
