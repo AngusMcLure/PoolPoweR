@@ -39,7 +39,7 @@ optimise_s_prevalence <- function(prevalence,
                                   form = "beta",
                                   sensitivity = 1,
                                   specificity = 1,
-                                  max.s = 50,
+                                  max_s = 50,
                                   interval = 0) {
   theta <- prevalence
   N <- pool_number
@@ -47,8 +47,8 @@ optimise_s_prevalence <- function(prevalence,
   if (form == "discrete") {
     stop('When form = "discrete" the cost of unit information function with respect to s often has mulitple minima and therefore the discrete distribution is not currently supported for optimisation')
   }
-  invalid.cost <- FALSE # trigger for when costs are infinite to ensure that there's no cost output in these cases
-  # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max.s = max.s))
+  invalid_cost <- FALSE # trigger for when costs are infinite to ensure that there's no cost output in these cases
+  # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max_s = max_s))
 
   ## The case cost_pool == Inf (or equivalently cost_unit = 0) is helpful because
   ## the s in this case (s_opt) is the largest you would ever want
@@ -60,7 +60,7 @@ optimise_s_prevalence <- function(prevalence,
   if (cost_pool == Inf) {
     cost_unit <- 0
     cost_pool <- 1
-    invalid.cost <- TRUE
+    invalid_cost <- TRUE
   }
 
   ## This case is also very helpful. The solution is trivially s_opt = 1 for
@@ -73,7 +73,7 @@ optimise_s_prevalence <- function(prevalence,
   if (cost_unit == Inf) {
     cost_pool <- 0
     cost_unit <- 1
-    invalid.cost <- TRUE
+    invalid_cost <- TRUE
   }
   if (is.na(correlation)) {
     cost <- function(s) {
@@ -94,7 +94,7 @@ optimise_s_prevalence <- function(prevalence,
     }
   }
 
-  opt <- optimise(cost, c(1, max.s))
+  opt <- optimise(cost, c(1, max_s))
   cost_opt_ceiling <- cost(ceiling(opt$minimum))
   cost_opt_floor <- cost(floor(opt$minimum))
 
@@ -106,10 +106,10 @@ optimise_s_prevalence <- function(prevalence,
     opt_cost <- cost_opt_floor
   }
 
-  if (s == max.s) warning("Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max.s")
+  if (s == max_s) warning("Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max_s")
 
   if (interval == 0) {
-    if (invalid.cost) opt_cost <- NA
+    if (invalid_cost) opt_cost <- NA
     return(list(s = s, cost = opt_cost, catch = s * N))
   } else if (interval > 0) {
     max_cost <- opt_cost * (1 + interval)
@@ -120,15 +120,15 @@ optimise_s_prevalence <- function(prevalence,
         cost(x) - max_cost
       }, c(1, s))$root)
     }
-    if (cost(max.s) < max_cost) {
-      upper <- max.s
-      warning("A pool size greater than max.s may fall within the specified range of cost effectiveness. Consider increasing max.s")
+    if (cost(max_s) < max_cost) {
+      upper <- max_s
+      warning("A pool size greater than max_s may fall within the specified range of cost effectiveness. Consider increasing max_s")
     } else {
       upper <- floor(uniroot(function(x) {
         cost(x) - max_cost
-      }, c(s, max.s))$root)
+      }, c(s, max_s))$root)
     }
-    if (invalid.cost) {
+    if (invalid_cost) {
       opt_cost <- NA
       cost_interval <- NA
     } else {
