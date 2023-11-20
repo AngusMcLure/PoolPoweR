@@ -1,3 +1,38 @@
+#' Optimising the pool size and number for estimating prevalence.
+#'
+#' These functions determine cost-effective pooling strategies for estimating
+#' the prevalence of a marker in a population. Both functions attempt to choose
+#' survey designs that maximise the Fisher Information for given cost or effort.
+#' `optimise_s_prevalence()` calculates the optimal single pool size that
+#' balances the cost and accuracy given the marker prevalence, test sensitivity,
+#' and specificity, and works for simple random surveys or cluster surveys.
+#' `optimise_sN_prevalence` also attempts to identify the optimal number of
+#' pools per cluster (cluster-surveys only).
+#'
+#' @param prevalence numeric The proportion of units that carry the marker of interest (i.e. true positive). Must be be a numeric value between 0 and 1, inclusive of both.
+#' @param correlation numeric The correlation between test results within a single cluster (units in different clusters are assumed to be uncorrelated). Must be a numeric value between 0 and 1, inclusive of both. A value of 1 indicates that units within clusters are perfectly correlated (there are no differences units within a single cluster). A value of 0 indicates that units within clusters are no more correlated than units in different clusters.
+#' @param sensitivity numeric The probability that the test correctly identifies a true positive. Must be a numeric value between 0 and 1, inclusive of both. A value of 1 indicates that the test can perfectly identify all true positives.
+#' @param specificity numeric The probability that the test correctly identifies a true negative. Must be a numeric value between 0 and 1, inclusive of both. A value of 1 indicates that the test can perfectly identify all true negatives.
+#' @param cost_unit numeric The cost to process a single unit. Must be a numeric value greater than or equal to 0.
+#' @param cost_pool numeric The cost to process a single pool. Must be a numeric value greater than or equal to 0.
+#' @param cost_cluster numeric/NA The cost to process a cluster. Must be a numeric value greater than or equal to 0. For `optimise_s_prevalence()`, this can be ignored if correlation is NA.
+#' @param max_s numeric The maximum number of units per pool (pool size).
+#' @param max_N numeric The maximum number of pools per cluster (pool number).
+#' @param form string The distribution used to model the cluster-level prevalence and correlation of units within cluster. Select one of "beta", "logitnorm" or "cloglognorm". See details.
+#'
+#' @returns
+#' * `optimise_s_prevalence` returns a list with the optimal pool size `s`,
+#'   cost, and range of near-optimal designs `catch`.
+#' * `optimise_sN_prevalence()` returns the same list as `optimise_s_prevalence`
+#'   with an additional optimal pool number `N`.
+#'
+#' @export
+#'
+#' @examples
+#' optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10)
+#'
+#' optimise_sN_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10, cost_cluster = 100, correlation = 0.05)
+
 design_effect <- function(pool_size,
                           pool_number,
                           prevalence,
@@ -12,33 +47,6 @@ design_effect <- function(pool_size,
       correlation, sensitivity, specificity, form)
       )[1, 1]
 }
-
-# optimising the pool size for estimating prevalence
-
-cost_fi <- function(pool_size, prevalence, sensitivity, specificity, cost_unit, cost_pool) {
-  (sum(cost_unit * pool_size) + cost_pool) /
-    fi_pool(pool_size, prevalence, sensitivity, specificity)
-}
-
-cost_fi_cluster <- function(pool_size,
-                            pool_number,
-                            prevalence,
-                            correlation,
-                            sensitivity,
-                            specificity,
-                            cost_unit,
-                            cost_pool,
-                            cost_cluster,
-                            form = "beta") {
-  s <- pool_size
-  N <- pool_number
-
-  fi <- fi_pool_cluster(s, N, prevalence, correlation, sensitivity, specificity, form)
-  cost <- sum(cost_unit * s * N) + sum(cost_pool * N) + cost_cluster
-  # print(c(cost = cost, information = fi))
-  cost * solve(fi)[1, 1]
-}
-
 
 optimise_s_prevalence <- function(pool_number = 1,
                                   prevalence,
@@ -205,4 +213,28 @@ optimise_sN_prevalence <- function(prevalence,
   }
 
   opt
+}
+
+cost_fi <- function(pool_size, prevalence, sensitivity, specificity, cost_unit, cost_pool) {
+  (sum(cost_unit * pool_size) + cost_pool) /
+    fi_pool(pool_size, prevalence, sensitivity, specificity)
+}
+
+cost_fi_cluster <- function(pool_size,
+                            pool_number,
+                            prevalence,
+                            correlation,
+                            sensitivity,
+                            specificity,
+                            cost_unit,
+                            cost_pool,
+                            cost_cluster,
+                            form = "beta") {
+  s <- pool_size
+  N <- pool_number
+
+  fi <- fi_pool_cluster(s, N, prevalence, correlation, sensitivity, specificity, form)
+  cost <- sum(cost_unit * s * N) + sum(cost_pool * N) + cost_cluster
+  # print(c(cost = cost, information = fi))
+  cost * solve(fi)[1, 1]
 }
