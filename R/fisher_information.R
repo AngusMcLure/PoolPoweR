@@ -7,14 +7,36 @@
 #' `fi_pool_cluster()` calculates the two-by-two Fisher information matrix for
 #' prevalence and within-cluster correlation for cluster survey designs.
 #'
-#' @param pool_size numeric The number of units per pool. Must be a numeric value greater than or equal to 0.
-#' @param pool_number numeric The number of pools per cluster. Must be a numeric value greater than or equal to 0.
-#' @param prevalence numeric The proportion of units that carry the marker of interest (i.e. true positive). Must be be a numeric value between 0 and 1, inclusive of both.
-#' @param correlation numeric The correlation between test results within a single cluster (units in different clusters are assumed to be uncorrelated). Must be a numeric value between 0 and 1, inclusive of both. A value of 1 indicates that units within clusters are perfectly correlated (there are no differences units within a single cluster). A value of 0 indicates that units within clusters are no more correlated than units in different clusters.
-#' @param sensitivity numeric The probability that the test correctly identifies a true positive. Must be a numeric value between 0 and 1, inclusive of both. A value of 1 indicates that the test can perfectly identify all true positives.
-#' @param specificity numeric The probability that the test correctly identifies a true negative. Must be a numeric value between 0 and 1, inclusive of both. A value of 1 indicates that the test can perfectly identify all true negatives.
-#' @param form string The distribution used to model the cluster-level prevalence and correlation of units within cluster. Select one of "beta", "logitnorm" or "cloglognorm". See details.
-#' @param real.scale boolean Applies only when `form = "logitnorm"` or `form = "cloglognorm"`. Determines whether Fisher information should be returned for the parameters of the logitnorm/cloglognorm distributions on the real scale (i.e. mu and sigma)? If FALSE (the default) Fisher information is returned for prevalence (theta) and correlation (rho) instead.
+#' @param pool_size numeric The number of units per pool. Must be a numeric
+#'   value greater than or equal to 0.
+#' @param pool_number numeric The number of pools per cluster. Must be a numeric
+#'   value greater than or equal to 0.
+#' @param prevalence numeric The proportion of units that carry the marker of
+#'   interest (i.e. true positive). Must be be a numeric value between 0 and 1,
+#'   inclusive of both.
+#' @param correlation numeric The correlation between test results within a
+#'   single cluster (units in different clusters are assumed to be
+#'   uncorrelated). Must be a numeric value between 0 and 1, inclusive of both.
+#'   A value of 1 indicates that units within clusters are perfectly correlated
+#'   (there are no differences units within a single cluster). A value of 0
+#'   indicates that units within clusters are no more correlated than units in
+#'   different clusters.
+#' @param sensitivity numeric The probability that the test correctly identifies
+#'   a true positive. Must be a numeric value between 0 and 1, inclusive of
+#'   both. A value of 1 indicates that the test can perfectly identify all true
+#'   positives.
+#' @param specificity numeric The probability that the test correctly identifies
+#'   a true negative. Must be a numeric value between 0 and 1, inclusive of
+#'   both. A value of 1 indicates that the test can perfectly identify all true
+#'   negatives.
+#' @param form string The distribution used to model the cluster-level
+#'   prevalence and correlation of units within cluster. Select one of "beta",
+#'   "logitnorm" or "cloglognorm". See details.
+#' @param real.scale boolean Applies only when `form = "logitnorm"` or `form =
+#'   "cloglognorm"`. Determines whether Fisher information should be returned
+#'   for the parameters of the logitnorm/cloglognorm distributions on the real
+#'   scale (i.e. mu and sigma)? If FALSE (the default) Fisher information is
+#'   returned for prevalence (theta) and correlation (rho) instead.
 #'
 #' @return A numeric value of the Fisher information
 #' @export
