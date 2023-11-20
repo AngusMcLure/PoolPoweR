@@ -58,6 +58,7 @@ fi_pool <- function(pool_size, prevalence, sensitivity, specificity) {
        (1 - varphi - q^s * (1 - psi - varphi)))
 }
 
+#' @rdname fi_pool
 fi_pool_cluster <- function(pool_size,
                             pool_number,
                             prevalence,
