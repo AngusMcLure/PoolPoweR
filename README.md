@@ -1,4 +1,7 @@
-# PoolPoweR
-Power and sample size calculations for surveys using pool testing (AKA groupt testing)
+# PoolPoweR  
 
-Eventually to be wrapped up as a R package but still very much a work in progress
+<!-- badges: start -->
+  [![R-CMD-check](https://github.com/AngusMcLure/PoolPoweR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/AngusMcLure/PoolPoweR/actions/workflows/R-CMD-check.yaml)
+  <!-- badges: end -->  
+  
+Power and sample size calculations for surveys using pool testing (AKA group testing)

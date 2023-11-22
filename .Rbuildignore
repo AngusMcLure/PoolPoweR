@@ -7,3 +7,4 @@
 man/hello.Rd
 ^LICENSE\.md$
 dependencies/
+^\.github$
