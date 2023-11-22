@@ -33,6 +33,9 @@ optimise_sN_prevalence(
 )
 }
 \arguments{
+\item{pool_number}{numeric The number of pools per cluster. Must be a numeric
+value greater than or equal to 0.}
+
 \item{prevalence}{numeric The proportion of units that carry the marker of
 interest (i.e. true positive). Must be be a numeric value between 0 and 1,
 inclusive of both.}
@@ -71,13 +74,18 @@ negatives.}
 prevalence and correlation of units within cluster. Select one of "beta",
 "logitnorm" or "cloglognorm". See details.}
 
+\item{interval}{Range of near-optimal designs to consider. If interval == 0
+(the default) only returns optimal design. If interval > 0, function
+identifies range of designs with cost less than the optimal cost * (1 +
+interval).}
+
 \item{max_N}{numeric The maximum number of pools per cluster (pool number).}
 }
 \value{
 * `optimise_s_prevalence` returns a list with the optimal pool size
-`s`, cost, and range of near-optimal designs `catch`. *
-`optimise_sN_prevalence()` returns the same list as `optimise_s_prevalence`
-with an additional optimal pool number `N`.
+  `s`, cost, and range of near-optimal designs `catch`. *
+  `optimise_sN_prevalence()` returns the same list as `optimise_s_prevalence`
+  with an additional optimal pool number `N`.
 }
 \description{
 These functions determine cost-effective pooling strategies for estimating
@@ -92,5 +100,8 @@ pools per cluster (cluster-surveys only).
 \examples{
 optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10)
 
-optimise_sN_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10, cost_cluster = 100, correlation = 0.05)
+optimise_sN_prevalence(
+  prevalence = 0.01, cost_unit = 5, cost_pool = 10,
+  cost_cluster = 100, correlation = 0.05
+  )
 }

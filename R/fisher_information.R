@@ -42,9 +42,14 @@
 #' @export
 #'
 #' @examples
-#' fi_pool(pool_size = 10, prevalence = 0.95, sensitivity = 0.95, specificity = 0.99)
+#' fi_pool(
+#'   pool_size = 10, prevalence = 0.95, sensitivity = 0.95, specificity = 0.99
+#'   )
 #'
-#' fi_pool_cluster(pool_size = 10, pool_number = 5, prevalence = 0.01, correlation = 0.05, sensitivity = 0.95, specificity = 0.99)
+#' fi_pool_cluster(
+#'   pool_size = 10, pool_number = 5, prevalence = 0.01,
+#'   correlation = 0.05, sensitivity = 0.95, specificity = 0.99
+#'   )
 
 fi_pool <- function(pool_size, prevalence, sensitivity, specificity) {
   s <- pool_size

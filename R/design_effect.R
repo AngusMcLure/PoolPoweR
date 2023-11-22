@@ -41,7 +41,10 @@
 #' @export
 #'
 #' @examples
-#' design_effect(pool_size = 5, pool_number = 10, prevalence = 0.01, sensitivity = 0.99, specificity = 0.95)
+#' design_effect(
+#'   pool_size = 5, pool_number = 10, prevalence = 0.01,
+#'   correlation = 0.05, sensitivity = 0.99, specificity = 0.95
+#'   )
 design_effect <- function(pool_size,
                           pool_number,
                           prevalence,

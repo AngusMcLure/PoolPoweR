@@ -9,6 +9,8 @@
 #' `optimise_sN_prevalence` also attempts to identify the optimal number of
 #' pools per cluster (cluster-surveys only).
 #'
+#' @param pool_number numeric The number of pools per cluster. Must be a numeric
+#'   value greater than or equal to 0.
 #' @param prevalence numeric The proportion of units that carry the marker of
 #'   interest (i.e. true positive). Must be be a numeric value between 0 and 1,
 #'   inclusive of both.
@@ -39,18 +41,25 @@
 #' @param form string The distribution used to model the cluster-level
 #'   prevalence and correlation of units within cluster. Select one of "beta",
 #'   "logitnorm" or "cloglognorm". See details.
+#' @param interval Range of near-optimal designs to consider. If interval == 0
+#'   (the default) only returns optimal design. If interval > 0, function
+#'   identifies range of designs with cost less than the optimal cost * (1 +
+#'   interval).
 #'
 #' @returns * `optimise_s_prevalence` returns a list with the optimal pool size
-#' `s`, cost, and range of near-optimal designs `catch`. *
-#' `optimise_sN_prevalence()` returns the same list as `optimise_s_prevalence`
-#' with an additional optimal pool number `N`.
+#'   `s`, cost, and range of near-optimal designs `catch`. *
+#'   `optimise_sN_prevalence()` returns the same list as `optimise_s_prevalence`
+#'   with an additional optimal pool number `N`.
 #'
 #' @export
 #'
 #' @examples
 #' optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10)
 #'
-#' optimise_sN_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10, cost_cluster = 100, correlation = 0.05)
+#' optimise_sN_prevalence(
+#'   prevalence = 0.01, cost_unit = 5, cost_pool = 10,
+#'   cost_cluster = 100, correlation = 0.05
+#'   )
 optimise_s_prevalence <- function(pool_number = 1,
                                   prevalence,
                                   cost_unit,
