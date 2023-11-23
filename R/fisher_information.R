@@ -64,6 +64,7 @@ fi_pool <- function(pool_size, prevalence, sensitivity, specificity) {
 }
 
 #' @rdname fi_pool
+#' @export
 fi_pool_cluster <- function(pool_size,
                             pool_number,
                             prevalence,

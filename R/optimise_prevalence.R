@@ -180,6 +180,7 @@ optimise_s_prevalence <- function(pool_number = 1,
 }
 
 #' @rdname optimise_s_prevalence
+#' @export
 optimise_sN_prevalence <- function(prevalence,
                                    cost_unit,
                                    cost_pool,

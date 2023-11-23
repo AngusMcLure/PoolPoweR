@@ -8,3 +8,5 @@ man/hello.Rd
 ^LICENSE\.md$
 dependencies/
 ^\.github$
+^PoolPoweR\.Rproj$
+^CHANGELOG.md$
