@@ -15,7 +15,7 @@ fi_pool_cluster(
   sensitivity,
   specificity,
   form = "beta",
-  real.scale = FALSE
+  real_scale = FALSE
 )
 }
 \arguments{
@@ -51,7 +51,7 @@ different clusters.}
 prevalence and correlation of units within cluster. Select one of "beta",
 "logitnorm" or "cloglognorm". See details.}
 
-\item{real.scale}{boolean Applies only when `form = "logitnorm"` or `form =
+\item{real_scale}{boolean Applies only when `form = "logitnorm"` or `form =
 "cloglognorm"`. Determines whether Fisher information should be returned
 for the parameters of the logitnorm/cloglognorm distributions on the real
 scale (i.e. mu and sigma)? If FALSE (the default) Fisher information is

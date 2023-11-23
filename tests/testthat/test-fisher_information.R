@@ -39,7 +39,7 @@ test_that("fi_pool_cluster() outputs a 2x2 matrix for input vectors of length 2"
       specificity = 1,
       correlation = 0.5,
       form = "beta",
-      real.scale = TRUE
+      real_scale = TRUE
     ),
     matrix(c(5.431112, -1.928655, -1.928655, 1.123625), nrow = 2),
     tolerance = 1e-6
@@ -53,7 +53,7 @@ test_that("fi_pool_cluster() outputs a 2x2 matrix for input vectors of length 2"
       specificity = 1,
       correlation = 0.5,
       form = "beta",
-      real.scale = TRUE
+      real_scale = TRUE
     ),
     matrix(c(9.028451, -1.718530, -1.718530, 1.130158), nrow = 2),
     tolerance = 1e-6
@@ -67,7 +67,7 @@ test_that("fi_pool_cluster() outputs a 2x2 matrix for input vectors of length 2"
       specificity = 0.8,
       correlation = 0.9,
       form = "cloglognorm",
-      real.scale = FALSE
+      real_scale = FALSE
     ),
     matrix(c(4.692347, -2.270677, -2.270677, 8.494053), nrow = 2),
     tolerance = 1e-6
@@ -84,7 +84,7 @@ test_that("fi_pool_cluster() fails when integral is divergent", {
       specificity = 1,
       correlation = 0.75,
       form = "beta",
-      real.scale = FALSE
+      real_scale = FALSE
     ),
     "the integral is probably divergent"
   )
@@ -97,7 +97,7 @@ test_that("fi_pool_cluster() fails when integral is divergent", {
       specificity = 1,
       correlation = 0.5,
       form = "beta",
-      real.scale = FALSE
+      real_scale = FALSE
     ),
     "the integral is probably divergent"
   )
@@ -113,7 +113,7 @@ test_that("fi_pool_cluster() fails when likelihoods or derivatives do not add up
       specificity = 1,
       correlation = 0.1,
       form = "beta",
-      real.scale = FALSE
+      real_scale = FALSE
     ),
     "Error in integration of likelihoods. Likelihoods do not add to 1 or derivatives of likelihood with respect to parameters do not sum to 0"
   )

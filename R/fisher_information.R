@@ -32,7 +32,7 @@
 #' @param form string The distribution used to model the cluster-level
 #'   prevalence and correlation of units within cluster. Select one of "beta",
 #'   "logitnorm" or "cloglognorm". See details.
-#' @param real.scale boolean Applies only when `form = "logitnorm"` or `form =
+#' @param real_scale boolean Applies only when `form = "logitnorm"` or `form =
 #'   "cloglognorm"`. Determines whether Fisher information should be returned
 #'   for the parameters of the logitnorm/cloglognorm distributions on the real
 #'   scale (i.e. mu and sigma)? If FALSE (the default) Fisher information is
@@ -71,7 +71,7 @@ fi_pool_cluster <- function(pool_size,
                             sensitivity,
                             specificity,
                             form = "beta",
-                            real.scale = FALSE) {
+                            real_scale = FALSE) {
   s <- pool_size
   N <- pool_number
   K <- length(N)
@@ -418,7 +418,7 @@ fi_pool_cluster <- function(pool_size,
       ),
       nrow = 2
     )
-    if (real.scale) { # If we want FI for the parameters on the real scale {mu,sigma} we're done!
+    if (real_scale) { # If we want FI for the parameters on the real scale {mu,sigma} we're done!
       return(FI)
     } else { # calculate Jacobian for the change of parameters from {mu,sigma} -> {theta, rho}
       integrand_dtheta_dmu <- function(z) {
