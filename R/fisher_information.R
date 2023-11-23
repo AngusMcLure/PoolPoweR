@@ -282,25 +282,25 @@ fi_pool_cluster <- function(pool_size,
 
         tol <- .Machine$double.eps^0.8
         lik <- apply(ys, 1, function(y) {
-          plot(function(x) {
-            integrand(x, y)
-          }, main = paste("integrand", y), to = 0.1, n = 10000)
+          # plot(function(x) {
+          #   integrand(x, y)
+          # }, main = paste("integrand", y), to = 0.1, n = 10000)
           (integrate(integrand, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_correction(y)) *
             prod(choose(N, y))
         })
 
         lik_theta <- apply(ys, 1, function(y) {
-          plot(function(x) {
-            integrand_theta(x, y)
-          }, main = paste("integrand_theta", y), to = 0.1, n = 10000)
+          # plot(function(x) {
+          #   integrand_theta(x, y)
+          # }, main = paste("integrand_theta", y), to = 0.1, n = 10000)
           (integrate(integrand_theta, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_theta_correction(y)) *
             prod(choose(N, y))
         })
 
         lik_rho <- apply(ys, 1, function(y) {
-          plot(function(x) {
-            integrand_rho(x, y)
-          }, main = paste("integrand_rho", y, Alpha, Beta), to = 0.1, n = 10000)
+          # plot(function(x) {
+          #   integrand_rho(x, y)
+          # }, main = paste("integrand_rho", y, Alpha, Beta), to = 0.1, n = 10000)
           (integrate(integrand_rho, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_rho_correction(y)) *
             prod(choose(N, y))
         })
@@ -462,3 +462,74 @@ fi_pool_cluster <- function(pool_size,
     stop("accepted forms of the site prevalence distribution (argument form) are logitnorm, cloglognorm, beta, and discrete.")
   }
 }
+
+fi_pool_cluster_random <- function(catch_dist,
+                                   pool_strat,
+                                   prevalence,
+                                   correlation,
+                                   sensitivity,
+                                   specificity,
+                                   form = 'beta',
+                                   real_scale = FALSE,
+                                   max_iter = 200,
+                                   rel_tol = 1e-4){
+  
+  #Calculates Fisher information (FI) for an unknown catch by taking
+  #expectations w.r.t. catch distribution. The expectation is a (potentially
+  #infinite) sum over possible integer catch sizes. Summation continues until FI
+  #appears to have converged (using a relative tolerance heuristic)
+  
+  
+  #Initialise sum of possible catch sizes
+  catch <- max(catch_dist$min-1, 0)
+  terminate <- FALSE
+  FI <- matrix(0, 2,2)
+  iter <- 0
+  FI_incr <- array(dim = c(2,2,max_iter))
+  catches <- c()
+  
+  #Main loop for sum
+  while(!terminate){
+    catch <- catch + 1
+    mass <- catch_dist$pmf(catch) #probability that we have a catch of size catch
+    
+    #this avoids unnecessary calls to fi_pool_cluster and prevents the
+    #early termination of the algorithm for distributions that may have 0 mass
+    #for some n but non-zero mass for m>n (e.g. if distribution only has mass on
+    #multiples of 10)
+    if(mass == 0){next} 
+    
+    # Note that iteration counter comes after check for zero mass: for the
+    # purposes of early termination, only counts iteration if mass is non-zero
+    iter <- iter + 1 
+    
+    pooling <- pool_strat(catch) #determine pool sizes and numbers based on catch size
+    catches[iter] <- catch
+    FI_incr[,,iter] <- mass *
+      fi_pool_cluster(pooling$s, pooling$N, prevalence,
+                      correlation,
+                      sensitivity,specificity,
+                      form,real_scale)
+    FI <- FI +  FI_incr[,,iter]
+    # Stop if increment changes ALL elements of FI by less than fraction rel_tol
+    # OR if distribution of catch size has finite support (i.e. if there is a
+    # maximum possible catch size)
+    rel_incr <- abs(FI_incr[,,iter]/FI)
+    if(all(rel_incr <= rel_tol) | catch == catch_dist$max){
+      terminate <- TRUE
+    }
+    if(iter == max_iter){
+      terminate <- TRUE
+      warning('reached max_iter without converging')
+      catches <- catches[1:iter]
+      FI_incr <- FI_incr[,,1:iter]
+      plot(catches, FI_incr[1,1,])
+      plot(catches, FI_incr[1,2,])
+      plot(catches, FI_incr[2,2,])
+    }
+  }
+  return(FI)
+}
+
+
+
