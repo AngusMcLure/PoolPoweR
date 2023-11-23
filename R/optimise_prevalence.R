@@ -125,7 +125,7 @@ optimise_s_prevalence <- function(pool_number = 1,
     }
   }
 
-  opt <- optimise(cost, c(1, max_s))
+  opt <- stats::optimise(cost, c(1, max_s))
   cost_opt_ceiling <- cost(ceiling(opt$minimum))
   cost_opt_floor <- cost(floor(opt$minimum))
 
@@ -147,7 +147,7 @@ optimise_s_prevalence <- function(pool_number = 1,
     if (cost(1) < max_cost) {
       lower <- 1
     } else {
-      lower <- ceiling(uniroot(function(x) {
+      lower <- ceiling(stats::uniroot(function(x) {
         cost(x) - max_cost
       }, c(1, s))$root)
     }
@@ -155,7 +155,7 @@ optimise_s_prevalence <- function(pool_number = 1,
       upper <- max_s
       warning("A pool size greater than max_s may fall within the specified range of cost effectiveness. Consider increasing max_s")
     } else {
-      upper <- floor(uniroot(function(x) {
+      upper <- floor(stats::uniroot(function(x) {
         cost(x) - max_cost
       }, c(s, max_s))$root)
     }
