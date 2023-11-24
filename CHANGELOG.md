@@ -6,20 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Upcoming]  
 
-### [v0.0.1] - 2023-11-24
+### Long-term
+- [ ] Establish default values for functions [#11](https://github.com/AngusMcLure/PoolPoweR/issues/11)
+- [ ] Create full class system for catch_distribution [#15](https://github.com/AngusMcLure/PoolPoweR/issues/15)
+
+### [v1.0.0]
+- CRAN release
+- [ ] What is the MVP required for a CRAN release?
+
+### [v0.1.1]  
+- [ ] Implement new functions  
+
+### [v0.1.0]
 **Focus:** Package
-- Minimum viable package online 
-- README.md updated i.e. installation 
-- GitHub actions implemented `check-standard`
-- No errors or warnings in R CMD Check and GHA workflows
-- [ ] Fix undocumented warning (cost_fi, cost_fi_unclustered, all utils.R)
-	- [ ] Move utils functions (clogclog, cloglog_inv, mu_sigma_linknorm) 
-	to fi_pool_cluster as only called once each. Will depend on other
-	functions to be added
-	- [ ] Move cost_fi and cost_fi_cluster to optimise_s_prevalence
-	- [ ] or, simply document the helper functions
+- [ ] Fix integrand issue  
+- [ ] Implement codecov.io  
+- [ ] Configure and optimise GHA workflows
+- [ ] Refer to package and tidyverse guides for coherency and note rooms for improvement
+
+### [v0.0.3]
+**Focus:** Documentation
+- [ ] Revise documentation so majority @inheritParams fi_pool
+- [ ] Rename interval [#13](https://github.com/AngusMcLure/PoolPoweR/issues/13)
+- [ ] Update docs with cluster and non-cluster cases
+[#14](https://github.com/AngusMcLure/PoolPoweR/issues/14)
+- [x] Rename real.scale to real_scale
 
 ### [v0.0.2] - 2023-12-01
 **Focus:** Tests
@@ -35,21 +48,14 @@ and this project adheres to
 - [ ] Add tests for uncovered lines
 - [ ] Speed up tests (some slow ones fo fisher_info.R)
 
-### [v0.0.3]
-**Focus:** Documentation
-- [ ] Revise documentation so majority @inheritParams fi_pool
-- [ ] Rename interval [#13](https://github.com/AngusMcLure/PoolPoweR/issues/13)
-- [ ] Update docs with cluster and non-cluster cases
-[#14](https://github.com/AngusMcLure/PoolPoweR/issues/14)
-- [x] Rename real.scale to real_scale
+## [Released]  
 
-### [v0.0.4]
-**Focus:** Package
-- [ ] Refer to package and tidyverse guides for coherency and note rooms for improvement
+### [v0.0.1] MVP!  
 
-### [v1.0.0]
-- CRAN release
-- [ ] What is the MVP for a CRAN release?
+#### Added  
+- End-user-ready PoolPoweR package with core functions (#1, #4, #6, #7, #8,
+	#10, #11)
+- GitHub Action workflows `check-standard` and `test-coverage` implemented (#5)  
 
-### Long-term
-- [ ] Establish default values for functions [#11](https://github.com/AngusMcLure/PoolPoweR/issues/11)
+[unreleased]:
+[0.0.1]:
