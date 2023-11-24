@@ -1,11 +1,12 @@
-#' Fisher information for population prevalence
+#' Fisher information for population prevalence (and intra-cluster correlation)
 #'
-#' `fi_pool()` and `fi_pool_cluster()` calculates the Fisher Information for
-#' pool testing strategies for a given number and size of pools, where the
-#' sensitivity and specificity of the test are known. `fi_pool()` calculates the
-#' Fisher information for the prevalence for simple random surveys.
-#' `fi_pool_cluster()` calculates the two-by-two Fisher information matrix for
-#' prevalence and within-cluster correlation for cluster survey designs.
+#' `fi_pool()` and `fi_pool_cluster()` calculate Fisher information (FI) for
+#' pool-tested surveys with a known number and size of pools.
+#' `fi_pool_cluster_random()` calculates FI for surveys where the cluster size
+#' (aka catch) size is random. `fi_pool()` calculates the Fisher information for
+#' the prevalence for a simple random survey. `fi_pool_cluster()` and
+#' `fi_pool_cluster_random()` calculate the two-by-two Fisher information matrix
+#' for prevalence and within-cluster correlation for cluster survey designs.
 #'
 #' @param pool_size numeric The number of units per pool. Must be a numeric
 #'   value greater than or equal to 0.
@@ -35,21 +36,25 @@
 #' @param real_scale boolean Applies only when `form = "logitnorm"` or `form =
 #'   "cloglognorm"`. Determines whether Fisher information should be returned
 #'   for the parameters of the logitnorm/cloglognorm distributions on the real
-#'   scale (i.e. mu and sigma)? If FALSE (the default) Fisher information is
+#'   scale (i.e. mu and sigma). If FALSE (the default) Fisher information is
 #'   returned for prevalence (theta) and correlation (rho) instead.
 #'
-#' @return A numeric value of the Fisher information
+#' @return The Fisher information for prevalence (`fi_pool()`) or the Fisher
+#'   information matrix for prevalence and intra-cluster correlation
+#'   (`fi_pool_cluster()` and `fi_pool_cluster_random()`)
 #' @export
 #'
 #' @examples
 #' fi_pool(
-#'   pool_size = 10, prevalence = 0.95, sensitivity = 0.95, specificity = 0.99
+#'   pool_size = 10, prevalence = 0.01, sensitivity = 0.95, specificity = 0.99
 #'   )
 #'
 #' fi_pool_cluster(
 #'   pool_size = 10, pool_number = 5, prevalence = 0.01,
 #'   correlation = 0.05, sensitivity = 0.95, specificity = 0.99
 #'   )
+#'
+#' 
 
 fi_pool <- function(pool_size, prevalence, sensitivity, specificity) {
   s <- pool_size
@@ -463,6 +468,8 @@ fi_pool_cluster <- function(pool_size,
   }
 }
 
+#' @rdname fi_pool
+#' @export
 fi_pool_cluster_random <- function(catch_dist,
                                    pool_strat,
                                    prevalence,
@@ -474,25 +481,30 @@ fi_pool_cluster_random <- function(catch_dist,
                                    max_iter = 200,
                                    rel_tol = 1e-4){
   
-  #Calculates Fisher information (FI) for an unknown catch by taking
+  #Calculates Fisher information (FI) for an unknown/random catch by taking
   #expectations w.r.t. catch distribution. The expectation is a (potentially
   #infinite) sum over possible integer catch sizes. Summation continues until FI
   #appears to have converged (using a relative tolerance heuristic)
   
-  
   #Initialise sum of possible catch sizes
-  catch <- max(catch_dist$min-1, 0)
+  catch <- max(0,support(catch_dist)[['min']] - 1)
+  max_catch <- support(catch_dist)[['max']]
   terminate <- FALSE
   FI <- matrix(0, 2,2)
   iter <- 0
   FI_incr <- array(dim = c(2,2,max_iter))
   catches <- c()
+  cumm_mass <- 0
+  
+  if(support(catch_dist)['min'] == -Inf){
+    stop('Catch distribution must have support on the positive integers. Provided catch distribution is defined over negative numbers also')
+  }
   
   #Main loop for sum
   while(!terminate){
     catch <- catch + 1
-    mass <- catch_dist$pmf(catch) #probability that we have a catch of size catch
-    
+    mass <- pdf(catch_dist,catch) #probability that we have a catch of size catch
+    cumm_mass <- cumm_mass + mass
     #this avoids unnecessary calls to fi_pool_cluster and prevents the
     #early termination of the algorithm for distributions that may have 0 mass
     #for some n but non-zero mass for m>n (e.g. if distribution only has mass on
@@ -506,22 +518,21 @@ fi_pool_cluster_random <- function(catch_dist,
     pooling <- pool_strat(catch) #determine pool sizes and numbers based on catch size
     catches[iter] <- catch
     FI_incr[,,iter] <- mass *
-      fi_pool_cluster(pooling$s, pooling$N, prevalence,
-                      correlation,
-                      sensitivity,specificity,
-                      form,real_scale)
+      fi_pool_cluster(pooling$pool_size, pooling$pool_number,
+                      prevalence, correlation,
+                      sensitivity, specificity,
+                      form, real_scale)
     FI <- FI +  FI_incr[,,iter]
     # Stop if increment changes ALL elements of FI by less than fraction rel_tol
-    # OR if distribution of catch size has finite support (i.e. if there is a
-    # maximum possible catch size)
+    # OR cumm_mass reaches 1 OR if distribution of catch size has finite support
+    # (i.e. if there is a maximum possible catch size)
     rel_incr <- abs(FI_incr[,,iter]/FI)
-    if(all(rel_incr <= rel_tol) | catch == catch_dist$max){
+    if(all(rel_incr <= rel_tol) | catch == max_catch | 1 - cumm_mass < .Machine$double.eps*10){
       terminate <- TRUE
     }
     if(iter == max_iter){
       terminate <- TRUE
       warning('reached max_iter without converging')
-      catches <- catches[1:iter]
       FI_incr <- FI_incr[,,1:iter]
       plot(catches, FI_incr[1,1,])
       plot(catches, FI_incr[1,2,])
