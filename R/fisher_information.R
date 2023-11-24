@@ -1,12 +1,13 @@
 #' Fisher information for population prevalence (and intra-cluster correlation)
 #'
 #' `fi_pool()` and `fi_pool_cluster()` calculate Fisher information (FI) for
-#' pool-tested surveys with a known number and size of pools.
-#' `fi_pool_cluster_random()` calculates FI for surveys where the cluster size
-#' (aka catch) size is random. `fi_pool()` calculates the Fisher information for
-#' the prevalence for a simple random survey. `fi_pool_cluster()` and
-#' `fi_pool_cluster_random()` calculate the two-by-two Fisher information matrix
-#' for prevalence and within-cluster correlation for cluster survey designs.
+#' pool-tested surveys with a known number and size of pools. `fi_pool_random()`
+#' and `fi_pool_cluster_random()` calculate FI for surveys where the number of
+#' units is random. `fi_pool()` and `fi_pool_random` calculates the Fisher
+#' information for the prevalence for simple random surveys.
+#' `fi_pool_cluster()` and `fi_pool_cluster_random()` calculate the two-by-two
+#' Fisher information matrix for prevalence and within-cluster correlation for
+#' cluster survey designs.
 #'
 #' @param pool_size numeric The number of units per pool. Must be a numeric
 #'   value greater than or equal to 0.
@@ -61,7 +62,7 @@ fi_pool <- function(pool_size, prevalence, sensitivity, specificity) {
   theta <- prevalence
   varphi <- sensitivity
   psi <- specificity
-
+  
   q <- 1 - theta
   s^2 * (1 - psi - varphi)^2 /
     (q^(2 - 2 * s) * (varphi + q^s * (1 - psi - varphi)) *
@@ -85,11 +86,11 @@ fi_pool_cluster <- function(pool_size,
   rho <- correlation
   varphi <- sensitivity
   psi <- specificity
-
+  
   if (length(s) != length(N) || !all((N %% 1) == 0) || !all(c(N, s) > 0)) {
     stop("s and N must be vectors of positive numbers of common length. s can be non-integer, but N must be integer")
   }
-
+  
   if (rho == 0) {
     # warning('correlation = 0 (no correlation) would mean that random sampling from a single location is equivalent to simple random sampling from the whole population (i.e. any one location is representative of the whole population). If this is the case, do not use cluster survey. However, this is highly unlikely to be true. Instead choose a small correlation')
     return(sum(fi_pool(s, theta, varphi, psi) * N))
@@ -104,7 +105,7 @@ fi_pool_cluster <- function(pool_size,
   phi <- function(theta) {
     varphi + (1 - psi - varphi) * (1 - theta)^s
   }
-
+  
   if (form %in% c("discrete", "beta")) {
     # In these cases Fisher information matrix is calculated directly in terms
     # of theta and rho and checks on sums of likelihoods and likelihood
@@ -119,19 +120,19 @@ fi_pool_cluster <- function(pool_size,
       # site-level prevalence. However, it demonstrates that optimal design depends
       # on the distribution. Namely, under this model the most cost-effective design
       # will usually be to lots of individual tests at a few sites
-
+      
       y <- 0:N
       phi. <- phi(theta)
-
+      
       lik <- choose(N, y) * ((1 - rho) * phi.^y * (1 - phi.)^(N - y) +
-        rho * theta * varphi^y * (1 - varphi)^(N - y) +
-        rho * (1 - theta) * psi^(N - y) * (1 - psi)^y)
+                               rho * theta * varphi^y * (1 - varphi)^(N - y) +
+                               rho * (1 - theta) * psi^(N - y) * (1 - psi)^y)
       lik_theta <- choose(N, y) * ((1 - rho) * (1 - psi - varphi) * s * (1 - theta)^(s - 1) * phi.^(y - 1) * (1 - phi.)^(N - y - 1) * (N * phi. - y) +
-        rho * varphi^y * (1 - varphi)^(N - y) -
-        rho * psi^(N - y) * (1 - psi)^y)
+                                     rho * varphi^y * (1 - varphi)^(N - y) -
+                                     rho * psi^(N - y) * (1 - psi)^y)
       lik_rho <- choose(N, y) * (-phi.^y * (1 - phi.)^(N - y) +
-        theta * varphi^y * (1 - varphi)^(N - y) +
-        (1 - theta) * psi^(N - y) * (1 - psi)^y)
+                                   theta * varphi^y * (1 - varphi)^(N - y) +
+                                   (1 - theta) * psi^(N - y) * (1 - psi)^y)
     } else if (form == "beta") {
       rho. <- rho^-1 - 1
       Alpha <- theta * rho.
@@ -142,48 +143,48 @@ fi_pool_cluster <- function(pool_size,
         if (s == 1) { # un-pooled case with a perfect test has simple exact solution
           # choose(N,y) * beta(Alpha + y, Beta + N - y)/beta(Alpha, Beta)
           lik <- exp(lchoose(N, y) + lbeta(Alpha + y, Beta + N - y) - lbeta(Alpha, Beta))
-
+          
           lik_theta <- lik * rho. * (digamma(Alpha + y) - digamma(Alpha) +
-            digamma(Beta) - digamma(Beta + N - y))
-
+                                       digamma(Beta) - digamma(Beta + N - y))
+          
           lik_rho <- lik / rho^2 * (theta * (digamma(Alpha) - digamma(Alpha + y)) +
-            (1 - theta) * (digamma(Beta) - digamma(Beta + N - y)) +
-            digamma(Alpha + Beta + N) - digamma(Alpha + Beta))
+                                      (1 - theta) * (digamma(Beta) - digamma(Beta + N - y)) +
+                                      digamma(Alpha + Beta + N) - digamma(Alpha + Beta))
         } else {
           lik <- sapply(y, function(y) {
             x <- 0:y
             choose(N, y) / beta(Alpha, Beta) * sum((-1)^x * choose(y, x) * beta(Alpha, Beta + s * (N - y + x)))
           })
-
+          
           lik_theta <- sapply(y, function(y) {
             x <- 0:y
             (Alpha + Beta) * choose(N, y) / beta(Alpha, Beta) *
               sum((-1)^x * choose(y, x) * beta(Alpha, Beta + s * (N - y + x)) *
-                (digamma(Beta) - digamma(Beta + s * (N - y + x))))
+                    (digamma(Beta) - digamma(Beta + s * (N - y + x))))
           })
-
+          
           lik_rho <- sapply(y, function(y) {
             x <- 0:y
             (Alpha + Beta + 1)^2 * choose(N, y) / beta(Alpha, Beta) *
               sum((-1)^x * choose(y, x) * beta(Alpha, Beta + s * (N - y + x)) *
-                ((digamma(Beta) - digamma(Beta + s * (N - y + x))) * (1 - theta) +
-                  digamma(Alpha + Beta + s * (N - y + x)) - digamma(Alpha + Beta)))
+                    ((digamma(Beta) - digamma(Beta + s * (N - y + x))) * (1 - theta) +
+                       digamma(Alpha + Beta + s * (N - y + x)) - digamma(Alpha + Beta)))
           })
         }
       } else { # most general case (imperfect test, mix of pool sizes, or large N)
         # requires numerical integration
         method <- "integration"
-
+        
         # All possible outcomes for N1,N2,... pools of sizes s1,s2,...
         ys <- do.call(expand.grid, purrr::map(N, ~ (0:.x)))
-
+        
         # probability of observing y positive pools out of N is prod(choose(N,y)) times
         # the integral of integrand. However for alpha < 1 or beta <1 numerical
         # integration can be problematic so we subtract off the poles at p=0 and
         # p=1 with a multiple of a beta density. The resulting integrand can be
         # integrated numerically without the stability issues, however has to be
         # corrected by the integral of the beta density
-
+        
         # integrand_theta and integrand_rho are the partial derivatives of
         # integrand with respect to theta and rho. It also has poles at p = 0 and
         # p = 1. We remove the poles with a similar trick as above, subtracting
@@ -191,7 +192,7 @@ fi_pool_cluster <- function(pool_size,
         # log(p) or log(1-p). The latter still has a closed form expression for
         # the integral but it involves the generalised hypergeometric distribution
         # (see mathematica)
-
+        
         if (Alpha >= 1 & Beta >= 1) {
           integrand <- function(p, y) { # note that this functions need to be vectorised for p, y, s, N. Vectorisation for p is done via loops, others through vectorised basic operations
             out <- dbeta(p, Alpha, Beta)
@@ -204,14 +205,14 @@ fi_pool_cluster <- function(pool_size,
           lik_correction <- function(y) {
             0
           }
-
+          
           integrand_theta <- function(p, y) {
             rho. * integrand(p, y) * (log(p) - log1p(-p) - digamma(Alpha) + digamma(Beta))
           }
           lik_theta_correction <- function(y) {
             0
           }
-
+          
           integrand_rho <- function(p, y) {
             rho^(-2) * integrand(p, y) * (theta * (digamma(Alpha) - log(p)) + (1 - theta) * (digamma(Beta) - log1p(-p)) - digamma(Alpha + Beta))
           }
@@ -233,7 +234,7 @@ fi_pool_cluster <- function(pool_size,
             pbeta(0.5, Alpha, Beta) * prod(psi^(N - y) * (1 - psi)^y) +
               pbeta(0.5, Beta, Alpha) * prod((1 - varphi)^(N - y) * (varphi)^y)
           }
-
+          
           integrand_theta <- function(p, y) { # note that this functions need to be vectorised for p
             out <- rho. * dbeta(p, Alpha, Beta)
             c0 <- prod((1 - psi)^y * psi^(N - y))
@@ -242,8 +243,8 @@ fi_pool_cluster <- function(pool_size,
               pj <- p[j]
               out[j] <- out[j] *
                 (-ifelse(pj < 0.5,
-                  c0 * (log(pj) - digamma(Alpha) + digamma(Beta)),
-                  c1 * (-log1p(-pj) - digamma(Alpha) + digamma(Beta))
+                         c0 * (log(pj) - digamma(Alpha) + digamma(Beta)),
+                         c1 * (-log1p(-pj) - digamma(Alpha) + digamma(Beta))
                 ) +
                   prod(phi(pj)^y * (1 - phi(pj))^(N - y)) * (log(pj) - log1p(-pj) - digamma(Alpha) + digamma(Beta)))
             }
@@ -251,14 +252,14 @@ fi_pool_cluster <- function(pool_size,
           }
           lik_theta_correction <- function(y) {
             (pbeta(0.5, Alpha, Beta) * (log(0.5) + digamma(Beta) - digamma(Alpha)) -
-              0.5^Alpha / (Alpha^2 * beta(Alpha, Beta)) *
-                hypergeo::genhypergeo(c(Alpha, Alpha, 1 - Beta), c(Alpha + 1, Alpha + 1), 0.5)) *
+               0.5^Alpha / (Alpha^2 * beta(Alpha, Beta)) *
+               hypergeo::genhypergeo(c(Alpha, Alpha, 1 - Beta), c(Alpha + 1, Alpha + 1), 0.5)) *
               prod((1 - psi)^y * psi^(N - y)) * rho. +
               (pbeta(0.5, Beta, Alpha) * (-log(0.5) + digamma(Beta) - digamma(Alpha)) +
-                0.5^Beta / Beta^2 / beta(Beta, Alpha) * hypergeo::genhypergeo(c(Beta, Beta, 1 - Alpha), c(Beta + 1, Beta + 1), 0.5)) *
-                prod(varphi^y * (1 - varphi)^(N - y)) * rho.
+                 0.5^Beta / Beta^2 / beta(Beta, Alpha) * hypergeo::genhypergeo(c(Beta, Beta, 1 - Alpha), c(Beta + 1, Beta + 1), 0.5)) *
+              prod(varphi^y * (1 - varphi)^(N - y)) * rho.
           }
-
+          
           integrand_rho <- function(p, y) { # note that this functions need to be vectorised for p
             out <- rho^(-2) * dbeta(p, Alpha, Beta)
             c0 <- prod((1 - psi)^y * psi^(N - y))
@@ -267,8 +268,8 @@ fi_pool_cluster <- function(pool_size,
               pj <- p[j]
               out[j] <- out[j] *
                 (-ifelse(pj < 0.5,
-                  c0 * (theta * (digamma(Alpha) - log(pj)) + (1 - theta) * digamma(Beta) - digamma(Alpha + Beta)),
-                  c1 * (theta * digamma(Alpha) + (1 - theta) * (digamma(Beta) - log1p(-pj)) - digamma(Alpha + Beta))
+                         c0 * (theta * (digamma(Alpha) - log(pj)) + (1 - theta) * digamma(Beta) - digamma(Alpha + Beta)),
+                         c1 * (theta * digamma(Alpha) + (1 - theta) * (digamma(Beta) - log1p(-pj)) - digamma(Alpha + Beta))
                 ) +
                   prod(phi(pj)^y * (1 - phi(pj))^(N - y)) * (theta * (digamma(Alpha) - log(pj)) + (1 - theta) * (digamma(Beta) - log1p(-pj)) - digamma(Alpha + Beta)))
             }
@@ -277,14 +278,14 @@ fi_pool_cluster <- function(pool_size,
           lik_rho_correction <- function(y) {
             rho^(-2) * prod((1 - psi)^y * psi^(N - y)) *
               ((theta * (digamma(Alpha) - log(0.5)) + (1 - theta) * digamma(Beta) - digamma(Alpha + Beta)) * pbeta(0.5, Alpha, Beta) +
-                theta * 0.5^Alpha / Alpha^2 / beta(Alpha, Beta) * hypergeo::genhypergeo(c(Alpha, Alpha, 1 - Beta), c(Alpha + 1, Alpha + 1), 0.5, series = TRUE)) +
-
+                 theta * 0.5^Alpha / Alpha^2 / beta(Alpha, Beta) * hypergeo::genhypergeo(c(Alpha, Alpha, 1 - Beta), c(Alpha + 1, Alpha + 1), 0.5, series = TRUE)) +
+              
               rho^(-2) * prod(varphi^y * (1 - varphi)^(N - y)) *
-                ((theta * digamma(Alpha) + (1 - theta) * (digamma(Beta) - log(0.5)) - digamma(Alpha + Beta)) * pbeta(0.5, Beta, Alpha) +
-                  (1 - theta) * 0.5^Beta / Beta^2 / beta(Beta, Alpha) * hypergeo::genhypergeo(c(Beta, Beta, 1 - Alpha), c(Beta + 1, Beta + 1), 0.5, series = TRUE))
+              ((theta * digamma(Alpha) + (1 - theta) * (digamma(Beta) - log(0.5)) - digamma(Alpha + Beta)) * pbeta(0.5, Beta, Alpha) +
+                 (1 - theta) * 0.5^Beta / Beta^2 / beta(Beta, Alpha) * hypergeo::genhypergeo(c(Beta, Beta, 1 - Alpha), c(Beta + 1, Beta + 1), 0.5, series = TRUE))
           }
         }
-
+        
         tol <- .Machine$double.eps^0.8
         lik <- apply(ys, 1, function(y) {
           # plot(function(x) {
@@ -293,7 +294,7 @@ fi_pool_cluster <- function(pool_size,
           (integrate(integrand, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_correction(y)) *
             prod(choose(N, y))
         })
-
+        
         lik_theta <- apply(ys, 1, function(y) {
           # plot(function(x) {
           #   integrand_theta(x, y)
@@ -301,7 +302,7 @@ fi_pool_cluster <- function(pool_size,
           (integrate(integrand_theta, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_theta_correction(y)) *
             prod(choose(N, y))
         })
-
+        
         lik_rho <- apply(ys, 1, function(y) {
           # plot(function(x) {
           #   integrand_rho(x, y)
@@ -313,8 +314,8 @@ fi_pool_cluster <- function(pool_size,
     }
     tol <- 1e-5
     if (abs(sum(lik) - 1) > tol ||
-      abs(sum(lik_theta)) > tol ||
-      abs(sum(lik_rho)) > tol) {
+        abs(sum(lik_theta)) > tol ||
+        abs(sum(lik_rho)) > tol) {
       print(lik)
       print(sum(lik) - 1)
       print(lik_theta)
@@ -330,7 +331,7 @@ fi_pool_cluster <- function(pool_size,
       print(form)
       stop("Error in ", method, " of likelihoods. Likelihoods do not add to 1 or derivatives of likelihood with respect to parameters do not sum to 0")
     }
-
+    
     return(matrix(
       c(
         sum(lik_theta^2 / lik),
@@ -341,22 +342,22 @@ fi_pool_cluster <- function(pool_size,
     ))
   } else if (form %in% c("logitnorm", "cloglognorm")) {
     link <- switch(form,
-      logitnorm = qlogis,
-      cloglognorm = cloglog
+                   logitnorm = qlogis,
+                   cloglognorm = cloglog
     )
     invlink <- switch(form,
-      logitnorm = plogis,
-      cloglognorm = cloglog_inv
+                      logitnorm = plogis,
+                      cloglognorm = cloglog_inv
     )
-
+    
     # calculate parameters on the real scale (mu, sigma of normal distribution)
     pars <- mu_sigma_linknorm(theta, theta * (1 - theta) * rho, link, invlink)
     mu <- pars[1]
     sigma <- pars[2]
-
+    
     # All possible outcomes for N1,N2,... pools of sizes s1,s2,...
     ys <- do.call(expand.grid, purrr::map(N, ~ (0:.x)))
-
+    
     # calculate Fisher information matrix for alternative parameters on the real scale
     integrand <- function(z, y) { # note that this functions need to be vectorised for p
       out <- dnorm(z, mean = mu, sd = sigma)
@@ -367,39 +368,39 @@ fi_pool_cluster <- function(pool_size,
       }
       out
     }
-
+    
     integrand_mu <- function(z, y) {
       integrand(z, y) * (z - mu) / sigma
     }
-
+    
     integrand_sigma <- function(z, y) {
       integrand(z, y) * ((z - mu)^2 - sigma^2) / sigma^3
     }
-
+    
     tol <- .Machine$double.eps^0.8
     lik <- apply(ys, 1, function(y) {
       # plot(function(x){integrand(x,y)},main = paste('integrand', y), n = 10000)
       integrate(integrand, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
-
+    
     lik_mu <- apply(ys, 1, function(y) {
       # plot(function(x){integrand_mu(x,y)},main = paste('integrand_mu', y), n = 10000)
       integrate(integrand_mu, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
-
+    
     lik_sigma <- apply(ys, 1, function(y) {
       # plot(function(x){integrand_sigma(x,y)},main = paste('integrand_sigma', y), n = 10000)
       integrate(integrand_sigma, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
-
+    
     # Check that integration is sufficiently accurate
     tol <- 1e-6
     if (abs(sum(lik) - 1) > tol ||
-      abs(sum(lik_mu)) > tol ||
-      abs(sum(lik_sigma)) > tol) {
+        abs(sum(lik_mu)) > tol ||
+        abs(sum(lik_sigma)) > tol) {
       print(lik)
       print(sum(lik) - 1)
       print(lik_mu)
@@ -415,7 +416,7 @@ fi_pool_cluster <- function(pool_size,
       print(form)
       stop("Error in integration of likelihoods. Likelihoods do not add to 1 or derivatives of likelihood with respect to parameters do not sum to 0")
     }
-
+    
     FI <- matrix(
       c(
         sum(lik_mu^2 / lik),
@@ -430,11 +431,11 @@ fi_pool_cluster <- function(pool_size,
       integrand_dtheta_dmu <- function(z) {
         dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma * invlink(z)
       }
-
+      
       integrand_dtheta_dsigma <- function(z) {
         dnorm(z, mean = mu, sd = sigma) * ((z - mu)^2 - sigma^2) / sigma^3 * invlink(z)
       }
-
+      
       # note that this function is the integrand for the dv/dmu where v non-centred second moment. To calculate drho/dmu we make corrections later in terms of theta, rho and dtheta/dmu
       integrand_drho_dmu <- function(z) {
         dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma * invlink(z)^2
@@ -443,7 +444,7 @@ fi_pool_cluster <- function(pool_size,
       integrand_drho_dsigma <- function(z) {
         dnorm(z, mean = mu, sd = sigma) * ((z - mu)^2 - sigma^2) / sigma^3 * invlink(z)^2
       }
-
+      
       tol <- .Machine$double.eps^0.8
       dtheta_dmu <- integrate(integrand_dtheta_dmu, lower = -Inf, upper = Inf, abs.tol = tol)$value
       dtheta_dsigma <- integrate(integrand_dtheta_dsigma, lower = -Inf, upper = Inf, abs.tol = tol)$value
@@ -451,7 +452,7 @@ fi_pool_cluster <- function(pool_size,
       drho_dmu <- (drho_dmu - dtheta_dmu * (rho * (1 - 2 * theta) + 2 * theta)) / (theta * (1 - theta))
       drho_dsigma <- integrate(integrand_drho_dsigma, lower = -Inf, upper = Inf, abs.tol = tol)$value
       drho_dsigma <- (drho_dsigma - dtheta_dsigma * (rho * (1 - 2 * theta) + 2 * theta)) / (theta * (1 - theta))
-
+      
       # We actually want the the Jacobian for the inverse transformation so we invert the matrix
       J <- solve(matrix(
         c(
@@ -516,6 +517,9 @@ fi_pool_cluster_random <- function(catch_dist,
     iter <- iter + 1 
     
     pooling <- pool_strat(catch) #determine pool sizes and numbers based on catch size
+    if(sum(pooling$pool_size * pooling$pool_number)>catch){
+      stop('Invalid pooling strategy. Total units across all pools is greater than the catch')
+    }
     catches[iter] <- catch
     FI_incr[,,iter] <- mass *
       fi_pool_cluster(pooling$pool_size, pooling$pool_number,
@@ -537,6 +541,79 @@ fi_pool_cluster_random <- function(catch_dist,
       plot(catches, FI_incr[1,1,])
       plot(catches, FI_incr[1,2,])
       plot(catches, FI_incr[2,2,])
+    }
+  }
+  return(FI)
+}
+
+
+#' @rdname fi_pool
+#' @export
+fi_pool_random <- function(catch_dist,
+                           pool_strat,
+                           prevalence,
+                           sensitivity,
+                           specificity,
+                           max_iter = 200,
+                           rel_tol = 1e-4){
+  
+  #Calculates Fisher information (FI) for an unknown/random catch by taking
+  #expectations w.r.t. catch distribution. The expectation is a (potentially
+  #infinite) sum over possible integer catch sizes. Summation continues until FI
+  #appears to have converged (using a relative tolerance heuristic)
+  
+  #Initialise sum of possible catch sizes
+  catch <- max(0,support(catch_dist)[['min']] - 1)
+  max_catch <- support(catch_dist)[['max']]
+  terminate <- FALSE
+  FI <- 0
+  iter <- 0
+  FI_incr <- c()
+  catches <- c()
+  cumm_mass <- 0
+  
+  if(support(catch_dist)['min'] == -Inf){
+    stop('Catch distribution must have support on the positive integers. Provided catch distribution is defined over negative numbers also')
+  }
+  
+  #Main loop for sum
+  while(!terminate){
+    catch <- catch + 1
+    mass <- pdf(catch_dist,catch) #probability that we have a catch of size catch
+    cumm_mass <- cumm_mass + mass
+    #this avoids unnecessary calls to fi_pool_cluster and prevents the
+    #early termination of the algorithm for distributions that may have 0 mass
+    #for some n but non-zero mass for m>n (e.g. if distribution only has mass on
+    #multiples of 10)
+    if(mass == 0){next} 
+    
+    # Note that iteration counter comes after check for zero mass: for the
+    # purposes of early termination, only counts iteration if mass is non-zero
+    iter <- iter + 1 
+    
+    pooling <- pool_strat(catch) #determine pool sizes and numbers based on catch size
+    
+    if(sum(pooling$pool_size * pooling$pool_number)>catch){
+      stop('Invalid pooling strategy. Total units across all pools is greater than the catch')
+    }
+    catches[iter] <- catch
+    FI_incr[iter] <- mass *
+      sum(pooling$pool_number * fi_pool(pooling$pool_size,
+                                      prevalence,
+                                      sensitivity, specificity)
+      )
+    FI <- FI +  FI_incr[iter]
+    # Stop if increment changes ALL elements of FI by less than fraction rel_tol
+    # OR cumm_mass reaches 1 OR if distribution of catch size has finite support
+    # (i.e. if there is a maximum possible catch size)
+    rel_incr <- abs(FI_incr[iter]/FI)
+    if(all(rel_incr <= rel_tol) | catch == max_catch | 1 - cumm_mass < .Machine$double.eps*10){
+      terminate <- TRUE
+    }
+    if(iter == max_iter){
+      terminate <- TRUE
+      warning('reached max_iter without converging')
+      plot(catches, FI_incr)
     }
   }
   return(FI)

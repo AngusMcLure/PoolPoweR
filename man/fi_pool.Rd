@@ -4,6 +4,7 @@
 \alias{fi_pool}
 \alias{fi_pool_cluster}
 \alias{fi_pool_cluster_random}
+\alias{fi_pool_random}
 \title{Fisher information for population prevalence (and intra-cluster correlation)}
 \usage{
 fi_pool(pool_size, prevalence, sensitivity, specificity)
@@ -28,6 +29,16 @@ fi_pool_cluster_random(
   specificity,
   form = "beta",
   real_scale = FALSE,
+  max_iter = 200,
+  rel_tol = 1e-04
+)
+
+fi_pool_random(
+  catch_dist,
+  pool_strat,
+  prevalence,
+  sensitivity,
+  specificity,
   max_iter = 200,
   rel_tol = 1e-04
 )
@@ -78,12 +89,13 @@ The Fisher information for prevalence (`fi_pool()`) or the Fisher
 }
 \description{
 `fi_pool()` and `fi_pool_cluster()` calculate Fisher information (FI) for
-pool-tested surveys with a known number and size of pools.
-`fi_pool_cluster_random()` calculates FI for surveys where the cluster size
-(aka catch) size is random. `fi_pool()` calculates the Fisher information for
-the prevalence for a simple random survey. `fi_pool_cluster()` and
-`fi_pool_cluster_random()` calculate the two-by-two Fisher information matrix
-for prevalence and within-cluster correlation for cluster survey designs.
+pool-tested surveys with a known number and size of pools. `fi_pool_random()`
+and `fi_pool_cluster_random()` calculate FI for surveys where the number of
+units is random. `fi_pool()` and `fi_pool_random` calculates the Fisher
+information for the prevalence for simple random surveys.
+`fi_pool_cluster()` and `fi_pool_cluster_random()` calculate the two-by-two
+Fisher information matrix for prevalence and within-cluster correlation for
+cluster survey designs.
 }
 \examples{
 fi_pool(
