@@ -305,7 +305,7 @@ fi_pool_cluster <- function(pool_size,
             prod(choose(N, y))
         })
       }
-    }
+    } ## End for form == "beta"
     tol <- 1e-5
     if (abs(sum(lik) - 1) > tol ||
       abs(sum(lik_theta)) > tol ||

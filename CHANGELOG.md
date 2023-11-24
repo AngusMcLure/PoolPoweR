@@ -23,8 +23,8 @@ and this project adheres to
 **Focus:** Package
 - [ ] Fix integrand issue  
 - [ ] Implement codecov.io  
+- [ ] Refactor functions (i.e. break down into smaller ones for readability)
 - [ ] Configure and optimise GHA workflows
-- [ ] Refer to package and tidyverse guides for coherency and note rooms for improvement
 
 ### [v0.0.3]
 **Focus:** Documentation
@@ -32,6 +32,7 @@ and this project adheres to
 - [ ] Rename interval [#13](https://github.com/AngusMcLure/PoolPoweR/issues/13)
 - [ ] Update docs with cluster and non-cluster cases
 [#14](https://github.com/AngusMcLure/PoolPoweR/issues/14)
+- [ ] Add PoolPoweR-package.R (#18)  
 - [x] Rename real.scale to real_scale
 
 ### [v0.0.2] - 2023-12-01

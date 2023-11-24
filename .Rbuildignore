@@ -6,7 +6,7 @@
 ^Figures*
 man/hello.Rd
 ^LICENSE\.md$
-dependencies/
+^dev_resources/$
 ^\.github$
 ^PoolPoweR\.Rproj$
 ^CHANGELOG.md$
