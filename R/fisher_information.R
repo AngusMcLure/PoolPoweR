@@ -517,24 +517,23 @@ fi_pool_cluster_random <- function(catch_dist,
   #appears to have converged (using a relative tolerance heuristic)
   
   #Initialise sum of possible catch sizes
-  catch <- max(0,support(catch_dist)[['min']] - 1)
-  max_catch <- support(catch_dist)[['max']]
+  catch <- max(0,distributions3::support(catch_dist)[['min']] - 1)
+  max_catch <- distributions3::support(catch_dist)[['max']]
   terminate <- FALSE
   FI <- matrix(0, 2,2)
   iter <- 0
   FI_incr <- array(dim = c(2,2,max_iter))
   catches <- c()
-  cumm_mass <- 0
-  
-  if(support(catch_dist)['min'] == -Inf){
+
+  if(distributions3::support(catch_dist)['min'] == -Inf){
     stop('Catch distribution must have support on the positive integers. Provided catch distribution is defined over negative numbers also')
   }
   
   #Main loop for sum
   while(!terminate){
     catch <- catch + 1
-    mass <- pdf(catch_dist,catch) #probability that we have a catch of size catch
-    cumm_mass <- cumm_mass + mass
+    mass <- distributions3::pdf(catch_dist,catch) #probability that we have a catch of size catch
+    cumm_mass <- distributions3::cdf(catch_dist,catch)
     #this avoids unnecessary calls to fi_pool_cluster and prevents the
     #early termination of the algorithm for distributions that may have 0 mass
     #for some n but non-zero mass for m>n (e.g. if distribution only has mass on
@@ -592,24 +591,23 @@ fi_pool_random <- function(catch_dist,
   #appears to have converged (using a relative tolerance heuristic)
   
   #Initialise sum of possible catch sizes
-  catch <- max(0,support(catch_dist)[['min']] - 1)
-  max_catch <- support(catch_dist)[['max']]
+  catch <- max(0,distributions3::support(catch_dist)[['min']] - 1)
+  max_catch <- distributions3::support(catch_dist)[['max']]
   terminate <- FALSE
   FI <- 0
   iter <- 0
   FI_incr <- c()
   catches <- c()
-  cumm_mass <- 0
-  
-  if(support(catch_dist)['min'] == -Inf){
+
+  if(distributions3::support(catch_dist)['min'] == -Inf){
     stop('Catch distribution must have support on the positive integers. Provided catch distribution is defined over negative numbers also')
   }
   
   #Main loop for sum
   while(!terminate){
     catch <- catch + 1
-    mass <- pdf(catch_dist,catch) #probability that we have a catch of size catch
-    cumm_mass <- cumm_mass + mass
+    mass <- distributions3::pdf(catch_dist,catch) #probability that we have a catch of size catch
+    cumm_mass <- distributions3::cdf(catch_dist,catch)
     #this avoids unnecessary calls to fi_pool_cluster and prevents the
     #early termination of the algorithm for distributions that may have 0 mass
     #for some n but non-zero mass for m>n (e.g. if distribution only has mass on
