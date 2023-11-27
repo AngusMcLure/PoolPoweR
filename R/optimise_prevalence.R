@@ -50,7 +50,7 @@
 #'   `s`, cost, and range of near-optimal designs `catch`. *
 #'   `optimise_sN_prevalence()` returns the same list as `optimise_s_prevalence`
 #'   with an additional optimal pool number `N`.
-#'
+#' @rdname optimise_prevalence
 #' @export
 #'
 #' @examples
@@ -179,7 +179,7 @@ optimise_s_prevalence <- function(pool_number = 1,
   out
 }
 
-#' @rdname optimise_s_prevalence
+#' @rdname optimise_prevalence
 #' @export
 optimise_sN_prevalence <- function(prevalence,
                                    cost_unit,
@@ -191,7 +191,6 @@ optimise_sN_prevalence <- function(prevalence,
                                    max_s = 50,
                                    max_N = 20,
                                    form = "beta") {
-  # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max.s = max.s))
 
   if (is.na(correlation) || correlation == 0) { # for simple random sampling there is no optimal N and for no correlation cluster survey the optimal approach is to infinite pools at one site (i.e. a simple random survey)
     opt <- optimise_s_prevalence(
@@ -228,6 +227,8 @@ optimise_sN_prevalence <- function(prevalence,
 
   opt
 }
+
+
 
 cost_fi <- function(pool_size, prevalence, sensitivity, specificity, cost_unit, cost_pool) {
   (sum(cost_unit * pool_size) + cost_pool) /

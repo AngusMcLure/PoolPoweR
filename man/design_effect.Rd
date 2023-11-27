@@ -2,11 +2,22 @@
 % Please edit documentation in R/design_effect.R
 \name{design_effect}
 \alias{design_effect}
+\alias{design_effect_random}
 \title{Calculate the design effect for pooled testing.}
 \usage{
 design_effect(
   pool_size,
   pool_number,
+  prevalence,
+  correlation,
+  sensitivity,
+  specificity,
+  form = "beta"
+)
+
+design_effect_random(
+  catch_dist,
+  pool_strat,
   prevalence,
   correlation,
   sensitivity,
@@ -46,21 +57,33 @@ negatives.}
 \item{form}{string The distribution used to model the cluster-level
 prevalence and correlation of units within cluster. Select one of "beta",
 "logitnorm" or "cloglognorm". See details.}
+
+\item{catch_dist}{An object of class `distribution` (e.g. produced by
+`nb_catch()`) defining the distribution of the possible catch. If
+`correlation = 0` the catch is for the whole survey. For `correlation > 0`
+the catch is per cluster (i.e. cluster size).}
+
+\item{pool_strat}{function Defines a rule for how a number of units will be
+divided into pools. Must take a single numeric argument and return a named
+list of pool sizes and pool numbers. `pool_max_size()` and
+`pool_target_number` provide convenience functions for defining common
+pooling strategies.}
 }
 \value{
 A numeric value of the design effect `D`.
 }
 \description{
-This function calculates the design effect (D) for survey designs using pool
-testing compared to a simple random survey with individual tests of the same
-number of units. This allows the comparison of the Fisher Information per
-unit sampled across different pooling and sampling strategies. A design
-effect `D>1` (`D<1`) indicates that the pooling/sampling strategy reduces
+Calculates the design effect (D) for survey designs using pool testing
+compared to a simple random survey with individual tests of the same number
+of units. This allows the comparison of the Fisher Information per unit
+sampled across different pooling and sampling strategies. A design effect
+`D>1` (`D<1`) indicates that the pooling/sampling strategy reduces
 (increases) the Fisher information per unit; the total sample size will have
 to be multiplied by a factor of D to achieve the same degree of precision in
 estimating prevalence as a simple random survey with individual tests.
-Supports both cluster and simple random sampling with perfect or imperfect
-tests.
+Supports cluster and simple random sampling with perfect or imperfect tests,
+and either fixed sample sizes (`design_effect()`) or random sample sizes
+(`design_effect_random()`)
 }
 \examples{
 design_effect(

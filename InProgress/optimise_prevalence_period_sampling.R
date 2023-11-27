@@ -29,7 +29,7 @@
 
 fi_pool_imperfect_cluster_unequal <- function(catch.dist, pool.strat, prevalence, sensitivity, specificity,
                                               correlation,form = 'beta', real.scale = FALSE, max.iter = 200){
-
+  
   catch <- max(catch.dist$min-1, 0)
   terminate <- FALSE
   FI <- matrix(0, 2,2)
@@ -66,7 +66,7 @@ fi_pool_imperfect_cluster_unequal <- function(catch.dist, pool.strat, prevalence
   plot(catches, FI.incr[1,1,])
   plot(catches, FI.incr[1,2,])
   plot(catches, FI.incr[2,2,])
-
+  
   FI
 }
 
@@ -85,10 +85,10 @@ optimise_N_prevalence <- function(prevalence, cost.unit, cost.pool,
   N.opt <- max(if(correlation == 0){1}else{2}, ceiling(n/max.s)) - 1
   cost.opt <- Inf
   while(N.opt<n){
-    cost.new <- unit_fi_cost_clustered(n/(N.opt+1),N.opt+1,prevalence,correlation,
-                                       sensitivity,specificity,
-                                       cost.unit + cost.collect/catch.collect,
-                                       cost.pool,cost.location,form)
+    cost.new <- cost_fi_cluster(n/(N.opt+1),N.opt+1,prevalence,correlation,
+                                sensitivity,specificity,
+                                cost.unit + cost.collect/catch.collect,
+                                cost.pool,cost.location,form)
     if(cost.new > cost.opt){
       break
     }
@@ -108,7 +108,7 @@ optimise_NP_prevalence <- function(prevalence, cost.unit, cost.pool,
                                    max.s = 50, max.P = 20){
   #print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost.unit, test = cost.pool, location = cost.location , rho = correlation, N = N, form = form, max.s = max.s))
   theta <- prevalence
-
+  
   if(correlation == 0){
     stop('If there is no correlation between units at locations, then this means sampling at a single random location is a identical to sampling from the whole population. This is assumption unlikely to be true in most settings, but would mean that sampling at a single site is the most cost-effective strategy')
   }else{
@@ -120,7 +120,7 @@ optimise_NP_prevalence <- function(prevalence, cost.unit, cost.pool,
                                        correlation, P.opt+1, form = 'beta',
                                        sensitivity, specificity,
                                        max.s, max.N)
-
+      
       if(opt.new$cost > opt$cost){
         break
       }else{
