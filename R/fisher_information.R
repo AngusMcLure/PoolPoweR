@@ -131,10 +131,26 @@ fi_pool_cluster <- function(pool_size,
   if (K == 1 && N == 1 && s == 1) {
     return(matrix(c(fi_pool(s, theta, varphi, psi) * N, 0, 0, 0), nrow = 2))
   }
-  phi <- function(theta) {
-    varphi + (1 - psi - varphi) * (1 - theta)^s
+  
+  phi <- function(p){
+    #varphi + (1 - psi - varphi) * (1 - p)^s
+    if(p %in% 0:1){
+      (1 - (1 - p)^s) * varphi + (1 - p)^s * (1 - psi)
+    }else{
+      -expm1(log1p(-p)*s) * varphi + exp(log1p(-p)*s) * (1-psi)
+    }
   }
   
+  one_minus_phi <- function(p){
+    #1 - varphi - (1 - psi - varphi) * (1 - p)^s
+    if(p %in% 0:1){
+      1 - (1 - (1 - p)^s) * varphi - (1 - p)^s * (1 - psi)
+    }else{
+      expm1(log1p(-p)*s) * (1 - varphi) + exp(log1p(-p)*s) * psi
+    }
+  }
+  
+
   if (form %in% c("discrete", "beta")) {
     # In these cases Fisher information matrix is calculated directly in terms
     # of theta and rho and checks on sums of likelihoods and likelihood
@@ -378,6 +394,10 @@ fi_pool_cluster <- function(pool_size,
                       logitnorm = plogis,
                       cloglognorm = cloglog_inv
     )
+    dinvlink <- switch(form,
+                       logitnorm = \(p) 1/(p * (1 - p)),
+                       cloglognorm = \(p) 1/(-log1p(-p) * (1 - p))
+    )
     
     # calculate parameters on the real scale (mu, sigma of normal distribution)
     pars <- mu_sigma_linknorm(theta, theta * (1 - theta) * rho, link, invlink)
@@ -388,45 +408,55 @@ fi_pool_cluster <- function(pool_size,
     ys <- do.call(expand.grid, purrr::map(N, ~ (0:.x)))
     
     # calculate Fisher information matrix for alternative parameters on the real scale
-    integrand <- function(z, y) { # note that this functions need to be vectorised for p
-      out <- dnorm(z, mean = mu, sd = sigma)
-      p <- invlink(z)
-      for (j in 1:length(p)) {
+    integrand <- function(p, y) { # note that this functions need to be vectorised for p
+      out <- numeric(length(p))
+      for (j in 1:length(p)){
         pj <- p[j]
-        out[j] <- out[j] * prod(phi(pj)^y * (1 - phi(pj))^(N - y))
+        if(pj %in% 0:1){
+          out[j] <- -Inf
+        }else{
+          out[j] <- dnorm(link(pj), mean = mu, sd = sigma, log = TRUE) +
+            log(dinvlink(pj)) +
+            sum(log(phi(pj)) * y) +
+            sum(log(one_minus_phi(pj)) * (N - y))
+        }
+      }
+      out <- exp(out)
+      if(any(is.nan(out) | any(is.infinite(out)))){
+        print(list(mu = mu, sigma = sigma, p = p, s = s, y = unname(y), N = N, out = out, problemp = p[is.nan(out) | is.infinite(out)]))
       }
       out
     }
     
-    integrand_mu <- function(z, y) {
-      integrand(z, y) * (z - mu) / sigma
+    integrand_mu <- function(p, y) {
+      integrand(p, y) * (link(p) - mu) / sigma^2
     }
     
-    integrand_sigma <- function(z, y) {
-      integrand(z, y) * ((z - mu)^2 - sigma^2) / sigma^3
+    integrand_sigma <- function(p, y) {
+      integrand(p, y) * ((link(p) - mu)^2 - sigma^2) / sigma^3
     }
     
     tol <- .Machine$double.eps^0.8
     lik <- apply(ys, 1, function(y) {
       # plot(function(x){integrand(x,y)},main = paste('integrand', y), n = 10000)
-      integrate(integrand, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
+      integrate(integrand, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
     lik_mu <- apply(ys, 1, function(y) {
       # plot(function(x){integrand_mu(x,y)},main = paste('integrand_mu', y), n = 10000)
-      integrate(integrand_mu, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
+      integrate(integrand_mu, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
     lik_sigma <- apply(ys, 1, function(y) {
       # plot(function(x){integrand_sigma(x,y)},main = paste('integrand_sigma', y), n = 10000)
-      integrate(integrand_sigma, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
+      integrate(integrand_sigma, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
     # Check that integration is sufficiently accurate
-    tol <- 1e-6
+    tol <- 1e-4
     if (abs(sum(lik) - 1) > tol ||
         abs(sum(lik_mu)) > tol ||
         abs(sum(lik_sigma)) > tol) {
@@ -458,7 +488,7 @@ fi_pool_cluster <- function(pool_size,
       return(FI)
     } else { # calculate Jacobian for the change of parameters from {mu,sigma} -> {theta, rho}
       integrand_dtheta_dmu <- function(z) {
-        dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma * invlink(z)
+        dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma^2 * invlink(z)
       }
       
       integrand_dtheta_dsigma <- function(z) {
@@ -467,7 +497,7 @@ fi_pool_cluster <- function(pool_size,
       
       # note that this function is the integrand for the dv/dmu where v non-centred second moment. To calculate drho/dmu we make corrections later in terms of theta, rho and dtheta/dmu
       integrand_drho_dmu <- function(z) {
-        dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma * invlink(z)^2
+        dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma^2 * invlink(z)^2
       }
       # note that this function is the integrand for the dv/dsigma where v non-centred second moment. To calculate drho/dsigma we make corrections later in terms of theta, rho and dtheta/dsigma
       integrand_drho_dsigma <- function(z) {
@@ -500,6 +530,38 @@ fi_pool_cluster <- function(pool_size,
 
 #' @rdname fi_pool
 #' @export
+fi_pool_random <- function(catch_dist,
+                           pool_strat,
+                           prevalence,
+                           sensitivity,
+                           specificity,
+                           max_iter = 1000,
+                           rel_tol = 1e-6){
+  
+  #Calculates Fisher information (FI) for an unknown/random catch by taking
+  #expectations w.r.t. catch distribution. The expectation is a (potentially
+  #infinite) sum over possible integer catch sizes. Summation continues until FI
+  #appears to have converged (using a relative tolerance heuristic)
+  
+  if(distributions3::support(catch_dist)['min'] == -Inf){
+    stop('Catch distribution must have support on the positive integers. Provided catch distribution is defined over negative numbers also')
+  }
+  
+  total_fi <- function(catch){
+    pooling <- pool_strat(catch) #determine pool sizes and numbers based on catch size
+    if(sum(pooling$pool_size * pooling$pool_number)>catch){
+      stop('Invalid pooling strategy. Total units across all pools is greater than the catch')
+    }
+      sum(pooling$pool_number * fi_pool(pooling$pool_size,
+                                        prevalence,
+                                        sensitivity, specificity))
+  }
+  return(ev(total_fi, catch_dist, max_iter, rel_tol))
+}
+
+
+#' @rdname fi_pool
+#' @export
 fi_pool_cluster_random <- function(catch_dist,
                                    pool_strat,
                                    prevalence,
@@ -509,142 +571,24 @@ fi_pool_cluster_random <- function(catch_dist,
                                    form = 'beta',
                                    real_scale = FALSE,
                                    max_iter = 1000,
-                                   rel_tol = 1e-4){
+                                   rel_tol = 1e-6){
   
-  #Calculates Fisher information (FI) for an unknown/random catch by taking
-  #expectations w.r.t. catch distribution. The expectation is a (potentially
-  #infinite) sum over possible integer catch sizes. Summation continues until FI
-  #appears to have converged (using a relative tolerance heuristic)
-  
-  #Initialise sum of possible catch sizes
-  catch <- max(0,distributions3::support(catch_dist)[['min']] - 1)
-  max_catch <- distributions3::support(catch_dist)[['max']]
-  terminate <- FALSE
-  FI <- matrix(0, 2,2)
-  iter <- 0
-  FI_incr <- array(dim = c(2,2,max_iter))
-  catches <- c()
-
   if(distributions3::support(catch_dist)['min'] == -Inf){
     stop('Catch distribution must have support on the positive integers. Provided catch distribution is defined over negative numbers also')
   }
   
-  #Main loop for sum
-  while(!terminate){
-    catch <- catch + 1
-    mass <- distributions3::pdf(catch_dist,catch) #probability that we have a catch of size catch
-    cumm_mass <- distributions3::cdf(catch_dist,catch)
-    #this avoids unnecessary calls to fi_pool_cluster and prevents the
-    #early termination of the algorithm for distributions that may have 0 mass
-    #for some n but non-zero mass for m>n (e.g. if distribution only has mass on
-    #multiples of 10)
-    if(mass == 0){next} 
-    
-    # Note that iteration counter comes after check for zero mass: for the
-    # purposes of early termination, only counts iteration if mass is non-zero
-    iter <- iter + 1 
-    
+  total_fi <- function(catch){
     pooling <- pool_strat(catch) #determine pool sizes and numbers based on catch size
     if(sum(pooling$pool_size * pooling$pool_number)>catch){
       stop('Invalid pooling strategy. Total units across all pools is greater than the catch')
     }
-    catches[iter] <- catch
-    FI_incr[,,iter] <- mass *
-      fi_pool_cluster(pooling$pool_size, pooling$pool_number,
-                      prevalence, correlation,
-                      sensitivity, specificity,
-                      form, real_scale)
-    FI <- FI +  FI_incr[,,iter]
-    # Stop if increment changes ALL elements of FI by less than fraction rel_tol
-    # OR cumm_mass reaches 1 OR if distribution of catch size has finite support
-    # (i.e. if there is a maximum possible catch size)
-    rel_incr <- abs(FI_incr[,,iter]/FI)
-    if(all(rel_incr <= rel_tol) | catch == max_catch | 1 - cumm_mass < .Machine$double.eps*10){
-      terminate <- TRUE
-    }
-    if(iter == max_iter){
-      terminate <- TRUE
-      warning('reached max_iter without converging. Result is an underestimate of true Fisher information. Increase max_iter')
-      FI_incr <- FI_incr[,,1:iter]
-      plot(catches, FI_incr[1,1,])
-      plot(catches, FI_incr[1,2,])
-      plot(catches, FI_incr[2,2,])
-    }
+    fi_pool_cluster(pooling$pool_size, pooling$pool_number,
+                    prevalence, correlation,
+                    sensitivity, specificity,
+                    form, real_scale)
   }
-  return(FI)
+  
+  return(ev(total_fi, catch_dist, max_iter, rel_tol))
 }
-
-
-#' @rdname fi_pool
-#' @export
-fi_pool_random <- function(catch_dist,
-                           pool_strat,
-                           prevalence,
-                           sensitivity,
-                           specificity,
-                           max_iter = 1000,
-                           rel_tol = 1e-4){
-  
-  #Calculates Fisher information (FI) for an unknown/random catch by taking
-  #expectations w.r.t. catch distribution. The expectation is a (potentially
-  #infinite) sum over possible integer catch sizes. Summation continues until FI
-  #appears to have converged (using a relative tolerance heuristic)
-  
-  #Initialise sum of possible catch sizes
-  catch <- max(0,distributions3::support(catch_dist)[['min']] - 1)
-  max_catch <- distributions3::support(catch_dist)[['max']]
-  terminate <- FALSE
-  FI <- 0
-  iter <- 0
-  FI_incr <- c()
-  catches <- c()
-
-  if(distributions3::support(catch_dist)['min'] == -Inf){
-    stop('Catch distribution must have support on the positive integers. Provided catch distribution is defined over negative numbers also')
-  }
-  
-  #Main loop for sum
-  while(!terminate){
-    catch <- catch + 1
-    mass <- distributions3::pdf(catch_dist,catch) #probability that we have a catch of size catch
-    cumm_mass <- distributions3::cdf(catch_dist,catch)
-    #this avoids unnecessary calls to fi_pool_cluster and prevents the
-    #early termination of the algorithm for distributions that may have 0 mass
-    #for some n but non-zero mass for m>n (e.g. if distribution only has mass on
-    #multiples of 10)
-    if(mass == 0){next} 
-    
-    # Note that iteration counter comes after check for zero mass: for the
-    # purposes of early termination, only counts iteration if mass is non-zero
-    iter <- iter + 1 
-    
-    pooling <- pool_strat(catch) #determine pool sizes and numbers based on catch size
-    
-    if(sum(pooling$pool_size * pooling$pool_number)>catch){
-      stop('Invalid pooling strategy. Total units across all pools is greater than the catch')
-    }
-    catches[iter] <- catch
-    FI_incr[iter] <- mass *
-      sum(pooling$pool_number * fi_pool(pooling$pool_size,
-                                      prevalence,
-                                      sensitivity, specificity)
-      )
-    FI <- FI +  FI_incr[iter]
-    # Stop if increment changes ALL elements of FI by less than fraction rel_tol
-    # OR cumm_mass reaches 1 OR if distribution of catch size has finite support
-    # (i.e. if there is a maximum possible catch size)
-    rel_incr <- abs(FI_incr[iter]/FI)
-    if(all(rel_incr <= rel_tol) | catch == max_catch | 1 - cumm_mass < .Machine$double.eps*10){
-      terminate <- TRUE
-    }
-    if(iter == max_iter){
-      terminate <- TRUE
-      warning('reached max_iter without converging. Result is an underestimate of true Fisher information. Increase max_iter')
-      plot(catches, FI_incr)
-    }
-  }
-  return(FI)
-}
-
 
 

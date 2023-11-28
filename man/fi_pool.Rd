@@ -3,8 +3,8 @@
 \name{fi_pool}
 \alias{fi_pool}
 \alias{fi_pool_cluster}
-\alias{fi_pool_cluster_random}
 \alias{fi_pool_random}
+\alias{fi_pool_cluster_random}
 \title{Fisher information for population prevalence (and intra-cluster correlation)}
 \usage{
 fi_pool(pool_size, prevalence, sensitivity, specificity)
@@ -20,6 +20,16 @@ fi_pool_cluster(
   real_scale = FALSE
 )
 
+fi_pool_random(
+  catch_dist,
+  pool_strat,
+  prevalence,
+  sensitivity,
+  specificity,
+  max_iter = 1000,
+  rel_tol = 1e-06
+)
+
 fi_pool_cluster_random(
   catch_dist,
   pool_strat,
@@ -30,17 +40,7 @@ fi_pool_cluster_random(
   form = "beta",
   real_scale = FALSE,
   max_iter = 1000,
-  rel_tol = 1e-04
-)
-
-fi_pool_random(
-  catch_dist,
-  pool_strat,
-  prevalence,
-  sensitivity,
-  specificity,
-  max_iter = 1000,
-  rel_tol = 1e-04
+  rel_tol = 1e-06
 )
 }
 \arguments{

@@ -73,17 +73,17 @@ pooling strategies.}
 A numeric value of the design effect `D`.
 }
 \description{
-Calculates the design effect (D) for survey designs using pool testing
-compared to a simple random survey with individual tests of the same number
-of units. This allows the comparison of the Fisher Information per unit
-sampled across different pooling and sampling strategies. A design effect
-`D>1` (`D<1`) indicates that the pooling/sampling strategy reduces
+These functions calculate the design effect (D) for survey designs using pool
+testing compared to a simple random survey with individual tests of the same
+number of units. This allows the comparison of the Fisher Information per
+unit sampled across different pooling and sampling strategies. A design
+effect `D>1` (`D<1`) indicates that the pooling/sampling strategy reduces
 (increases) the Fisher information per unit; the total sample size will have
 to be multiplied by a factor of D to achieve the same degree of precision in
-estimating prevalence as a simple random survey with individual tests.
-Supports cluster and simple random sampling with perfect or imperfect tests,
-and either fixed sample sizes (`design_effect()`) or random sample sizes
-(`design_effect_random()`)
+estimating prevalence as a simple random survey with individual tests. The
+functions support cluster and simple random sampling with perfect or
+imperfect tests, and either fixed sample sizes (`design_effect()`) or random
+sample sizes (`design_effect_random()`).
 }
 \examples{
 design_effect(
