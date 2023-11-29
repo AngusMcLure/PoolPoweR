@@ -38,3 +38,27 @@
       i prevalence must be a numeric value between 0 and 1, inclusive.
       x 1.1 is > 1
 
+# check_rho()
+
+    Code
+      check_rho(-1)
+    Message <cliMessage>
+      i rho must be a numeric value between 0 and 1, or NA
+      x -1 is < 0
+
+---
+
+    Code
+      check_rho(2)
+    Message <cliMessage>
+      i rho must be a numeric value between 0 and 1, or NA
+      x 2 is > 1
+
+---
+
+    Code
+      check_rho("chr")
+    Message <cliMessage>
+      i rho must be a numeric value between 0 and 1, or NA
+      x "chr" is a character.
+

@@ -1,6 +1,16 @@
-check_input <- function(argument_name, value) {
+check_input <- function(argument_name, input_value) {
+  geq0 <- c('pool_size', 'pool_number', 'cost_unit',
+            'cost_pool', 'cost_cluster', 'interval')
+  geq1 <- c('max_s', 'max_N')
+  range <- c('prevalence', 'correlation', 'sensitivity', 'specificity')
   na <- c('cost_cluster', 'correlation')
   forms <- c('beta', 'logitnorm', 'cloglognorm')
+
+  if(argument_name %in% geq0) check_geq(argument_name, input_value, min = 0)
+  else if(argument_name %in% geq1) check_geq(argument_name, input_value, min = 1)
+  else if(argument_name %in% range) check_in_range(argument_name, input_value)
+  #else if(argument_name == "form")
+  #else if(argument_name == "real_scale")
 }
 
 check_geq <- function(argument_name, input_value) {
@@ -39,4 +49,20 @@ check_in_range <- function(argument_name, input_value) {
   }
   if(input_value < 0) cli::cli_alert_danger("{.val {input_value}} is < 0")
   if(input_value > 1) cli::cli_alert_danger("{.val {input_value}} is > 1")
+}
+
+check_rho <- function(rho) {
+  alert_msg <- "{.field rho} must be a numeric value between 0 and 1, or NA"
+  if(!is.numeric(rho) & !is.na(rho)) {
+    cli::cli_alert_info(alert_msg)
+    cli::cli_alert_danger("{.val {rho}} is a {class(rho)}.")
+  }
+  if(is.numeric(rho)) {
+    # `<` and `>` can't deal with NAs
+    if(rho < 0 || rho > 1) {
+      cli::cli_alert_info(alert_msg)
+      if(rho < 0) cli::cli_alert_danger("{.val {rho}} is < 0")
+      if(rho > 1) cli::cli_alert_danger("{.val {rho}} is > 1")
+    }
+  }
 }

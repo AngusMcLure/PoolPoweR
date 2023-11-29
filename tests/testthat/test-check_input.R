@@ -19,3 +19,13 @@ test_that("check_in_range()", {
   expect_silent(check_in_range("sensitivity", 1))
   expect_silent(check_in_range("specificity", 0))
 })
+
+test_that("check_rho()", {
+  expect_silent(check_rho(0))
+  expect_silent(check_rho(1))
+  expect_silent(check_rho(NA))
+  expect_snapshot(check_rho(-1))
+  expect_snapshot(check_rho(2))
+  expect_snapshot(check_rho("chr"))
+})
+
