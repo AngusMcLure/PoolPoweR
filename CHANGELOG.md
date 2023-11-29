@@ -14,6 +14,7 @@ and this project adheres to
 
 ### [v1.0.0]
 - CRAN release
+- Add pkgdown site #20  
 - [ ] What is the MVP required for a CRAN release?
 
 ### [v0.1.1]  
@@ -33,6 +34,7 @@ and this project adheres to
 - [ ] Update docs with cluster and non-cluster cases
 [#14](https://github.com/AngusMcLure/PoolPoweR/issues/14)
 - [ ] Add PoolPoweR-package.R (#18)  
+- [ ] Move descriptions to details  
 - [x] Rename real.scale to real_scale
 
 ### [v0.0.2] - 2023-12-01

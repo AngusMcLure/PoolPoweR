@@ -64,18 +64,6 @@ test_that("optimise_sN_prevalence() when opt$N == max_N", {
     "Maximum cost effectivness is achieved at or above the maximum number of pools allowed. Consider increasing max_N")
 })
 
-# TODO: fix this
-#test_that("optimise_sN_prevalence() when opt$s == max_s", {
-#  # Not an amazing text, catches all the optimise_s_prevalence() warnings too
-#  tryCatch(
-#  optimise_sN_prevalence(
-#    prevalence = 0.01, cost_unit = 5, cost_pool = 10,
-#    cost_cluster = 100, correlation = 0.05, max_s = 5)
-#  )
-#  expect_warning()
-#
-#})
-
 test_that("optimise_s_prevalence() gives consistent output for basic tests", {
   # Reasonable parameters
   expect_true(all.equal(
