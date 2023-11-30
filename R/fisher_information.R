@@ -240,7 +240,7 @@ fi_pool_cluster <- function(pool_size,
         
         if (Alpha >= 1 & Beta >= 1) {
           integrand <- function(p, y) { # note that this functions need to be vectorised for p, y, s, N. Vectorisation for p is done via loops, others through vectorised basic operations
-            out <- dbeta(p, Alpha, Beta)
+            out <- stats::dbeta(p, Alpha, Beta)
             for (j in 1:length(p)) {
               pj <- p[j]
               out[j] <- out[j] * prod(phi(pj)^y * (1 - phi(pj))^(N - y))
@@ -266,7 +266,7 @@ fi_pool_cluster <- function(pool_size,
           }
         } else if (Alpha < 1 || Beta < 1) {
           integrand <- function(p, y) { # note that these functions need to be vectorised for p to be passed to integrate
-            out <- dbeta(p, Alpha, Beta)
+            out <- stats::dbeta(p, Alpha, Beta)
             c0 <- prod((1 - psi)^y * psi^(N - y))
             c1 <- prod(varphi^y * (1 - varphi)^(N - y))
             for (j in 1:length(p)) {
@@ -276,12 +276,12 @@ fi_pool_cluster <- function(pool_size,
             out
           }
           lik_correction <- function(y) {
-            pbeta(0.5, Alpha, Beta) * prod(psi^(N - y) * (1 - psi)^y) +
-              pbeta(0.5, Beta, Alpha) * prod((1 - varphi)^(N - y) * (varphi)^y)
+            stats::pbeta(0.5, Alpha, Beta) * prod(psi^(N - y) * (1 - psi)^y) +
+              stats::pbeta(0.5, Beta, Alpha) * prod((1 - varphi)^(N - y) * (varphi)^y)
           }
           
           integrand_theta <- function(p, y) { # note that this functions need to be vectorised for p
-            out <- rho. * dbeta(p, Alpha, Beta)
+            out <- rho. * stats::dbeta(p, Alpha, Beta)
             c0 <- prod((1 - psi)^y * psi^(N - y))
             c1 <- prod(varphi^y * (1 - varphi)^(N - y))
             for (j in 1:length(p)) {
@@ -296,17 +296,17 @@ fi_pool_cluster <- function(pool_size,
             out
           }
           lik_theta_correction <- function(y) {
-            (pbeta(0.5, Alpha, Beta) * (log(0.5) + digamma(Beta) - digamma(Alpha)) -
-               0.5^Alpha / (Alpha^2 * beta(Alpha, Beta)) *
-               hypergeo::genhypergeo(c(Alpha, Alpha, 1 - Beta), c(Alpha + 1, Alpha + 1), 0.5)) *
+            (stats::pbeta(0.5, Alpha, Beta) * (log(0.5) + digamma(Beta) - digamma(Alpha)) -
+              0.5^Alpha / (Alpha^2 * beta(Alpha, Beta)) *
+                hypergeo::genhypergeo(c(Alpha, Alpha, 1 - Beta), c(Alpha + 1, Alpha + 1), 0.5)) *
               prod((1 - psi)^y * psi^(N - y)) * rho. +
-              (pbeta(0.5, Beta, Alpha) * (-log(0.5) + digamma(Beta) - digamma(Alpha)) +
-                 0.5^Beta / Beta^2 / beta(Beta, Alpha) * hypergeo::genhypergeo(c(Beta, Beta, 1 - Alpha), c(Beta + 1, Beta + 1), 0.5)) *
-              prod(varphi^y * (1 - varphi)^(N - y)) * rho.
+              (stats::pbeta(0.5, Beta, Alpha) * (-log(0.5) + digamma(Beta) - digamma(Alpha)) +
+                0.5^Beta / Beta^2 / beta(Beta, Alpha) * hypergeo::genhypergeo(c(Beta, Beta, 1 - Alpha), c(Beta + 1, Beta + 1), 0.5)) *
+                prod(varphi^y * (1 - varphi)^(N - y)) * rho.
           }
           
           integrand_rho <- function(p, y) { # note that this functions need to be vectorised for p
-            out <- rho^(-2) * dbeta(p, Alpha, Beta)
+            out <- rho^(-2) * stats::dbeta(p, Alpha, Beta)
             c0 <- prod((1 - psi)^y * psi^(N - y))
             c1 <- prod(varphi^y * (1 - varphi)^(N - y))
             for (j in 1:length(p)) {
@@ -322,12 +322,12 @@ fi_pool_cluster <- function(pool_size,
           }
           lik_rho_correction <- function(y) {
             rho^(-2) * prod((1 - psi)^y * psi^(N - y)) *
-              ((theta * (digamma(Alpha) - log(0.5)) + (1 - theta) * digamma(Beta) - digamma(Alpha + Beta)) * pbeta(0.5, Alpha, Beta) +
-                 theta * 0.5^Alpha / Alpha^2 / beta(Alpha, Beta) * hypergeo::genhypergeo(c(Alpha, Alpha, 1 - Beta), c(Alpha + 1, Alpha + 1), 0.5, series = TRUE)) +
-              
+              ((theta * (digamma(Alpha) - log(0.5)) + (1 - theta) * digamma(Beta) - digamma(Alpha + Beta)) * stats::pbeta(0.5, Alpha, Beta) +
+                theta * 0.5^Alpha / Alpha^2 / beta(Alpha, Beta) * hypergeo::genhypergeo(c(Alpha, Alpha, 1 - Beta), c(Alpha + 1, Alpha + 1), 0.5, series = TRUE)) +
+
               rho^(-2) * prod(varphi^y * (1 - varphi)^(N - y)) *
-              ((theta * digamma(Alpha) + (1 - theta) * (digamma(Beta) - log(0.5)) - digamma(Alpha + Beta)) * pbeta(0.5, Beta, Alpha) +
-                 (1 - theta) * 0.5^Beta / Beta^2 / beta(Beta, Alpha) * hypergeo::genhypergeo(c(Beta, Beta, 1 - Alpha), c(Beta + 1, Beta + 1), 0.5, series = TRUE))
+                ((theta * digamma(Alpha) + (1 - theta) * (digamma(Beta) - log(0.5)) - digamma(Alpha + Beta)) * stats::pbeta(0.5, Beta, Alpha) +
+                  (1 - theta) * 0.5^Beta / Beta^2 / beta(Beta, Alpha) * hypergeo::genhypergeo(c(Beta, Beta, 1 - Alpha), c(Beta + 1, Beta + 1), 0.5, series = TRUE))
           }
         }
         
@@ -336,7 +336,7 @@ fi_pool_cluster <- function(pool_size,
           # plot(function(x) {
           #   integrand(x, y)
           # }, main = paste("integrand", y), to = 0.1, n = 10000)
-          (integrate(integrand, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_correction(y)) *
+          (stats::integrate(integrand, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_correction(y)) *
             prod(choose(N, y))
         })
         
@@ -344,7 +344,7 @@ fi_pool_cluster <- function(pool_size,
           # plot(function(x) {
           #   integrand_theta(x, y)
           # }, main = paste("integrand_theta", y), to = 0.1, n = 10000)
-          (integrate(integrand_theta, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_theta_correction(y)) *
+          (stats::integrate(integrand_theta, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_theta_correction(y)) *
             prod(choose(N, y))
         })
         
@@ -352,11 +352,11 @@ fi_pool_cluster <- function(pool_size,
           # plot(function(x) {
           #   integrand_rho(x, y)
           # }, main = paste("integrand_rho", y, Alpha, Beta), to = 0.1, n = 10000)
-          (integrate(integrand_rho, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_rho_correction(y)) *
+          (stats::integrate(integrand_rho, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value + lik_rho_correction(y)) *
             prod(choose(N, y))
         })
       }
-    }
+    } ## End for form == "beta"
     tol <- 1e-5
     if (abs(sum(lik) - 1) > tol ||
         abs(sum(lik_theta)) > tol ||
@@ -387,11 +387,11 @@ fi_pool_cluster <- function(pool_size,
     ))
   } else if (form %in% c("logitnorm", "cloglognorm")) {
     link <- switch(form,
-                   logitnorm = qlogis,
+                   logitnorm = stats::qlogis,
                    cloglognorm = cloglog
     )
     invlink <- switch(form,
-                      logitnorm = plogis,
+                      logitnorm = stats::plogis,
                       cloglognorm = cloglog_inv
     )
     dinvlink <- switch(form,
@@ -415,7 +415,7 @@ fi_pool_cluster <- function(pool_size,
         if(pj %in% 0:1){
           out[j] <- -Inf
         }else{
-          out[j] <- dnorm(link(pj), mean = mu, sd = sigma, log = TRUE) +
+          out[j] <- stats::dnorm(link(pj), mean = mu, sd = sigma, log = TRUE) +
             log(dinvlink(pj)) +
             sum(log(phi(pj)) * y) +
             sum(log(one_minus_phi(pj)) * (N - y))
@@ -439,19 +439,19 @@ fi_pool_cluster <- function(pool_size,
     tol <- .Machine$double.eps^0.8
     lik <- apply(ys, 1, function(y) {
       # plot(function(x){integrand(x,y)},main = paste('integrand', y), n = 10000)
-      integrate(integrand, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
+      stats::integrate(integrand, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
     lik_mu <- apply(ys, 1, function(y) {
       # plot(function(x){integrand_mu(x,y)},main = paste('integrand_mu', y), n = 10000)
-      integrate(integrand_mu, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
+      stats::integrate(integrand_mu, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
     lik_sigma <- apply(ys, 1, function(y) {
       # plot(function(x){integrand_sigma(x,y)},main = paste('integrand_sigma', y), n = 10000)
-      integrate(integrand_sigma, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
+      stats::integrate(integrand_sigma, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
@@ -488,28 +488,28 @@ fi_pool_cluster <- function(pool_size,
       return(FI)
     } else { # calculate Jacobian for the change of parameters from {mu,sigma} -> {theta, rho}
       integrand_dtheta_dmu <- function(z) {
-        dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma^2 * invlink(z)
+        stats::dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma^2 * invlink(z)
       }
       
       integrand_dtheta_dsigma <- function(z) {
-        dnorm(z, mean = mu, sd = sigma) * ((z - mu)^2 - sigma^2) / sigma^3 * invlink(z)
+        stats::dnorm(z, mean = mu, sd = sigma) * ((z - mu)^2 - sigma^2) / sigma^3 * invlink(z)
       }
       
       # note that this function is the integrand for the dv/dmu where v non-centred second moment. To calculate drho/dmu we make corrections later in terms of theta, rho and dtheta/dmu
       integrand_drho_dmu <- function(z) {
-        dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma^2 * invlink(z)^2
+        stats::dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma^2 * invlink(z)^2
       }
       # note that this function is the integrand for the dv/dsigma where v non-centred second moment. To calculate drho/dsigma we make corrections later in terms of theta, rho and dtheta/dsigma
       integrand_drho_dsigma <- function(z) {
-        dnorm(z, mean = mu, sd = sigma) * ((z - mu)^2 - sigma^2) / sigma^3 * invlink(z)^2
+        stats::dnorm(z, mean = mu, sd = sigma) * ((z - mu)^2 - sigma^2) / sigma^3 * invlink(z)^2
       }
       
       tol <- .Machine$double.eps^0.8
-      dtheta_dmu <- integrate(integrand_dtheta_dmu, lower = -Inf, upper = Inf, abs.tol = tol)$value
-      dtheta_dsigma <- integrate(integrand_dtheta_dsigma, lower = -Inf, upper = Inf, abs.tol = tol)$value
-      drho_dmu <- integrate(integrand_drho_dmu, lower = -Inf, upper = Inf, abs.tol = tol)$value
+      dtheta_dmu <- stats::integrate(integrand_dtheta_dmu, lower = -Inf, upper = Inf, abs.tol = tol)$value
+      dtheta_dsigma <- stats::integrate(integrand_dtheta_dsigma, lower = -Inf, upper = Inf, abs.tol = tol)$value
+      drho_dmu <- stats::integrate(integrand_drho_dmu, lower = -Inf, upper = Inf, abs.tol = tol)$value
       drho_dmu <- (drho_dmu - dtheta_dmu * (rho * (1 - 2 * theta) + 2 * theta)) / (theta * (1 - theta))
-      drho_dsigma <- integrate(integrand_drho_dsigma, lower = -Inf, upper = Inf, abs.tol = tol)$value
+      drho_dsigma <- stats::integrate(integrand_drho_dsigma, lower = -Inf, upper = Inf, abs.tol = tol)$value
       drho_dsigma <- (drho_dsigma - dtheta_dsigma * (rho * (1 - 2 * theta) + 2 * theta)) / (theta * (1 - theta))
       
       # We actually want the the Jacobian for the inverse transformation so we invert the matrix

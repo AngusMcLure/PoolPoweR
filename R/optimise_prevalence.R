@@ -78,6 +78,8 @@ optimise_s_prevalence <- function(pool_number = 1,
          respect to s often has mulitple minima and therefore the discrete
          distribution is not currently supported for optimisation')
   }
+  if (interval < 0) stop("interval must be 0 or higher")
+
   invalid_cost <- FALSE # trigger for when costs are infinite to ensure that there's no cost output in these cases
   # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max_s = max_s))
 
@@ -125,7 +127,7 @@ optimise_s_prevalence <- function(pool_number = 1,
     }
   }
 
-  opt <- optimise(cost, c(1, max_s))
+  opt <- stats::optimise(cost, c(1, max_s))
   cost_opt_ceiling <- cost(ceiling(opt$minimum))
   cost_opt_floor <- cost(floor(opt$minimum))
 
@@ -147,7 +149,7 @@ optimise_s_prevalence <- function(pool_number = 1,
     if (cost(1) < max_cost) {
       lower <- 1
     } else {
-      lower <- ceiling(uniroot(function(x) {
+      lower <- ceiling(stats::uniroot(function(x) {
         cost(x) - max_cost
       }, c(1, s))$root)
     }
@@ -155,7 +157,7 @@ optimise_s_prevalence <- function(pool_number = 1,
       upper <- max_s
       warning("A pool size greater than max_s may fall within the specified range of cost effectiveness. Consider increasing max_s")
     } else {
-      upper <- floor(uniroot(function(x) {
+      upper <- floor(stats::uniroot(function(x) {
         cost(x) - max_cost
       }, c(s, max_s))$root)
     }
@@ -173,8 +175,6 @@ optimise_s_prevalence <- function(pool_number = 1,
       cost_interval = cost_interval,
       catch_interval = N * c(lower, upper)
     )
-  } else {
-    stop("interval must be between 0 and 1.")
   }
   out
 }
@@ -218,10 +218,10 @@ optimise_sN_prevalence <- function(prevalence,
     }
     opt$N <- Nopt
     if (opt$N == max_N) {
-      warning("Maximum cost effectivness is achieved at or above the maximum number of pools allowed. Consider increasing max.N")
+      warning("Maximum cost effectivness is achieved at or above the maximum number of pools allowed. Consider increasing max_N")
     }
     if (opt$s == max_s) {
-      warning("Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max.s")
+      warning("Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max_s")
     }
   }
 

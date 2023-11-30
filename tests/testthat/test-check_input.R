@@ -1,0 +1,42 @@
+# Not using cli::test_that_cli for cleaner output
+test_that("check_geq()", {
+  expect_silent(check_geq("max_s", 1)) # > 1
+  # > 0
+  expect_silent(check_geq("pool_size", 1))
+  expect_snapshot(check_geq("pool_size", "chr"))
+  expect_snapshot(check_geq("pool_size", -1))
+  expect_snapshot(check_geq("max_s", 0))
+  expect_error(check_geq("prevalence", 0.05),
+               "Needs to be one of the accepted_args")
+})
+
+test_that("check_in_range()", {
+  expect_silent(check_in_range("prevalence", 0.05))
+  expect_snapshot(check_in_range("prevalence", -1))
+  expect_snapshot(check_in_range("prevalence", 1.1))
+  expect_error(check_in_range("pool_size", 1.1),
+               "Needs to be one of the accepted_args")
+  expect_silent(check_in_range("sensitivity", 1))
+  expect_silent(check_in_range("specificity", 0))
+})
+
+test_that("check_rho()", {
+  expect_silent(check_rho(0))
+  expect_silent(check_rho(1))
+  expect_silent(check_rho(NA))
+  expect_snapshot(check_rho(-1))
+  expect_snapshot(check_rho(2))
+  expect_snapshot(check_rho("chr"))
+})
+
+test_that("check_form()", {
+  expect_silent(check_form("beta"))
+  expect_snapshot(check_form("binomial"))
+  expect_snapshot(check_form(1))
+})
+
+test_that("check_scale()", {
+  expect_silent(check_scale(T))
+  expect_snapshot(check_scale("chr"))
+  expect_snapshot(check_scale(10))
+})

@@ -1,4 +1,11 @@
 test_that("optimise_sN_prevalence() gives consistent output for basic tests", {
+  # Reasonable params
+  expect_true(all.equal(
+    optimise_sN_prevalence(
+      prevalence = 0.01, cost_unit = 5, cost_pool = 10,
+      cost_cluster = 100, correlation = 0.05
+    ), list(s=5,cost =0.2513798, catch=20, N=4),tolerance=1e-7))
+  # Rest not so much
   expect_true(all.equal(
     optimise_sN_prevalence(
       prevalence = 0.9,
@@ -31,7 +38,7 @@ test_that("optimise_sN_prevalence() gives consistent output for basic tests", {
   ))
 })
 
-test_that("optimise_sN_prevalence() basic tests when correlation == 0 (flow control)", {
+test_that("optimise_sN_prevalence() when correlation == 0", {
   expect_true(all.equal(
     optimise_sN_prevalence(
       prevalence = 0.9,
@@ -49,7 +56,21 @@ test_that("optimise_sN_prevalence() basic tests when correlation == 0 (flow cont
   ))
 })
 
+test_that("optimise_sN_prevalence() when opt$N == max_N", {
+  expect_warning(
+    optimise_sN_prevalence(
+      prevalence = 0.01, cost_unit = 5, cost_pool = 10,
+      cost_cluster = 100, correlation = 0.05, max_N = 4),
+    "Maximum cost effectivness is achieved at or above the maximum number of pools allowed. Consider increasing max_N")
+})
+
 test_that("optimise_s_prevalence() gives consistent output for basic tests", {
+  # Reasonable parameters
+  expect_true(all.equal(
+    optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10),
+    list(s=19, cost=0.05998076, catch=19), tolerance = 1e-7
+  ))
+  # Not very
   expect_true(all.equal(
     optimise_s_prevalence(
       prevalence = 0.7, cost_unit = 10, cost_pool = 100,
@@ -72,7 +93,42 @@ test_that("optimise_s_prevalence() gives consistent output for basic tests", {
   ))
 })
 
+test_that("optimise_s_prevalence() throws error when form == 'discrete'", {
+  expect_error(optimise_s_prevalence(
+    prevalence = 0.01, cost_unit = 5, cost_pool = 10, form = "discrete"),
+    'When form = "discrete" the cost of unit information function with
+         respect to s often has mulitple minima and therefore the discrete
+         distribution is not currently supported for optimisation')
+})
+
+test_that("optimise_s_prevalence() when cost_unit == Inf", {
+  expect_true(all.equal(
+    optimise_s_prevalence(prevalence = 0.01, cost_unit = Inf, cost_pool = 10, interval = 0.1),
+    list(s=1, cost=NA, catch=1, s_interval=c(1,19), cost_interval=NA, catch_interval=c(1,19))
+    ))
+})
+
+test_that("optimise_s_prevalence() when cost_pool == Inf", {
+  expect_true(all.equal(
+    optimise_s_prevalence(prevalence = 0.1, cost_unit = 5, cost_pool = Inf, interval = 0.1),
+    list(s=15, cost=NA, catch=15, s_interval=c(10,21), cost_interval=NA, catch_interval=c(10,21))
+  ))
+})
+
+test_that("optimise_s_prevalence() hits max_s when determining cost floor/ceiling", {
+  expect_warning(
+    optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = Inf, max_s = 50),
+    'Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max_s')
+})
+
+test_that("optimise_s_prevalence() when cost(max_s) < max_cost", {
+  expect_warning(
+    optimise_s_prevalence(prevalence = 0.1, cost_pool = 1, cost_unit = 0.5, max_s = 6, interval = 0.1),
+    'A pool size greater than max_s may fall within the specified range of cost effectiveness. Consider increasing max_s')
+})
+
 test_that("optimise_s_prevalence() extremely bad integrand behaviour", {
+  # This takes a few seconds to run
   expect_error(
     optimise_s_prevalence(
       prevalence = 0.2, cost_unit = 1, cost_pool = 200,
