@@ -62,3 +62,33 @@
       i rho must be a numeric value between 0 and 1, or NA
       x "chr" is a character.
 
+# check_form()
+
+    Code
+      check_form("binomial")
+    Message <cliMessage>
+      i form must be one of "beta", "logitnorm", "cloglognorm", and "discrete"
+
+---
+
+    Code
+      check_form(1)
+    Message <cliMessage>
+      i form must be one of "beta", "logitnorm", "cloglognorm", and "discrete"
+
+# check_scale()
+
+    Code
+      check_scale("chr")
+    Message <cliMessage>
+      i real_scale must be either TRUE/FALSE
+      x "chr" is not TRUE/FALSE
+
+---
+
+    Code
+      check_scale(10)
+    Message <cliMessage>
+      i real_scale must be either TRUE/FALSE
+      x 10 is not TRUE/FALSE
+

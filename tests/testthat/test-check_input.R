@@ -29,3 +29,14 @@ test_that("check_rho()", {
   expect_snapshot(check_rho("chr"))
 })
 
+test_that("check_form()", {
+  expect_silent(check_form("beta"))
+  expect_snapshot(check_form("binomial"))
+  expect_snapshot(check_form(1))
+})
+
+test_that("check_scale()", {
+  expect_silent(check_scale(T))
+  expect_snapshot(check_scale("chr"))
+  expect_snapshot(check_scale(10))
+})

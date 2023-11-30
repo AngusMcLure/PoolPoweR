@@ -1,14 +1,16 @@
 check_input <- function(argument_name, input_value) {
+  # Wrapper function to triage arguments, so one function can be used for all
+  # inputs instead of remembering which one to use.
   geq0 <- c('pool_size', 'pool_number', 'cost_unit',
             'cost_pool', 'cost_cluster', 'interval')
   geq1 <- c('max_s', 'max_N')
   range <- c('prevalence', 'correlation', 'sensitivity', 'specificity')
   na <- c('cost_cluster', 'correlation')
-  forms <- c('beta', 'logitnorm', 'cloglognorm')
+  forms <- c('beta', 'logitnorm', 'cloglognorm', 'discrete')
 
-  if(argument_name %in% geq0) check_geq(argument_name, input_value, min = 0)
-  else if(argument_name %in% geq1) check_geq(argument_name, input_value, min = 1)
-  else if(argument_name %in% range) check_in_range(argument_name, input_value)
+  #if(argument_name %in% geq0) check_geq(argument_name, input_value, min = 0)
+  #else if(argument_name %in% geq1) check_geq(argument_name, input_value, min = 1)
+  #else if(argument_name %in% range) check_in_range(argument_name, input_value)
   #else if(argument_name == "form")
   #else if(argument_name == "real_scale")
 }
@@ -64,5 +66,19 @@ check_rho <- function(rho) {
       if(rho < 0) cli::cli_alert_danger("{.val {rho}} is < 0")
       if(rho > 1) cli::cli_alert_danger("{.val {rho}} is > 1")
     }
+  }
+}
+
+check_form <- function(form) {
+  forms <- c('beta', 'logitnorm', 'cloglognorm', 'discrete')
+  if(!form %in% forms) {
+    cli::cli_alert_info("{.field form} must be one of {.val {forms}}")
+  }
+}
+
+check_scale <- function(real_scale) {
+  if(!is.logical(real_scale)) {
+    cli::cli_alert_info("{.field real_scale} must be either TRUE/FALSE")
+    cli::cli_alert_danger("{.val {real_scale}} is not TRUE/FALSE")
   }
 }
