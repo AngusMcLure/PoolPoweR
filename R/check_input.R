@@ -27,13 +27,13 @@ check_geq <- function(argument_name, input_value) {
   if(argument_name %in% geq1) min <- 1
 
   if(!is.numeric(input_value) | input_value < min) {
-    cli::cli_alert_info("{.field {argument_name}} must be a numeric value {min} or greater.")
+    message(glue::glue("{argument_name} must be a numeric value {min} or greater."))
   }
-  if(!is.numeric(input_value)) {
-    cli::cli_alert_danger("{.val {input_value}} is a {class(input_value)}.")
+    if(!is.numeric(input_value)) {
+    stop(glue::glue("{input_value} is a {class(input_value)}."))
   }
   if(input_value < min) {
-    cli::cli_alert_danger("{.val {input_value}} is < {min}")
+    stop(glue::glue("{input_value} is < {min}"))
   }
 }
 
@@ -44,27 +44,27 @@ check_in_range <- function(argument_name, input_value) {
   if(!argument_name %in% accepted_args) stop("Needs to be one of the accepted_args")
 
   if(input_value < 0 | input_value > 1) {
-    cli::cli_alert_info("{.field {argument_name}} must be a numeric value between 0 and 1, inclusive.")
+    message(glue::glue("{argument_name} must be a numeric value between 0 and 1, inclusive."))
   }
   if(!is.numeric(input_value)) {
-    cli::cli_alert_danger("{.val {input_value}} is a {class(input_value)}.")
+    stop(glue::glue("{input_value} is a {class(input_value)}."))
   }
-  if(input_value < 0) cli::cli_alert_danger("{.val {input_value}} is < 0")
-  if(input_value > 1) cli::cli_alert_danger("{.val {input_value}} is > 1")
+  if(input_value < 0) stop(glue::glue("{input_value} is < 0"))
+  if(input_value > 1) stop(glue::glue("{input_value} is > 1"))
 }
 
 check_rho <- function(rho) {
-  alert_msg <- "{.field rho} must be a numeric value between 0 and 1, or NA"
+  alert_msg <- "correlation must be a numeric value between 0 and 1, or NA"
   if(!is.numeric(rho) & !is.na(rho)) {
-    cli::cli_alert_info(alert_msg)
-    cli::cli_alert_danger("{.val {rho}} is a {class(rho)}.")
+    message(alert_msg)
+    stop(glue::glue("{rho} is a {class(rho)}."))
   }
   if(is.numeric(rho)) {
     # `<` and `>` can't deal with NAs
     if(rho < 0 || rho > 1) {
-      cli::cli_alert_info(alert_msg)
-      if(rho < 0) cli::cli_alert_danger("{.val {rho}} is < 0")
-      if(rho > 1) cli::cli_alert_danger("{.val {rho}} is > 1")
+      message(alert_msg)
+      if(rho < 0) stop(glue::glue("{rho} is < 0"))
+      if(rho > 1) stop(glue::glue("{rho} is > 1"))
     }
   }
 }
@@ -72,13 +72,13 @@ check_rho <- function(rho) {
 check_form <- function(form) {
   forms <- c('beta', 'logitnorm', 'cloglognorm', 'discrete')
   if(!form %in% forms) {
-    cli::cli_alert_info("{.field form} must be one of {.val {forms}}")
+    stop(glue::glue("form must be one of 'beta', 'logitnorm', 'cloglognorm', or 'discrete'."))
   }
 }
 
 check_scale <- function(real_scale) {
   if(!is.logical(real_scale)) {
-    cli::cli_alert_info("{.field real_scale} must be either TRUE/FALSE")
-    cli::cli_alert_danger("{.val {real_scale}} is not TRUE/FALSE")
+    message("real_scale must be either TRUE/FALSE")
+    stop(glue::glue("{real_scale} is not TRUE/FALSE"))
   }
 }
