@@ -524,11 +524,11 @@ $$
 where
 $$
 \begin{align*}
-\frac{\part\theta}{\part \mu} &= \int_0^1 Normal(h(p)|\mu,\sigma) \frac{h(p) - \mu}{\sigma} p dp\\
+\frac{\part\theta}{\part \mu} &= \int_0^1 Normal(h(p)|\mu,\sigma) \frac{h(p) - \mu}{\sigma^2} p dp\\
 
 \frac{\part\theta}{\part \sigma} &= \int_0^1 Normal(h(p)|\mu,\sigma) \frac{(h(p) - \mu)^2 - \sigma^2}{\sigma^3} p dp\\
 
-\frac{\part\rho}{\part \mu} &= \left[\int_0^1 Normal(h(p)|\mu,\sigma) \frac{h(p) - \mu}{\sigma} p^2 dp - \frac{\part\theta}{\part \mu}(2\theta + \rho(1-2\theta))\right]\left[\theta(1-\theta)\right]^{-1}\\
+\frac{\part\rho}{\part \mu} &= \left[\int_0^1 Normal(h(p)|\mu,\sigma) \frac{h(p) - \mu}{\sigma^2} p^2 dp - \frac{\part\theta}{\part \mu}(2\theta + \rho(1-2\theta))\right]\left[\theta(1-\theta)\right]^{-1}\\
 
 \frac{\part\rho}{\part \sigma} &= \left[\int_0^1 Normal(h(p)|\mu,\sigma) \frac{(h(p) - \mu)^2 - \sigma^2}{\sigma^3}  p^2 dp - \frac{\part\theta}{\part \sigma}(2\theta + \rho(1-2\theta))\right]\left[\theta(1-\theta)\right]^{-1}.
 \end{align*}

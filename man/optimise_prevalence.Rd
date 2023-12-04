@@ -3,6 +3,7 @@
 \name{optimise_s_prevalence}
 \alias{optimise_s_prevalence}
 \alias{optimise_sN_prevalence}
+\alias{optimise_random_prevalence}
 \title{Optimising the pool size and number for estimating prevalence.}
 \usage{
 optimise_s_prevalence(
@@ -30,6 +31,23 @@ optimise_sN_prevalence(
   max_s = 50,
   max_N = 20,
   form = "beta"
+)
+
+optimise_random_prevalence(
+  catch_mean,
+  catch_variance,
+  pool_strat_family,
+  prevalence,
+  cost_unit,
+  cost_pool,
+  cost_period,
+  cost_cluster = NA,
+  correlation = NA,
+  sensitivity = 1,
+  specificity = 1,
+  max_period = 10,
+  form = "beta",
+  verbose = FALSE
 )
 }
 \arguments{

@@ -50,7 +50,7 @@
 #'   `s`, cost, and range of near-optimal designs `catch`. *
 #'   `optimise_sN_prevalence()` returns the same list as `optimise_s_prevalence`
 #'   with an additional optimal pool number `N`.
-#'
+#' @rdname optimise_prevalence
 #' @export
 #'
 #' @examples
@@ -188,7 +188,7 @@ optimise_s_prevalence <- function(pool_number = 1,
   out
 }
 
-#' @rdname optimise_s_prevalence
+#' @rdname optimise_prevalence
 #' @export
 optimise_sN_prevalence <- function(prevalence,
                                    cost_unit,
@@ -200,6 +200,7 @@ optimise_sN_prevalence <- function(prevalence,
                                    max_s = 50,
                                    max_N = 20,
                                    form = "beta") {
+
   # max_N is the only argument that optimise_s_prevalence doesn't use
   # The rest of the input_checks are in optimise_s_prevalence
   check_input("max_N", max_N)
@@ -242,20 +243,93 @@ optimise_sN_prevalence <- function(prevalence,
   opt
 }
 
+#' @rdname optimise_prevalence
+#' @export
+optimise_random_prevalence <- function(catch_mean, catch_variance,
+                                       pool_strat_family,
+                                       prevalence,
+                                       cost_unit, cost_pool, cost_period, cost_cluster = NA,
+                                       correlation = NA,
+                                       sensitivity = 1, specificity = 1,
+                                       max_period = 10, form = "beta",
+                                       verbose = FALSE) {
+  
+  strat_par_names <- names(formals(pool_strat_family))
+  pars <- as.list(rep(1, 1+ length(strat_par_names)))
+  names(pars) <- c(".periods", strat_par_names)
+  
+  if(is.na(correlation)){
+    f <- function(prm){
+      cost_fi_random(nb_catch(catch_mean * prm$.periods, catch_variance * prm$.periods),
+                     do.call(pool_strat_family, prm[strat_par_names]),
+                     prevalence, sensitivity,specificity,
+                     cost_unit, cost_pool, prm$.periods * cost_period)
+    }
+    
+    opt <- optim_local_int(pars,f,verbose = verbose)
+  }else{
+    f <- function(prm){
+      
+      cost_fi_cluster_random(nb_catch(catch_mean * prm$.periods, catch_variance * prm$.periods),
+                             do.call(pool_strat_family, prm[strat_par_names]),
+                             prevalence, correlation,
+                             sensitivity,specificity,
+                             cost_unit, cost_pool,cost_cluster + prm$.periods * cost_period,
+                             form = form)
+    }
+    
+    opt <- optim_local_int(pars,f, verbose = verbose)
+    
+  }
+  
+  opt
+}
+
+
+optim_local_int <- function(par, fn,
+                            width = rep(1, length(par)),
+                            par_lower = rep(1, length(par)),
+                            par_upper = rep(Inf, length(par)),
+                            max_iter = 20, verbose = FALSE){
+  
+  opt_par <- lapply(par, round)
+  searched_par <- as.data.frame(opt_par)
+  opt_val <- fn(opt_par)
+  
+  for(iter in 1:max_iter){
+    print(paste0('Iteration ', iter, '. optimal parameters = ', paste(opt_par, collapse = ', '), ', with function value = ', opt_val))
+    local_par_ranges <- purrr::pmap(list(op = opt_par, w = width, pl = par_lower, pu = par_upper), 
+                                   \(op, w, pl, pu) max((op - w), pl):min((op + w), pu))
+    local_par <- do.call(expand.grid,local_par_ranges)
+    search <- dplyr::setdiff(local_par, searched_par)
+    searched_par <- rbind(searched_par, search)
+    
+    val <- c()
+    for(i in 1:nrow(search)){
+      if(verbose){print(paste0('Calculating for paramter set #',i,': ', paste(unlist(search[i,]), collapse = ", ") ))}
+      val[i] <- fn(as.list(search[i,]))
+    }
+    
+    min_val <- min(val)
+    if(opt_val < min_val){
+      break
+    }else{
+      opt_val <- min_val
+      opt_par <- unlist(search[which.min(val),])
+    }
+  }
+  return(list(val = opt_val, par = opt_par))
+}
+
 cost_fi <- function(pool_size, prevalence, sensitivity, specificity, cost_unit, cost_pool) {
   (sum(cost_unit * pool_size) + cost_pool) /
     fi_pool(pool_size, prevalence, sensitivity, specificity)
 }
 
-cost_fi_cluster <- function(pool_size,
-                            pool_number,
-                            prevalence,
-                            correlation,
-                            sensitivity,
-                            specificity,
-                            cost_unit,
-                            cost_pool,
-                            cost_cluster,
+cost_fi_cluster <- function(pool_size, pool_number,
+                            prevalence, correlation,
+                            sensitivity, specificity,
+                            cost_unit, cost_pool, cost_cluster,
                             form = "beta") {
   s <- pool_size
   N <- pool_number
@@ -264,4 +338,36 @@ cost_fi_cluster <- function(pool_size,
   cost <- sum(cost_unit * s * N) + sum(cost_pool * N) + cost_cluster
   # print(c(cost = cost, information = fi))
   cost * solve(fi)[1, 1]
+}
+
+cost_fi_random <- function(catch_dist, pool_strat, prevalence,
+                           sensitivity, specificity, cost_unit, cost_pool, cost_fixed){
+  
+  fn <- function(catch){
+    pooling <- pool_strat(catch)
+    cost_unit * catch + cost_pool * sum(pooling$pool_number) + cost_fixed
+  }
+  
+  fi <- fi_pool_random(catch_dist,pool_strat,prevalence,sensitivity, specificity)
+  mean_cost <- ev(fn, catch_dist)
+  mean_cost/fi
+}
+
+cost_fi_cluster_random <- function(catch_dist, pool_strat,
+                                   prevalence, correlation,
+                                   sensitivity, specificity,
+                                   cost_unit, cost_pool, cost_cluster,
+                                   form = "beta"){
+
+  fn <- function(catch){
+    pooling <- pool_strat(catch)
+    cost_unit * catch + cost_pool * sum(pooling$pool_number) + cost_cluster
+  }
+  
+  fi <- fi_pool_cluster_random(catch_dist,pool_strat,
+                               prevalence, correlation,
+                               sensitivity,specificity,
+                               form)
+  mean_cost <- ev(fn, catch_dist)
+  mean_cost * solve(fi)[1,1]
 }
