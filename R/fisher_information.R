@@ -146,7 +146,7 @@ fi_pool_cluster <- function(pool_size,
     if(p %in% 0:1){
       1 - (1 - (1 - p)^s) * varphi - (1 - p)^s * (1 - psi)
     }else{
-      expm1(log1p(-p)*s) * (1 - varphi) + exp(log1p(-p)*s) * psi
+      expm1(log1p(-p)*s) * (varphi - 1) + exp(log1p(-p)*s) * psi
     }
   }
   
