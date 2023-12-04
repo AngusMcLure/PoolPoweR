@@ -5,14 +5,13 @@ check_input <- function(argument_name, input_value) {
             'cost_pool', 'cost_cluster', 'interval')
   geq1 <- c('max_s', 'max_N')
   range <- c('prevalence', 'correlation', 'sensitivity', 'specificity')
-  na <- c('cost_cluster', 'correlation')
-  forms <- c('beta', 'logitnorm', 'cloglognorm', 'discrete')
 
   if(argument_name %in% geq0) check_geq(argument_name, input_value, min = 0)
   else if(argument_name %in% geq1) check_geq(argument_name, input_value, min = 1)
   else if(argument_name %in% range) check_in_range(argument_name, input_value)
   else if(argument_name == "form") check_form(input_value)
   else if(argument_name == "real_scale") check_scale(real_scale = input_value)
+  else if(argument_name == "cost_cluster") check_cost_cluster(real_scale = input_value)
 }
 
 check_geq <- function(argument_name, input_value, min) {
@@ -78,5 +77,21 @@ check_scale <- function(real_scale) {
   if(!is.logical(real_scale)) {
     message("real_scale must be either TRUE/FALSE")
     stop(glue::glue("{real_scale} is not TRUE/FALSE"))
+  }
+}
+
+check_cost_cluster <- function(cost_cluster) {
+  # Function really similar to check_rho()
+  alert_msg <- "cost_cluster must be a numeric value 0 or greater, or NA"
+  if(!is.numeric(cost_cluster) & !is.na(cost_cluster)) {
+    message(alert_msg)
+    stop(glue::glue("{cost_cluster} is a {class(cost_cluster)}."))
+  }
+  if(is.numeric(cost_cluster)) {
+    # `<` and `>` can't deal with NAs
+    if(cost_cluster < 0) {
+      message(alert_msg)
+      stop(glue::glue("{cost_cluster} is < 0"))
+    }
   }
 }

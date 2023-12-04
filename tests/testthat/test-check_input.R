@@ -40,3 +40,10 @@ test_that("check_scale()", {
   expect_error(check_scale("chr"), "chr is not TRUE/FALSE")
   expect_error(check_scale(10), "10 is not TRUE/FALSE")
 })
+
+test_that("check_cost_cluster()", {
+  expect_silent(check_cost_cluster(NA))
+  expect_silent(check_cost_cluster(0))
+  expect_error(check_cost_cluster(-1), "-1 is < 0")
+  expect_error(check_cost_cluster("foo"), "foo is a character.")
+})
