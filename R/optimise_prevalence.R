@@ -191,6 +191,11 @@ optimise_sN_prevalence <- function(prevalence,
                                    max_s = 50,
                                    max_N = 20,
                                    form = "beta") {
+
+  # max_N is the only argument that optimise_s_prevalence doesn't use
+  # The rest of the input_checks are in optimise_s_prevalence
+  check_input("max_N", max_N)
+
   # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max.s = max.s))
 
   if (is.na(correlation) || correlation == 0) { # for simple random sampling there is no optimal N and for no correlation cluster survey the optimal approach is to infinite pools at one site (i.e. a simple random survey)

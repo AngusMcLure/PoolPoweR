@@ -137,3 +137,14 @@ test_that("optimise_s_prevalence() extremely bad integrand behaviour", {
     ),
     "extremely bad integrand behaviour"
     )})
+
+test_that("Bad max_n inputs caught in optimise_sN_prevalence()", {
+  expect_error(optimise_sN_prevalence(
+    prevalence = 0.01, cost_unit = 5, cost_pool = 10,
+    cost_cluster = 100, correlation = 0.05, max_N = 0
+  ), "0 is < 1")
+  expect_error(optimise_sN_prevalence(
+    prevalence = 0.01, cost_unit = 5, cost_pool = 10,
+    cost_cluster = 100, correlation = 0.05, max_N = NA
+  ), "NA is a logical.")
+})
