@@ -445,21 +445,19 @@ fi_pool_cluster <- function(pool_size,
     
     tol <- .Machine$double.eps^0.8
     lik <- apply(ys, 1, function(y) {
-      plot(\(x){integrand(x,y)},
-           from = mu - 4 * sigma, to = mu + 4 * sigma,
-           main = paste('integrand', y), n = 1000)
+      #plot(\(x){integrand(x,y)}, from = mu - 4 * sigma, to = mu + 4 * sigma, main = paste('integrand', y), n = 1000)
       stats::integrate(integrand, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
     lik_mu <- apply(ys, 1, function(y) {
-      # plot(function(x){integrand_mu(x,y)},main = paste('integrand_mu', y), n = 10000)
+      # plot(function(x){integrand_mu(x,y)}, from = mu - 4 * sigma, to = mu + 4 * sigma, main = paste('integrand_mu', y), n = 10000)
       stats::integrate(integrand_mu, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
     lik_sigma <- apply(ys, 1, function(y) {
-      # plot(function(x){integrand_sigma(x,y)},main = paste('integrand_sigma', y), n = 10000)
+      # plot(function(x){integrand_sigma(x,y)}, from = mu - 4 * sigma, to = mu + 4 * sigma, main = paste('integrand_sigma', y), n = 10000)
       stats::integrate(integrand_sigma, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
