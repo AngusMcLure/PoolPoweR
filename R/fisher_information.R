@@ -131,22 +131,25 @@ fi_pool_cluster <- function(pool_size,
   if (K == 1 && N == 1 && s == 1) {
     return(matrix(c(fi_pool(s, theta, varphi, psi) * N, 0, 0, 0), nrow = 2))
   }
+
   
   phi <- function(p){
     #varphi + (1 - psi - varphi) * (1 - p)^s
     if(p %in% 0:1){
       (1 - (1 - p)^s) * varphi + (1 - p)^s * (1 - psi)
     }else{
-      -expm1(log1p(-p)*s) * varphi + exp(log1p(-p)*s) * (1-psi)
+      -expm1(log1p(-p) * s) * varphi + exp(log1p(-p) * s) * (1 - psi)
     }
   }
   
-  one_minus_phi <- function(p){
+  log_one_minus_phi <- function(p){
     #1 - varphi - (1 - psi - varphi) * (1 - p)^s
     if(p %in% 0:1){
-      1 - (1 - (1 - p)^s) * varphi - (1 - p)^s * (1 - psi)
+      log1p(- (1 - (1 - p)^s) * varphi - (1 - p)^s * (1 - psi))
+    }else if(varphi == 1){
+      log1p(-p) * s + log(psi)
     }else{
-      expm1(log1p(-p)*s) * (varphi - 1) + exp(log1p(-p)*s) * psi
+      expm1(log1p(-p) * s) * (varphi - 1) + exp(log1p(-p) * s) * psi
     }
   }
   
@@ -418,7 +421,7 @@ fi_pool_cluster <- function(pool_size,
           out[j] <- stats::dnorm(link(pj), mean = mu, sd = sigma, log = TRUE) +
             log(dinvlink(pj)) +
             sum(log(phi(pj)) * y) +
-            sum(log(one_minus_phi(pj)) * (N - y))
+            sum(log_one_minus_phi(pj) * (N - y))
         }
       }
       out <- exp(out)
@@ -427,6 +430,9 @@ fi_pool_cluster <- function(pool_size,
       }
       out
     }
+    
+    
+    
     
     integrand_mu <- function(p, y) {
       integrand(p, y) * (link(p) - mu) / sigma^2
@@ -438,7 +444,7 @@ fi_pool_cluster <- function(pool_size,
     
     tol <- .Machine$double.eps^0.8
     lik <- apply(ys, 1, function(y) {
-      # plot(function(x){integrand(x,y)},main = paste('integrand', y), n = 10000)
+      plot(\(x){integrand(x,y)}, main = paste('integrand', y), n = 1000)
       stats::integrate(integrand, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
