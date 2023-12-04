@@ -36,7 +36,6 @@ test_that("fi_pool() works with expected input ranges", {
 })
 
 test_that("fi_pool_cluster() outputs a 2x2 matrix for input vectors of length 2", {
-  ## Reasonable params
   expect_true(all.equal(fi_pool_cluster(
     pool_size = 10, pool_number = 5, prevalence = 0.01, correlation = 0.05,
     sensitivity = 0.95, specificity = 0.99),
@@ -47,6 +46,22 @@ test_that("fi_pool_cluster() outputs a 2x2 matrix for input vectors of length 2"
     sensitivity = 0.95, specificity = 0.99),
     matrix(c(926.41807, -23.055960, -23.055960, 9.535592), nrow = 2), tolerance = 1e-6
     ))
+})
+
+test_that("fi_pool_cluster() s and N are numeric/integer vectors of same length", {
+  e <- "pool_size and pool_number must be vectors of positive numbers of common length. pool_size can be non-integer, but pool_number must be integer"
+  expect_error(fi_pool_cluster(
+    pool_size = 10, pool_number = c(10, 20, 30), prevalence = 0.01,
+    correlation = 0.05, sensitivity = 0.95, specificity = 0.99), e)
+  expect_error(fi_pool_cluster(
+    pool_size = "foo", pool_number = "bar", prevalence = 0.01,
+    correlation = 0.05, sensitivity = 0.95, specificity = 0.99), e)
+  expect_error(fi_pool_cluster(
+    pool_size = c(1.1, 1), pool_number = c(1.1, 1), prevalence = 0.01,
+    correlation = 0.05, sensitivity = 0.95, specificity = 0.99), e)
+  expect_error(fi_pool_cluster(
+    pool_size = 0, pool_number = 10, prevalence = 0.01,
+    correlation = 0.05, sensitivity = 0.95, specificity = 0.99), e)
 })
 
 test_that("fi_pool_cluster() fails when integral is divergent", {

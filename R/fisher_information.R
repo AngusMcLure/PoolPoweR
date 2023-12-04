@@ -84,8 +84,10 @@ fi_pool_cluster <- function(pool_size,
   varphi <- sensitivity
   psi <- specificity
 
-  if (length(s) != length(N) || !all((N %% 1) == 0) || !all(c(N, s) > 0)) {
-    stop("s and N must be vectors of positive numbers of common length. s can be non-integer, but N must be integer")
+  if (!is.numeric(c(s,N)) || length(s) != length(N) || !all((N %% 1) == 0) || !all(c(N, s) > 0)) {
+    # Not providing outputs for vectors because of nasty coercion hierarchies...
+    # and because this is "power-user" facing
+    stop("pool_size and pool_number must be vectors of positive numbers of common length. pool_size can be non-integer, but pool_number must be integer")
   }
 
   if (rho == 0) {
