@@ -118,3 +118,16 @@ test_that("fi_pool_cluster() fails when likelihoods or derivatives do not add up
     "Error in integration of likelihoods. Likelihoods do not add to 1 or derivatives of likelihood with respect to parameters do not sum to 0"
   )
 })
+
+test_that("bad real_scale input caught in fi_pool_cluster()", {
+  expect_error(
+    fi_pool_cluster(
+      pool_size = 5, pool_number = 10, prevalence = 0.01, correlation = 0.1,
+      sensitivity = 1, specificity = 1, real_scale = 0),
+    "0 is not TRUE/FALSE")
+  expect_error(
+    fi_pool_cluster(
+      pool_size = 5, pool_number = 10, prevalence = 0.01, correlation = 0.1,
+      sensitivity = 1, specificity = 1, real_scale = "yes"),
+    "yes is not TRUE/FALSE")
+})
