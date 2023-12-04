@@ -149,7 +149,7 @@ fi_pool_cluster <- function(pool_size,
     }else if(varphi == 1){
       log1p(-p) * s + log(psi)
     }else{
-      expm1(log1p(-p) * s) * (varphi - 1) + exp(log1p(-p) * s) * psi
+      log(expm1(log1p(-p) * s) * (varphi - 1) + exp(log1p(-p) * s) * psi)
     }
   }
   
@@ -411,22 +411,23 @@ fi_pool_cluster <- function(pool_size,
     ys <- do.call(expand.grid, purrr::map(N, ~ (0:.x)))
     
     # calculate Fisher information matrix for alternative parameters on the real scale
-    integrand <- function(p, y) { # note that this functions need to be vectorised for p
-      out <- numeric(length(p))
-      for (j in 1:length(p)){
-        pj <- p[j]
+    integrand <- function(z, y) { # note that this functions need to be vectorised for z
+      
+      out <- numeric(length(z))
+      for (j in 1:length(z)){
+        zj <- z[j]
+        pj <- invlink(zj)
         if(pj %in% 0:1){
           out[j] <- -Inf
         }else{
-          out[j] <- stats::dnorm(link(pj), mean = mu, sd = sigma, log = TRUE) +
-            log(dinvlink(pj)) +
+          out[j] <- stats::dnorm(zj, mean = mu, sd = sigma, log = TRUE) +
             sum(log(phi(pj)) * y) +
             sum(log_one_minus_phi(pj) * (N - y))
         }
       }
       out <- exp(out)
       if(any(is.nan(out) | any(is.infinite(out)))){
-        print(list(mu = mu, sigma = sigma, p = p, s = s, y = unname(y), N = N, out = out, problemp = p[is.nan(out) | is.infinite(out)]))
+        print(list(mu = mu, sigma = sigma, z = z, s = s, y = unname(y), N = N, out = out, problemz = z[is.nan(out) | is.infinite(out)]))
       }
       out
     }
@@ -434,30 +435,32 @@ fi_pool_cluster <- function(pool_size,
     
     
     
-    integrand_mu <- function(p, y) {
-      integrand(p, y) * (link(p) - mu) / sigma^2
+    integrand_mu <- function(z, y) {
+      integrand(z, y) * (z - mu) / sigma^2
     }
     
-    integrand_sigma <- function(p, y) {
-      integrand(p, y) * ((link(p) - mu)^2 - sigma^2) / sigma^3
+    integrand_sigma <- function(z, y) {
+      integrand(z, y) * ((z - mu)^2 - sigma^2) / sigma^3
     }
     
     tol <- .Machine$double.eps^0.8
     lik <- apply(ys, 1, function(y) {
-      plot(\(x){integrand(x,y)}, main = paste('integrand', y), n = 1000)
-      stats::integrate(integrand, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
+      plot(\(x){integrand(x,y)},
+           from = mu - 4 * sigma, to = mu + 4 * sigma,
+           main = paste('integrand', y), n = 1000)
+      stats::integrate(integrand, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
     lik_mu <- apply(ys, 1, function(y) {
       # plot(function(x){integrand_mu(x,y)},main = paste('integrand_mu', y), n = 10000)
-      stats::integrate(integrand_mu, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
+      stats::integrate(integrand_mu, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
     lik_sigma <- apply(ys, 1, function(y) {
       # plot(function(x){integrand_sigma(x,y)},main = paste('integrand_sigma', y), n = 10000)
-      stats::integrate(integrand_sigma, 0, 1, y = y, rel.tol = tol, abs.tol = tol)$value *
+      stats::integrate(integrand_sigma, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
