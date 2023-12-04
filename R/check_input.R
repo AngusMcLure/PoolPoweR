@@ -8,23 +8,21 @@ check_input <- function(argument_name, input_value) {
   na <- c('cost_cluster', 'correlation')
   forms <- c('beta', 'logitnorm', 'cloglognorm', 'discrete')
 
-  #if(argument_name %in% geq0) check_geq(argument_name, input_value, min = 0)
-  #else if(argument_name %in% geq1) check_geq(argument_name, input_value, min = 1)
-  #else if(argument_name %in% range) check_in_range(argument_name, input_value)
-  #else if(argument_name == "form")
-  #else if(argument_name == "real_scale")
+  if(argument_name %in% geq0) check_geq(argument_name, input_value, min = 0)
+  else if(argument_name %in% geq1) check_geq(argument_name, input_value, min = 1)
+  else if(argument_name %in% range) check_in_range(argument_name, input_value)
+  else if(argument_name == "form") check_form(input_value)
+  else if(argument_name == "real_scale") check_scale(real_scale = input_value)
 }
 
-check_geq <- function(argument_name, input_value) {
+check_geq <- function(argument_name, input_value, min) {
   # Check that an input value is numeric, and greater than `min`
+  # `min` either 0 or 1
   # Stop condition for developers only
   geq0 <- c('pool_size', 'pool_number', 'cost_unit',
             'cost_pool', 'cost_cluster', 'interval')
   geq1 <- c('max_s', 'max_N')
   if(!argument_name %in% c(geq0, geq1)) stop("Needs to be one of the accepted_args")
-  # So one function can be used for all >= checks
-  min <- 0
-  if(argument_name %in% geq1) min <- 1
 
   if(!is.numeric(input_value) | input_value < min) {
     message(glue::glue("{argument_name} must be a numeric value {min} or greater."))

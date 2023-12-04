@@ -1,11 +1,11 @@
 test_that("check_geq()", {
-  expect_silent(check_geq("max_s", 1)) # > 1
+  expect_silent(check_geq("max_s", 1, min = 1)) # > 1
+  expect_error(check_geq("max_s", 0, min = 1), "0 is < 1")
   # > 0
-  expect_silent(check_geq("pool_size", 1))
-  expect_error(check_geq("pool_size", "chr"), "chr is a character.")
-  expect_error(check_geq("pool_size", -1), "-1 is < 0")
-  expect_error(check_geq("max_s", 0), "0 is < 1")
-  expect_error(check_geq("prevalence", 0.05),
+  expect_silent(check_geq("pool_size", 1, min = 0))
+  expect_error(check_geq("pool_size", "chr", min = 0), "chr is a character.")
+  expect_error(check_geq("pool_size", -1, min = 0), "-1 is < 0")
+  expect_error(check_geq("prevalence", 0.05, min = 0),
                "Needs to be one of the accepted_args")
 })
 

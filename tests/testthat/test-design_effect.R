@@ -50,3 +50,10 @@ test_that("design_effect() gives consistent output for basic tests", {
     tolerance = 1e-4
   )
 })
+
+test_that("bad inputs caught in design_effect()", {
+  expect_error(design_effect(pool_size = TRUE), "TRUE is a logical")
+  expect_error(design_effect(pool_size = 5, pool_number = 10, prevalence = 10), "10 is > 1")
+  expect_error(design_effect(pool_size = 5, pool_number = 10, prevalence = 0.01, correlation = 0.1, sensitivity = 1, specificity = 1, form = "binomal"),
+               "form must be one of 'beta', 'logitnorm', 'cloglognorm', or 'discrete'.")
+})
