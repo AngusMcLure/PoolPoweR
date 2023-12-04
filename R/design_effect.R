@@ -63,6 +63,14 @@ design_effect <- function(pool_size,
                           specificity,
                           form = "beta"){
 
+  check_input("pool_size", pool_size)
+  check_input("pool_number", pool_number)
+  check_input("prevalence", prevalence)
+  check_input("correlation", correlation)
+  check_input("sensitivity", sensitivity)
+  check_input("specificity", specificity)
+  check_input("form", form)
+
   pool_number * pool_size * fi_pool(pool_size = 1, prevalence, sensitivity, specificity) *
     solve(fi_pool_cluster(
       pool_size, pool_number, prevalence,

@@ -108,6 +108,9 @@ fi_pool_cluster <- function(pool_size,
                             specificity,
                             form = "beta",
                             real_scale = FALSE) {
+
+  check_input("real_scale", real_scale)
+
   s <- pool_size
   N <- pool_number
   K <- length(N)
