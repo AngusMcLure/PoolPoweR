@@ -39,8 +39,11 @@ and this project adheres to
 
 ### [v0.0.2] - 2023-12-01
 **Focus:** Tests
-- [ ] Add helper function for input variable checks
-[#2](https://github.com/AngusMcLure/PoolPoweR/issues/2)
+
+- Added helper functions to check argument inputs. Implemented in mainly user-
+facing functions: `optimise_s_prevalence()`, `optimise_sN_prevalence()`,
+`design_effect()` and `fi_pool_cluster()` (
+[#2](https://github.com/AngusMcLure/PoolPoweR/issues/2))  
 - [ ] Throw warnings for some input variable ranges
 [#3](https://github.com/AngusMcLure/PoolPoweR/issues/3)
 	- Note: these parts currently lack test coverage in user-level functions

@@ -1,6 +1,12 @@
 # Tolerance to address floating point precision errors
 test_that("fi_pool() works with expected input ranges", {
   # Tests mainly to ensure same outputs when refactoring fi_pool internals
+  # This one has reasonable params
+  expect_equal(fi_pool(
+    pool_size = 10, prevalence = 0.01, sensitivity = 0.95, specificity = 0.99),
+    820.1759, tolerance = 1e-4
+  )
+  # These ones do not really
   expect_equal(
     fi_pool(
       pool_size = 10,
@@ -30,48 +36,17 @@ test_that("fi_pool() works with expected input ranges", {
 })
 
 test_that("fi_pool_cluster() outputs a 2x2 matrix for input vectors of length 2", {
-  expect_true(all.equal(
-    fi_pool_cluster(
-      pool_size = c(10, 20),
-      pool_number = c(10, 20),
-      prevalence = 0.9,
-      sensitivity = 1,
-      specificity = 1,
-      correlation = 0.5,
-      form = "beta",
-      real_scale = TRUE
-    ),
-    matrix(c(5.431112, -1.928655, -1.928655, 1.123625), nrow = 2),
-    tolerance = 1e-6
-  ))
-  expect_true(all.equal(
-    fi_pool_cluster(
-      pool_size = c(5, 10),
-      pool_number = c(10, 15),
-      prevalence = 0.9,
-      sensitivity = 1,
-      specificity = 1,
-      correlation = 0.5,
-      form = "beta",
-      real_scale = TRUE
-    ),
-    matrix(c(9.028451, -1.718530, -1.718530, 1.130158), nrow = 2),
-    tolerance = 1e-6
-  ))
-  expect_true(all.equal(
-    fi_pool_cluster(
-      pool_size = c(5, 10),
-      pool_number = c(10, 15),
-      prevalence = 0.7,
-      sensitivity = 0.95,
-      specificity = 0.8,
-      correlation = 0.9,
-      form = "cloglognorm",
-      real_scale = FALSE
-    ),
-    matrix(c(4.692347, -2.270677, -2.270677, 8.494053), nrow = 2),
-    tolerance = 1e-6
-  ))
+  ## Reasonable params
+  expect_true(all.equal(fi_pool_cluster(
+    pool_size = 10, pool_number = 5, prevalence = 0.01, correlation = 0.05,
+    sensitivity = 0.95, specificity = 0.99),
+    matrix(c(1880.3484, -125.47514, -125.4751, 23.71574), nrow = 2), tolerance = 1e-5
+    ))
+  expect_true(all.equal(fi_pool_cluster(
+    pool_size = c(1, 2), pool_number = c(5, 10), prevalence = 0.01, correlation = 0.05,
+    sensitivity = 0.95, specificity = 0.99),
+    matrix(c(926.41807, -23.055960, -23.055960, 9.535592), nrow = 2), tolerance = 1e-6
+    ))
 })
 
 test_that("fi_pool_cluster() fails when integral is divergent", {
@@ -104,6 +79,7 @@ test_that("fi_pool_cluster() fails when integral is divergent", {
 })
 
 test_that("fi_pool_cluster() fails when likelihoods or derivatives do not add up", {
+  # SLOW (doesn't scale with pool size, number, and vector length)
   expect_error(
     fi_pool_cluster(
       pool_size = c(5, 10),
