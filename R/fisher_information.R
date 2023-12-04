@@ -74,6 +74,7 @@ fi_pool_cluster <- function(pool_size,
                             form = "beta",
                             real_scale = FALSE) {
 
+  check_input("form", form)
   check_input("real_scale", real_scale)
 
   s <- pool_size
@@ -111,7 +112,7 @@ fi_pool_cluster <- function(pool_size,
     # derivatives can be performed accordingly
     if (form == "discrete") {
       method <- "summation"
-      if (length(s) != 1) stop("unequal pool size not implemented for kind = 'discrete'")
+      if (length(s) != 1) stop("unequal pool size not implemented for form = 'discrete'")
       # This models the prevalence at each site as a discrete distribution:
       # values:                0,   theta,           1
       # weights: rho * (1-theta), (1-rho), rho * theta
@@ -463,7 +464,5 @@ fi_pool_cluster <- function(pool_size,
       # FI on the {theta, rho} parameterisation
       return(t(J) %*% FI %*% J)
     }
-  } else {
-    stop("accepted forms of the site prevalence distribution (argument form) are logitnorm, cloglognorm, beta, and discrete.")
   }
 }
