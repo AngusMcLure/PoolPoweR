@@ -148,3 +148,13 @@ test_that("Bad max_n inputs caught in optimise_sN_prevalence()", {
     cost_cluster = 100, correlation = 0.05, max_N = NA
   ), "NA is a logical.")
 })
+
+test_that("Bad inputs caught in optimise_s_prevalence()", {
+  expect_error(optimise_sN_prevalence(prevalence = NA, correlation = 0.1), "NA is a logical.")
+  expect_error(optimise_s_prevalence(
+    prevalence = 0.01, cost_unit = -1, cost_pool = 10,
+    cost_cluster = 100, correlation = 0.05
+  ), "-1 is < 0")
+  expect_error(optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10, max_s = 0),
+               "0 is < 1")
+})

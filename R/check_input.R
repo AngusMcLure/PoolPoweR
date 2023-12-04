@@ -1,17 +1,16 @@
 check_input <- function(argument_name, input_value) {
   # Wrapper function to triage arguments, so one function can be used for all
   # inputs instead of remembering which one to use.
-  geq0 <- c('pool_size', 'pool_number', 'cost_unit',
-            'cost_pool', 'cost_cluster', 'interval')
+  geq0 <- c('pool_size', 'pool_number', 'cost_unit', 'cost_pool', 'interval')
   geq1 <- c('max_s', 'max_N')
-  range <- c('prevalence', 'correlation', 'sensitivity', 'specificity')
+  range <- c('prevalence', 'sensitivity', 'specificity')
 
   if(argument_name %in% geq0) check_geq(argument_name, input_value, min = 0)
   else if(argument_name %in% geq1) check_geq(argument_name, input_value, min = 1)
   else if(argument_name %in% range) check_in_range(argument_name, input_value)
   else if(argument_name == "form") check_form(input_value)
-  else if(argument_name == "real_scale") check_scale(real_scale = input_value)
-  else if(argument_name == "cost_cluster") check_cost_cluster(real_scale = input_value)
+  else if(argument_name == "real_scale") check_scale(input_value)
+  else if(argument_name == "cost_cluster") check_cost_cluster(input_value)
 }
 
 check_geq <- function(argument_name, input_value, min) {
@@ -40,11 +39,11 @@ check_in_range <- function(argument_name, input_value) {
   accepted_args <- c('prevalence', 'correlation', 'sensitivity', 'specificity')
   if(!argument_name %in% accepted_args) stop("Needs to be one of the accepted_args")
 
-  if(input_value < 0 | input_value > 1) {
-    message(glue::glue("{argument_name} must be a numeric value between 0 and 1, inclusive."))
-  }
   if(!is.numeric(input_value)) {
     stop(glue::glue("{input_value} is a {class(input_value)}."))
+  }
+  if(input_value < 0 | input_value > 1) {
+    message(glue::glue("{argument_name} must be a numeric value between 0 and 1, inclusive."))
   }
   if(input_value < 0) stop(glue::glue("{input_value} is < 0"))
   if(input_value > 1) stop(glue::glue("{input_value} is > 1"))
