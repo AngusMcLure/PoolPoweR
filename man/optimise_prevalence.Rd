@@ -98,10 +98,33 @@ identifies range of designs with cost less than the optimal cost * (1 +
 interval).}
 
 \item{max_N}{numeric The maximum number of pools per cluster (pool number).}
+
+\item{catch_mean, catch_variance}{numeric The mean and variance of the number
+of units collected per collection period. Both must be greater than 0 and
+`catch_variance` must be greater than or equal to `catch_mean`. Number of
+units caught per period is assumed to follow a negative binomial
+distribution (or Poisson distribution if `catch_mean = catch_variance`)}
+
+\item{pool_strat_family}{function A function that defines a family of rules
+for how a number of units will be divided into pools, e.g.
+`pool_max_size()` and `pool_target_number()`. The function must take
+positive integer valued parameters, and return a function that defines a
+pooling strategy}
+
+\item{cost_period}{numeric The cost per collection period (per collection per
+cluster if `correlation` is not `NA`). Most be a numeric value greater than
+or equal to 0.}
+
+\item{max_period}{numeric The maximum number of collection periods (per
+cluster if `correlation` is not `NA`)}
+
+\item{verbose}{logical Should function indicate progress by printing each
+parameter set calculated to screen? If FALSE (default) only prints optimal
+parameters identified in each iteration}
 }
 \value{
-* `optimise_s_prevalence` returns a list with the optimal pool size
-  `s`, cost, and range of near-optimal designs `catch`. *
+`optimise_s_prevalence` returns a list with the optimal pool size
+  `s`, cost, and range of near-optimal designs `catch`.
   `optimise_sN_prevalence()` returns the same list as `optimise_s_prevalence`
   with an additional optimal pool number `N`.
 }
@@ -112,8 +135,14 @@ survey designs that maximise the Fisher Information for given cost or effort.
 `optimise_s_prevalence()` calculates the optimal single pool size that
 balances the cost and accuracy given the marker prevalence, test sensitivity,
 and specificity, and works for simple random surveys or cluster surveys.
-`optimise_sN_prevalence` also attempts to identify the optimal number of
-pools per cluster (cluster-surveys only).
+`optimise_sN_prevalence()` also attempts to identify the optimal number of
+pools per cluster (cluster-surveys only). `optimise_random_prevalence()`
+works for designs where collection proceeds for a number of collection
+periods, but the number of units collected (and therefore the pool sizes,
+pool numbers, and total cost) is random. Given the mean and variance of the
+catch sizes per collection period and a family of pooling strategies, it
+calculates the optimal combination of number of sampling periods and pooling
+strategy.
 }
 \examples{
 optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10)

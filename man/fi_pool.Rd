@@ -90,7 +90,7 @@ returned for prevalence (theta) and correlation (rho) instead.}
 \item{pool_strat}{function Defines a rule for how a number of units will be
 divided into pools. Must take a single numeric argument and return a named
 list of pool sizes and pool numbers. `pool_max_size()` and
-`pool_target_number` provide convenience functions for defining common
+`pool_target_number()` provide convenience functions for defining common
 pooling strategies.}
 
 \item{max_iter}{numeric Maximum number of iterations (possible catch sizes)
@@ -103,9 +103,10 @@ calculating expected FI over random catch sizes. Must be positive and
 should be much smaller than 1.}
 }
 \value{
-The Fisher information for prevalence (`fi_pool()`) or the Fisher
-  information matrix for prevalence and intra-cluster correlation
-  (`fi_pool_cluster()` and `fi_pool_cluster_random()`)
+The Fisher information for prevalence (`fi_pool()` and
+  `fi_pool_random()`) or the Fisher information matrix for prevalence and
+  intra-cluster correlation (`fi_pool_cluster()` and
+  `fi_pool_cluster_random()`)
 }
 \description{
 `fi_pool()` and `fi_pool_cluster()` calculate Fisher information (FI) for
