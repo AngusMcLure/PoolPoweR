@@ -71,9 +71,13 @@
 #'   parameters identified in each iteration
 #'
 #' @returns `optimise_s_prevalence` returns a list with the optimal pool size
-#'   `s`, cost, and range of near-optimal designs `catch`.
-#'   `optimise_sN_prevalence()` returns the same list as `optimise_s_prevalence`
-#'   with an additional optimal pool number `N`.
+#'   `s`, the unit cost of Fisher information, and range of near-optimal designs
+#'   `catch`. `optimise_sN_prevalence()` returns the same list as
+#'   `optimise_s_prevalence` with an additional optimal pool number `N`.
+#'   `optimise_random_prevlance` returns a list including the optimal number of
+#'   sampling periods; the unit cost of Fisher information; the mean, variance,
+#'   and distribution of the number of units caught across all sampling
+#'   periods(per cluster where applicable); and the optimal pooling strategy.
 #' @rdname optimise_prevalence
 #' @export
 #'
@@ -279,7 +283,7 @@ optimise_random_prevalence <- function(catch_mean, catch_variance,
                                        verbose = FALSE) {
   
   strat_par_names <- names(formals(pool_strat_family))
-  pars <- as.list(rep(1, 1+ length(strat_par_names)))
+  pars <- as.list(rep(1, 1 + length(strat_par_names)))
   names(pars) <- c(".periods", strat_par_names)
   
   if(is.na(correlation)){
@@ -302,10 +306,18 @@ optimise_random_prevalence <- function(catch_mean, catch_variance,
                              form = form)
     }
     
-    opt <- optim_local_int(pars,f, verbose = verbose)
+    optpars <- optim_local_int(pars,f, verbose = verbose)
     
   }
   
+  opt <- list(periods = optpars$par$.periods,
+              cost = optpars$val,
+              catch = list(mean = optpars$par$.periods * catch_mean,
+                           variance = optpars$par$.periods * catch_variance,
+                           distribution = nb_catch(optpars$par$.periods * catch_mean,
+                                                   optpars$par$.periods * catch_variance)),
+              pool_strat = do.call(pool_strat_family, optpars$par[-1]),
+              pool_strat_pars = optpars$par[-1])
   opt
 }
 
@@ -342,7 +354,7 @@ optim_local_int <- function(par, fn,
       opt_par <- unlist(search[which.min(val),])
     }
   }
-  return(list(val = opt_val, par = opt_par))
+  return(list(val = opt_val, par = as.list(opt_par)))
 }
 
 cost_fi <- function(pool_size, prevalence, sensitivity, specificity, cost_unit, cost_pool) {
