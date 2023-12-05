@@ -7,9 +7,9 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Upcoming]  
+
 ### Long-term
 - [ ] Establish default values for functions [#11](https://github.com/AngusMcLure/PoolPoweR/issues/11)
-- [ ] Create full class system for catch_distribution [#15](https://github.com/AngusMcLure/PoolPoweR/issues/15)
 
 ### [v1.0.0]
 - CRAN release
@@ -18,10 +18,10 @@ and this project adheres to
 
 ### [vX]
 **Focus:** Package
-- [ ] Fix integrand issue  
-- [ ] Implement codecov.io  
-- [ ] Refactor functions (i.e. break down into smaller ones for readability)
-- [ ] Configure and optimise GHA workflows
+- [ ] Fix integrand issue (#21)
+- [ ] Implement codecov.io (#5)
+- [ ] Refactor functions i.e. break down into smaller ones for readability (#26)
+- [ ] Configure and optimise GHA workflows 
 
 ### [vX]
 **Focus:** Documentation
@@ -31,15 +31,19 @@ and this project adheres to
 [#14](https://github.com/AngusMcLure/PoolPoweR/issues/14)
 - [ ] Add PoolPoweR-package.R (#18)  
 - [ ] Move descriptions to details  
-- [x] Rename real.scale to real_scale
 
-## [Released]  
+### [v0.1.1] - 2023-12-08
+- Update tests to pass new additions (#29, #30, #32)
+- Add check_rho() to input_check() (#32)  
+- Document optimise_random_prevalence() arguments #31
+
+## [Available]  
 
 ### [v0.1.0] - 2023-12-05  
 
 Period sampling functions.  
 
-#### Added  
+#### Added
 - `fi_pool_cluster_random()` and `optimise_random_prevalence()` for evaluating
 and designing surverys where the number of units caught at each site (or
 overall) are random
@@ -76,5 +80,6 @@ also had extreme parameters.
 	#10, #11)
 - GitHub Action workflows `check-standard` and `test-coverage` implemented (#5)  
 
-[unreleased]:
+[upcoming]:
+[0.0.2]:
 [0.0.1]:
