@@ -120,7 +120,7 @@ test_that("fi_pool_cluster() when s != 1 and form = discrete", {
 })
 
 # Integration fails ------------------------------------------------------------
-test_that("fi_pool_cluster() fails when integral is divergent", {
+test_that("fi_pool_cluster() fails when integral input parameters are so extreme such that the integral appears divergent", {
   expect_error(
     fi_pool_cluster(
       pool_size = c(10, 20),

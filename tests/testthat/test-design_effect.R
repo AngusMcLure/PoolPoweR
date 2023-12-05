@@ -36,7 +36,10 @@ test_that("design_effect() gives consistent output for basic tests", {
     26.50055,
     tolerance = 1e-5
   )
-  expect_equal(
+})
+
+test_that("design_effect() fails for some very unusual parameters because integral in call to fi_pool_cluster() appears starts to have numeric issues", {
+  expect_error(
     design_effect(
       pool_size = 100,
       pool_number = 10,
@@ -46,10 +49,10 @@ test_that("design_effect() gives consistent output for basic tests", {
       correlation = 0.8,
       form = "cloglognorm"
     ),
-    4422,
-    tolerance = 1e-4
+    "Error in integration of likelihoods. Likelihoods do not add to 1 or derivatives of likelihood with respect to parameters do not sum to 0"
   )
 })
+
 
 test_that("bad inputs caught in design_effect()", {
   expect_error(design_effect(pool_size = TRUE), "TRUE is a logical")
