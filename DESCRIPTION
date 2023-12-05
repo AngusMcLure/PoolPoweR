@@ -1,7 +1,7 @@
 Package: PoolPoweR
 Type: Package
 Title: Power and Sample Size Calculations for Surveys Using Pool Testing
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: c(
     person(given = "Angus", family = "McLure", role = c("aut", "cre"), 
         email = "angus.mclure@anu.edu.au", 

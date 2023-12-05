@@ -10,24 +10,20 @@ and this project adheres to
 
 ### Long-term
 - [ ] Establish default values for functions [#11](https://github.com/AngusMcLure/PoolPoweR/issues/11)
-- [ ] Create full class system for catch_distribution [#15](https://github.com/AngusMcLure/PoolPoweR/issues/15)
 
 ### [v1.0.0]
 - CRAN release
 - Add pkgdown site #20  
 - [ ] What is the MVP required for a CRAN release?
 
-### [v0.1.1]  
-- [ ] Implement new functions  
-
-### [v0.1.0]
+### [vX]
 **Focus:** Package
-- [ ] Fix integrand issue  
-- [ ] Implement codecov.io  
-- [ ] Refactor functions (i.e. break down into smaller ones for readability)
-- [ ] Configure and optimise GHA workflows
+- [ ] Fix integrand issue (#21)
+- [ ] Implement codecov.io (#5)
+- [ ] Refactor functions i.e. break down into smaller ones for readability (#26)
+- [ ] Configure and optimise GHA workflows 
 
-### [v0.0.3]
+### [vX]
 **Focus:** Documentation
 - [ ] Revise documentation so majority @inheritParams fi_pool
 - [ ] Rename interval [#13](https://github.com/AngusMcLure/PoolPoweR/issues/13)
@@ -35,23 +31,47 @@ and this project adheres to
 [#14](https://github.com/AngusMcLure/PoolPoweR/issues/14)
 - [ ] Add PoolPoweR-package.R (#18)  
 - [ ] Move descriptions to details  
-- [x] Rename real.scale to real_scale
 
-### [v0.0.2] - 2023-12-01
-**Focus:** Tests
-- [ ] Add helper function for input variable checks
-[#2](https://github.com/AngusMcLure/PoolPoweR/issues/2)
-- [ ] Throw warnings for some input variable ranges
-[#3](https://github.com/AngusMcLure/PoolPoweR/issues/3)
-	- Note: these parts currently lack test coverage in user-level functions
-- [ ] Update unit tests with examples added in
-[#11](https://github.com/AngusMcLure/PoolPoweR/issues/11)
-- [ ] Add GHA for test coverage
-[#5](https://github.com/AngusMcLure/PoolPoweR/issues/5)
-- [ ] Add tests for uncovered lines
-- [ ] Speed up tests (some slow ones fo fisher_info.R)
+### [v0.1.1] - 2023-12-08
+- Update tests to pass new additions (#29, #30, #32)
+- Add check_rho() to input_check() (#32)  
+- Document optimise_random_prevalence() arguments #31
 
-## [Released]  
+## [Available]  
+
+### [v0.1.0] - 2023-12-05  
+
+Period sampling functions.  
+
+#### Added
+- `fi_pool_cluster_random()` and `optimise_random_prevalence()` for evaluating
+and designing surverys where the number of units caught at each site (or
+overall) are random
+- Machinery to make the above work (`catch_distributions.R`, `pooling_strategies.R`)
+
+#### Fixed  
+- Convergence of integrals with `fi_pool_cluster()` introduced by edge cases.  
+
+#### Changed  
+- `fi_pool_cluster()` integration will throw an error with extreme cases.  
+
+### [v0.0.2] - 2023-12-05
+
+Test coverage at 96.79%, but still requires considerable revision.
+
+#### Added  
+- Helper functions for arguments in `check_inputs.R`. Implemented in mainly
+user-facing functions: `optimise_s_prevalence()`, `optimise_sN_prevalence()`,
+`design_effect()` and `fi_pool_cluster()` (#2)
+- Unit tests with reasonable examples from #11.  
+- `test-coverage` and GHA (#5)
+
+#### Changed  
+- Error and warning handling for `fi_pool_cluster()` inputs
+
+#### Removed
+- Slower `fi_pool_cluster()` unit tests (cases where $s>1$ and $N>1$), these
+also had extreme parameters.  
 
 ### [v0.0.1] MVP!  
 
@@ -60,5 +80,6 @@ and this project adheres to
 	#10, #11)
 - GitHub Action workflows `check-standard` and `test-coverage` implemented (#5)  
 
-[unreleased]:
+[upcoming]:
+[0.0.2]:
 [0.0.1]:
