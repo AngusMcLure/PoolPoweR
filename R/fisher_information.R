@@ -20,7 +20,7 @@
 #' @param pool_strat function Defines a rule for how a number of units will be
 #'   divided into pools. Must take a single numeric argument and return a named
 #'   list of pool sizes and pool numbers. `pool_max_size()` and
-#'   `pool_target_number` provide convenience functions for defining common
+#'   `pool_target_number()` provide convenience functions for defining common
 #'   pooling strategies.
 #' @param prevalence numeric The proportion of units that carry the marker of
 #'   interest (i.e. true positive). Must be be a numeric value between 0 and 1,
@@ -57,9 +57,10 @@
 #'   should be much smaller than 1.
 #'
 #'
-#' @return The Fisher information for prevalence (`fi_pool()`) or the Fisher
-#'   information matrix for prevalence and intra-cluster correlation
-#'   (`fi_pool_cluster()` and `fi_pool_cluster_random()`)
+#' @return The Fisher information for prevalence (`fi_pool()` and
+#'   `fi_pool_random()`) or the Fisher information matrix for prevalence and
+#'   intra-cluster correlation (`fi_pool_cluster()` and
+#'   `fi_pool_cluster_random()`)
 #' @export
 #'
 #' @examples
