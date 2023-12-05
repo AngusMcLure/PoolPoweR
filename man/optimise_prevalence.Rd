@@ -124,9 +124,13 @@ parameters identified in each iteration}
 }
 \value{
 `optimise_s_prevalence` returns a list with the optimal pool size
-  `s`, cost, and range of near-optimal designs `catch`.
-  `optimise_sN_prevalence()` returns the same list as `optimise_s_prevalence`
-  with an additional optimal pool number `N`.
+  `s`, the unit cost of Fisher information, and range of near-optimal designs
+  `catch`. `optimise_sN_prevalence()` returns the same list as
+  `optimise_s_prevalence` with an additional optimal pool number `N`.
+  `optimise_random_prevlance` returns a list including the optimal number of
+  sampling periods; the unit cost of Fisher information; the mean, variance,
+  and distribution of the number of units caught across all sampling
+  periods(per cluster where applicable); and the optimal pooling strategy.
 }
 \description{
 These functions determine cost-effective pooling strategies for estimating

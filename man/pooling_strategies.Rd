@@ -16,12 +16,12 @@ pool_target_number(target_number)
 (catch)}
 }
 \value{
-A function with a single argument, `catch`, for the catch size that
-  returns a list of the pool sizes and numbers that the catch should be split
-  into
+A function of class `pool_strat` with a single argument, `catch`, for
+  the catch size that returns a list of the pool sizes and numbers that the
+  catch should be split into
 }
 \description{
-`pool_max_size()` and `pool_fixed_N()` are functions for defining the how a
+`pool_max_size()` and `pool_taget_number()` are functions for defining the how a
 given number of units should be divided into pools. Using `pool_max_size()`
 pools have fixed maximum pool size (`max_size`) with any remainder placed in
 a single smaller pool. Using `pool_target_number()` pools have a target number (target)

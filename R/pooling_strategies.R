@@ -1,6 +1,6 @@
 #' Tools for defining pooling strategies
 #'
-#' `pool_max_size()` and `pool_fixed_N()` are functions for defining the how a
+#' `pool_max_size()` and `pool_taget_number()` are functions for defining the how a
 #' given number of units should be divided into pools. Using `pool_max_size()`
 #' pools have fixed maximum pool size (`max_size`) with any remainder placed in
 #' a single smaller pool. Using `pool_target_number()` pools have a target number (target)
@@ -11,9 +11,9 @@
 #' @param target_number integer The variance of the number of units per cluster
 #'   (catch)
 #'
-#' @return A function with a single argument, `catch`, for the catch size that
-#'   returns a list of the pool sizes and numbers that the catch should be split
-#'   into
+#' @return A function of class `pool_strat` with a single argument, `catch`, for
+#'   the catch size that returns a list of the pool sizes and numbers that the
+#'   catch should be split into
 #' @rdname pooling_strategies
 #' @export
 #'
@@ -24,7 +24,7 @@
 
 
 pool_max_size <- function(max_size){
-  function(catch){
+  strat <- function(catch){
     if(catch<max_size){
       return(list(pool_size = catch, pool_number = 1))
     }else if(catch%%max_size == 0){
@@ -33,13 +33,17 @@ pool_max_size <- function(max_size){
       return(list(pool_size = c(catch%%max_size, max_size), pool_number = c(1, catch%/%max_size)))
     }
   }
+  attr(strat, 'call') <- match.call()
+  attr(strat, 'description') <- paste('that places units in pools of size', max_size, 'with any remainder placed in a single smaller pool.')
+  class(strat) <- 'pool_strat'
+  strat
 }
 
 #' @rdname pooling_strategies
 #' @export
 pool_target_number <- function(target_number){
   if(target_number%%1 !=0) stop('target_number must be an integer')
-  function(catch){
+  strat <- function(catch){
     if(catch<target_number){
       return(list(pool_size = 1, pool_number = catch))
     }else if(catch%%target_number == 0){
@@ -50,8 +54,15 @@ pool_target_number <- function(target_number){
       return(list(pool_size = c(base_size, base_size + 1), pool_number = c(base_number, target_number-base_number)))
     }
   }
+  attr(strat, 'call') <- match.call()
+  attr(strat, 'description') <- paste(if(target_number == 1){'places all units in 1 pool,'}else{paste('aims to distribute units into', target_number, 'equally sized pools,')},'with no maximum pool size')
+  class(strat) <- 'pool_strat'
+  strat
 }
 
+
+
+  
 # #An example of a more complicated pooling function generator. For the first
 # #pool, the a fraction (specified) of total catch is placed into a pool (rounding
 # #up). For the second pool, the same fraction of the remaining units (rounding
