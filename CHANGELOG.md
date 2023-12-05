@@ -7,7 +7,6 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Upcoming]  
-
 ### Long-term
 - [ ] Establish default values for functions [#11](https://github.com/AngusMcLure/PoolPoweR/issues/11)
 - [ ] Create full class system for catch_distribution [#15](https://github.com/AngusMcLure/PoolPoweR/issues/15)
@@ -17,17 +16,14 @@ and this project adheres to
 - Add pkgdown site #20  
 - [ ] What is the MVP required for a CRAN release?
 
-### [v0.1.1]  
-- [ ] Implement new functions  
-
-### [v0.1.0]
+### [vX]
 **Focus:** Package
 - [ ] Fix integrand issue  
 - [ ] Implement codecov.io  
 - [ ] Refactor functions (i.e. break down into smaller ones for readability)
 - [ ] Configure and optimise GHA workflows
 
-### [v0.0.3]
+### [vX]
 **Focus:** Documentation
 - [ ] Revise documentation so majority @inheritParams fi_pool
 - [ ] Rename interval [#13](https://github.com/AngusMcLure/PoolPoweR/issues/13)
@@ -36,6 +32,24 @@ and this project adheres to
 - [ ] Add PoolPoweR-package.R (#18)  
 - [ ] Move descriptions to details  
 - [x] Rename real.scale to real_scale
+
+## [Released]  
+
+### [v0.1.0] - 2023-12-05  
+
+Period sampling functions.  
+
+#### Added  
+- `fi_pool_cluster_random()` and `optimise_random_prevalence()` for evaluating
+and designing surverys where the number of units caught at each site (or
+overall) are random
+- Machinery to make the above work (`catch_distributions.R`, `pooling_strategies.R`)
+
+#### Fixed  
+- Convergence of integrals with `fi_pool_cluster()` introduced by edge cases.  
+
+#### Changed  
+- `fi_pool_cluster()` integration will throw an error with extreme cases.  
 
 ### [v0.0.2] - 2023-12-05
 
@@ -54,8 +68,6 @@ user-facing functions: `optimise_s_prevalence()`, `optimise_sN_prevalence()`,
 #### Removed
 - Slower `fi_pool_cluster()` unit tests (cases where $s>1$ and $N>1$), these
 also had extreme parameters.  
-
-## [Released]  
 
 ### [v0.0.1] MVP!  
 

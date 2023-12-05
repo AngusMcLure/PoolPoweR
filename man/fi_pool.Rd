@@ -3,7 +3,9 @@
 \name{fi_pool}
 \alias{fi_pool}
 \alias{fi_pool_cluster}
-\title{Fisher information for population prevalence}
+\alias{fi_pool_random}
+\alias{fi_pool_cluster_random}
+\title{Fisher information for population prevalence (and intra-cluster correlation)}
 \usage{
 fi_pool(pool_size, prevalence, sensitivity, specificity)
 
@@ -16,6 +18,29 @@ fi_pool_cluster(
   specificity,
   form = "beta",
   real_scale = FALSE
+)
+
+fi_pool_random(
+  catch_dist,
+  pool_strat,
+  prevalence,
+  sensitivity,
+  specificity,
+  max_iter = 1000,
+  rel_tol = 1e-06
+)
+
+fi_pool_cluster_random(
+  catch_dist,
+  pool_strat,
+  prevalence,
+  correlation,
+  sensitivity,
+  specificity,
+  form = "beta",
+  real_scale = FALSE,
+  max_iter = 1000,
+  rel_tol = 1e-06
 )
 }
 \arguments{
@@ -54,27 +79,65 @@ prevalence and correlation of units within cluster. Select one of "beta",
 \item{real_scale}{boolean Applies only when `form = "logitnorm"` or `form =
 "cloglognorm"`. Determines whether Fisher information should be returned
 for the parameters of the logitnorm/cloglognorm distributions on the real
-scale (i.e. mu and sigma)? If FALSE (the default) Fisher information is
+scale (i.e. mu and sigma). If FALSE (the default) Fisher information is
 returned for prevalence (theta) and correlation (rho) instead.}
+
+\item{catch_dist}{An object of class `distribution` (e.g. produced by
+`nb_catch()`) defining the distribution of the possible catch. For
+`fi_pool_random` catch is for the whole survey. For
+`fi_pool_cluster_random` catch is per cluster (i.e. cluster size) sizes}
+
+\item{pool_strat}{function Defines a rule for how a number of units will be
+divided into pools. Must take a single numeric argument and return a named
+list of pool sizes and pool numbers. `pool_max_size()` and
+`pool_target_number` provide convenience functions for defining common
+pooling strategies.}
+
+\item{max_iter}{numeric Maximum number of iterations (possible catch sizes)
+to consider when calculating expected FI over random catch sizes. Generally
+needs to be large enough so that the nearly all catch sizes will be less
+than `max_iter` otherwise algorithm will terminate early (with a warning)}
+
+\item{rel_tol}{numeric Relative tolerance for determining convergence when
+calculating expected FI over random catch sizes. Must be positive and
+should be much smaller than 1.}
 }
 \value{
-A numeric value of the Fisher information
+The Fisher information for prevalence (`fi_pool()`) or the Fisher
+  information matrix for prevalence and intra-cluster correlation
+  (`fi_pool_cluster()` and `fi_pool_cluster_random()`)
 }
 \description{
-`fi_pool()` and `fi_pool_cluster()` calculates the Fisher Information for
-pool testing strategies for a given number and size of pools, where the
-sensitivity and specificity of the test are known. `fi_pool()` calculates the
-Fisher information for the prevalence for simple random surveys.
-`fi_pool_cluster()` calculates the two-by-two Fisher information matrix for
-prevalence and within-cluster correlation for cluster survey designs.
+`fi_pool()` and `fi_pool_cluster()` calculate Fisher information (FI) for
+pool-tested surveys with a known number and size of pools. `fi_pool_random()`
+and `fi_pool_cluster_random()` calculate FI for surveys where the number of
+units is random. `fi_pool()` and `fi_pool_random` calculates the Fisher
+information for the prevalence for simple random surveys. `fi_pool_cluster()`
+and `fi_pool_cluster_random()` calculate the two-by-two Fisher information
+matrix for prevalence and within-cluster correlation for cluster survey
+designs.
 }
 \examples{
 fi_pool(
-  pool_size = 10, prevalence = 0.95, sensitivity = 0.95, specificity = 0.99
+  pool_size = 10, prevalence = 0.01, sensitivity = 0.95, specificity = 0.99
   )
 
 fi_pool_cluster(
   pool_size = 10, pool_number = 5, prevalence = 0.01,
   correlation = 0.05, sensitivity = 0.95, specificity = 0.99
   )
+
+fi_pool_random(
+  catch_dist = nb_catch(mean = 10, variance = 50),
+  pool_strat = pool_target_number(target_number = 2),
+  prevalence = 0.01,
+  sensitivity = 0.95, specificity = 0.99)
+
+fi_pool_cluster_random(
+  catch_dist = nb_catch(mean = 10, variance = 50),
+  pool_strat = pool_target_number(target_number = 2),
+  prevalence = 0.01, correlation = 0.05,
+  sensitivity = 0.95, specificity = 0.99,
+  form = 'logitnorm')
+
 }
