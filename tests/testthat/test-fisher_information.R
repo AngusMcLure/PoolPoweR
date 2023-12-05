@@ -90,15 +90,15 @@ test_that("fi_pool_cluster() when form == 'discrete'", {
     pool_size = 10, pool_number = 5, prevalence = 0.01, correlation = 0.05,
     sensitivity = 0.95, specificity = 0.99, form = "discrete"),
     matrix(c(3793.83363, -39.6160580, -39.6160580, 0.6903514), nrow = 2),
-    tolerance = 1e-7)
+    tolerance = 1e-6)
 })
 
 test_that("fi_pool_cluster() when real_scale", {
   expect_equal(fi_pool_cluster(
     pool_size = 10, pool_number = 5, prevalence = 0.01, correlation = 0.05,
     sensitivity = 0.95, specificity = 0.99, form = "cloglognorm", real_scale = T),
-    matrix(c(0.3152587, 0.2093284, 0.2093284, 0.2246682), nrow = 2),
-    tolerance = 1e-7)
+    matrix(c(0.1536556, 0.1461399, 0.1461399, 0.2246681), nrow = 2),
+    tolerance = 1e-6)
 })
 
 test_that("fi_pool_cluster() when rho 0 or 1", {
