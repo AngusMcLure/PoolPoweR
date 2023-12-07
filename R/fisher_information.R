@@ -418,7 +418,7 @@ fi_pool_cluster <- function(pool_size,
     ys <- do.call(expand.grid, purrr::map(N, ~ (0:.x)))
     
     # calculate Fisher information matrix for alternative parameters on the real scale
-    integrand <- function(z, y) { # note that this functions need to be vectorised for z
+    integrand_real <- function(z, y) { # note that this functions need to be vectorised for z
       
       out <- numeric(length(z))
       for (j in 1:length(z)){
@@ -438,22 +438,20 @@ fi_pool_cluster <- function(pool_size,
       }
       out
     }
-    
-    
-    
+  
     
     integrand_mu <- function(z, y) {
-      integrand(z, y) * (z - mu) / sigma^2
+      integrand_real(z, y) * (z - mu) / sigma^2
     }
     
     integrand_sigma <- function(z, y) {
-      integrand(z, y) * ((z - mu)^2 - sigma^2) / sigma^3
+      integrand_real(z, y) * ((z - mu)^2 - sigma^2) / sigma^3
     }
     
     tol <- .Machine$double.eps^0.8
     lik <- apply(ys, 1, function(y) {
-      #plot(\(x){integrand(x,y)}, from = mu - 4 * sigma, to = mu + 4 * sigma, main = paste('integrand', y), n = 1000)
-      stats::integrate(integrand, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
+      #plot(\(x){integrand_real(x,y)}, from = mu - 4 * sigma, to = mu + 4 * sigma, main = paste('integrand_real', y), n = 1000)
+      stats::integrate(integrand_real, -Inf, Inf, y = y, rel.tol = tol, abs.tol = tol)$value *
         prod(choose(N, y))
     })
     
@@ -509,11 +507,11 @@ fi_pool_cluster <- function(pool_size,
         stats::dnorm(z, mean = mu, sd = sigma) * ((z - mu)^2 - sigma^2) / sigma^3 * invlink(z)
       }
       
-      # note that this function is the integrand for the dv/dmu where v non-centred second moment. To calculate drho/dmu we make corrections later in terms of theta, rho and dtheta/dmu
+      # note that this function is the integrand for the dv/dmu where v is non-centred second moment. To calculate drho/dmu we make corrections later in terms of theta, rho and dtheta/dmu
       integrand_drho_dmu <- function(z) {
         stats::dnorm(z, mean = mu, sd = sigma) * (z - mu) / sigma^2 * invlink(z)^2
       }
-      # note that this function is the integrand for the dv/dsigma where v non-centred second moment. To calculate drho/dsigma we make corrections later in terms of theta, rho and dtheta/dsigma
+      # note that this function is the integrand for the dv/dsigma where v is non-centred second moment. To calculate drho/dsigma we make corrections later in terms of theta, rho and dtheta/dsigma
       integrand_drho_dsigma <- function(z) {
         stats::dnorm(z, mean = mu, sd = sigma) * ((z - mu)^2 - sigma^2) / sigma^3 * invlink(z)^2
       }
