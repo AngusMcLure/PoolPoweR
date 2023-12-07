@@ -10,6 +10,8 @@
 \item{x}{An object of class `pool_strat` (typically produced by one of the
 built-in functions for generating them such as `pool_max_size()` and
 `pool_taget_number()`}
+
+\item{...}{Ignored}
 }
 \description{
 Methods for pool_strat obejcts
