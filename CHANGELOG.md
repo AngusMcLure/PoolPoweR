@@ -13,31 +13,40 @@ and this project adheres to
 
 ### [v1.0.0]
 - CRAN release
-- Add pkgdown site #20  
-- [ ] What is the MVP required for a CRAN release?
+- Add pkgdown site (#20)  
+- Implement codecov.io (#5)
+- Add PoolPoweR-package.R (#18)  
+- Configure and optimise GHA workflows
 
 ### [vX]
-**Focus:** Package
-- [ ] Fix integrand issue (#21)
-- [ ] Implement codecov.io (#5)
-- [ ] Refactor functions i.e. break down into smaller ones for readability (#26)
-- [ ] Configure and optimise GHA workflows 
+**Focus:** Enhancements  
+- Refactor functions i.e. break down into smaller ones for readability (#26)
 
-### [vX]
+### [v0.1.3] - 2023-12-22
 **Focus:** Documentation
-- [ ] Revise documentation so majority @inheritParams fi_pool
-- [ ] Rename interval [#13](https://github.com/AngusMcLure/PoolPoweR/issues/13)
-- [ ] Update docs with cluster and non-cluster cases
-[#14](https://github.com/AngusMcLure/PoolPoweR/issues/14)
-- [ ] Add PoolPoweR-package.R (#18)  
-- [ ] Move descriptions to details  
+- Revise documentation so majority @inheritParams fi_pool (#28)
+- Rename interval (#13)  
+- Update docs with cluster and non-cluster cases (#14) 
+- Move descriptions to details  
+
+### [v0.1.2] - 2023-12-15  
+- Implement warnings for input checks (#3, #27)
+- Include tests with expected inputs (#27, #34)  
 
 ### [v0.1.1] - 2023-12-08
-- Update tests to pass new additions (#29, #30, #32)
 - Add check_rho() to input_check() (#32)  
-- Document optimise_random_prevalence() arguments #31
 
 ## [Available]  
+
+### [v0.1.1] - 2023-12-07  
+
+#### Added
+- Class system `pool_strat_methods.R` for `catch_distribution()` (#15)  
+
+#### Fixed
+- Documentation for `_random()` functions and `pooling_strategies.R` (#31)
+- Tests (#29, #30)
+- Multiple local function definitions for `integrand` (#21)
 
 ### [v0.1.0] - 2023-12-05  
 
