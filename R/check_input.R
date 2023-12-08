@@ -8,6 +8,7 @@ check_input <- function(argument_name, input_value) {
   if(argument_name %in% geq0) check_geq(argument_name, input_value, min = 0)
   else if(argument_name %in% geq1) check_geq(argument_name, input_value, min = 1)
   else if(argument_name %in% range) check_in_range(argument_name, input_value)
+  else if(argument_name == "correlation") check_rho(input_value)
   else if(argument_name == "form") check_form(input_value)
   else if(argument_name == "real_scale") check_scale(input_value)
   else if(argument_name == "cost_cluster") check_cost_cluster(input_value)

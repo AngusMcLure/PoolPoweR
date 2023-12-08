@@ -150,7 +150,7 @@ test_that("fi_pool_cluster() fails when integral input parameters are so extreme
 })
 
 test_that("fi_pool_cluster() fails when likelihoods or derivatives do not add up", {
-  # SLOW (doesn't scale with pool size, number, and vector length)
+  # Previously did not scale with pool size, number, and vector length
   expect_error(
     fi_pool_cluster(
       pool_size = c(5, 10),
