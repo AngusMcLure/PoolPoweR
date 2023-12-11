@@ -29,7 +29,7 @@ test_that("fi_pool_cluster() outputs a 2x2 matrix for input vectors of length 2"
     pool_size = c(1, 2), pool_number = c(5, 10), prevalence = 0.01, correlation = 0.05,
     sensitivity = 0.95, specificity = 0.99)
   exp <- matrix(c(926.41807, -23.055960, -23.055960, 9.535592), nrow = 2)
-  expect_true(matrix_rel_diff(act, exp, tolerance = 1e-7))
+  expect_true(matrix_rel_diff(act, exp, tolerance = 1e-8))
 })
 
 # Input argument checks --------------------------------------------------------

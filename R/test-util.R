@@ -11,16 +11,10 @@ numeric_rel_diff <- function(act, exp, tolerance) {
 }
 
 matrix_rel_diff <- function(act, exp, tolerance) {
-  cm <- matrix(c(1,1,1,1), nrow = 2)
-  comp <- all.equal(act/exp, cm)
-  #comp <- mean(abs(act-exp)/mean(exp))
-  if(is.logical(comp)) return(TRUE) # All values are perfectly equal
+  mean_rd <- mean(abs(act-exp)/mean(exp))
+  if(mean_rd < tolerance) TRUE
   else {
-    mean_rel_diff <- as.numeric(strsplit(comp, " ")[[1]][4])
-    if(mean_rel_diff < tolerance) return(TRUE)
-    else {
-      warning(glue::glue("mean_rel_diff: {mean_rel_diff} is >= tolerance: {tolerance}"))
-      return(FALSE)
-    }
+    warning(glue::glue("Mean relative difference: {mean_rd} is >= tolerance: {tolerance}"))
+    FALSE
   }
 }
