@@ -1,37 +1,21 @@
 test_that("fi_pool() works with expected input ranges", {
-  # Tests mainly to ensure same outputs when refactoring fi_pool internals
   # This one has reasonable params
-  expect_equal(fi_pool(
-    pool_size = 10, prevalence = 0.01, sensitivity = 0.95, specificity = 0.99),
-    820.1759, tolerance = 1e-4
-  )
+  act <- fi_pool(pool_size = 10, prevalence = 0.01, sensitivity = 0.95, specificity = 0.99)
+  expect_true(numeric_rel_diff(act, 820.175856686646, tolerance = 1e-15))
+
   # These ones do not really
-  expect_equal(
-    fi_pool(
-      pool_size = 10,
-      prevalence = 0.7,
-      sensitivity = 0.8,
-      specificity = 0.9
-    ),
-    1.186457e-07,
-    tolerance = 1e-6
-  )
-  expect_equal(
-    fi_pool(
-      pool_size = 20,
-      prevalence = 0.55,
-      sensitivity = 0.9,
-      specificity = 0.6
-    ),
-    7.376202e-11,
-    tolerance = 1e-6
-  )
-  expect_true(is.nan(fi_pool(
-    pool_size = 10,
-    prevalence = 1,
-    sensitivity = 1,
-    specificity = 1
-  )))
+  act <- fi_pool(pool_size = 10, prevalence = 0.7, sensitivity = 0.8, specificity = 0.9)
+  expect_true(numeric_rel_diff(act, 1.18645717782e-07, tolerance = 1e-6)) # previously 1e-7
+
+  act <- fi_pool(pool_size = 20, prevalence = 0.55, sensitivity = 0.9, specificity = 0.6)
+  expect_true(numeric_rel_diff(act, 7.37620180817331e-11, tolerance = 1e-15))
+})
+
+test_that("fi_pool() returns NaN", {
+ expect_true(
+    is.nan(
+      fi_pool(pool_size = 10, prevalence = 1, sensitivity = 1, specificity = 1))
+    )
 })
 
 test_that("fi_pool_cluster() outputs a 2x2 matrix for input vectors of length 2", {
@@ -39,13 +23,13 @@ test_that("fi_pool_cluster() outputs a 2x2 matrix for input vectors of length 2"
     pool_size = 10, pool_number = 5, prevalence = 0.01, correlation = 0.05,
     sensitivity = 0.95, specificity = 0.99)
   exp <- matrix(c(1880.3484, -125.47514, -125.4751, 23.71574), nrow = 2)
-  expect_true(relative_difference(act, exp, tolerance = 1e-7))
+  expect_true(matrix_rel_diff(act, exp, tolerance = 1e-7))
 
   act <- fi_pool_cluster(
     pool_size = c(1, 2), pool_number = c(5, 10), prevalence = 0.01, correlation = 0.05,
     sensitivity = 0.95, specificity = 0.99)
   exp <- matrix(c(926.41807, -23.055960, -23.055960, 9.535592), nrow = 2)
-  expect_true(relative_difference(act, exp, tolerance = 1e-7))
+  expect_true(matrix_rel_diff(act, exp, tolerance = 1e-7))
 })
 
 # Input argument checks --------------------------------------------------------
