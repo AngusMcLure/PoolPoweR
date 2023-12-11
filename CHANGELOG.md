@@ -33,9 +33,6 @@ and this project adheres to
 - Implement warnings for input checks (#3, #27)
 - Include tests with expected inputs (#27, #34)  
 
-### [v0.1.1] - 2023-12-08
-- Add check_rho() to input_check() (#32)  
-
 ## [Available]  
 
 ### [v0.1.1] - 2023-12-07  
@@ -47,6 +44,7 @@ and this project adheres to
 - Documentation for `_random()` functions and `pooling_strategies.R` (#31)
 - Tests (#29, #30)
 - Multiple local function definitions for `integrand` (#21)
+- check_rho() added to input_check() (#32)
 
 ### [v0.1.0] - 2023-12-05  
 
@@ -90,5 +88,7 @@ also had extreme parameters.
 - GitHub Action workflows `check-standard` and `test-coverage` implemented (#5)  
 
 [upcoming]:
+[0.1.1]:
+[0.1.0]:
 [0.0.2]:
 [0.0.1]:

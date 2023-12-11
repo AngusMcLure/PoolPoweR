@@ -1,4 +1,3 @@
-# Tolerance to address floating point precision errors
 test_that("fi_pool() works with expected input ranges", {
   # Tests mainly to ensure same outputs when refactoring fi_pool internals
   # This one has reasonable params
@@ -36,16 +35,17 @@ test_that("fi_pool() works with expected input ranges", {
 })
 
 test_that("fi_pool_cluster() outputs a 2x2 matrix for input vectors of length 2", {
-  expect_true(all.equal(fi_pool_cluster(
+  act <- fi_pool_cluster(
     pool_size = 10, pool_number = 5, prevalence = 0.01, correlation = 0.05,
-    sensitivity = 0.95, specificity = 0.99),
-    matrix(c(1880.3484, -125.47514, -125.4751, 23.71574), nrow = 2), tolerance = 1e-5
-    ))
-  expect_true(all.equal(fi_pool_cluster(
+    sensitivity = 0.95, specificity = 0.99)
+  exp <- matrix(c(1880.3484, -125.47514, -125.4751, 23.71574), nrow = 2)
+  expect_true(relative_difference(act, exp, tolerance = 1e-7))
+
+  act <- fi_pool_cluster(
     pool_size = c(1, 2), pool_number = c(5, 10), prevalence = 0.01, correlation = 0.05,
-    sensitivity = 0.95, specificity = 0.99),
-    matrix(c(926.41807, -23.055960, -23.055960, 9.535592), nrow = 2), tolerance = 1e-6
-    ))
+    sensitivity = 0.95, specificity = 0.99)
+  exp <- matrix(c(926.41807, -23.055960, -23.055960, 9.535592), nrow = 2)
+  expect_true(relative_difference(act, exp, tolerance = 1e-7))
 })
 
 # Input argument checks --------------------------------------------------------
