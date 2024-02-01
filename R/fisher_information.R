@@ -545,7 +545,7 @@ fi_pool_random <- function(catch_dist,
                            prevalence,
                            sensitivity,
                            specificity,
-                           max_iter = 1000,
+                           max_iter = 10000,
                            rel_tol = 1e-6){
   
   #Calculates Fisher information (FI) for an unknown/random catch by taking

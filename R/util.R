@@ -32,7 +32,7 @@ mu_sigma_linknorm <- function(.mean, .var,link,invlink){
 
 
 ev <- function(fn, distr,
-               max_iter = 1000,
+               max_iter = 10000,
                rel_tol = 1e-6){
   
   #Helper function for calculating the expected value of a function with respect
@@ -81,6 +81,8 @@ ev <- function(fn, distr,
       terminate <- TRUE
     }
     if(iter == max_iter){
+      print(rel_incr)
+      print(iter)
       terminate <- TRUE
       warning('Reached max_iter without converging. Increase max_iter')
       plot(xs, E_incr)
