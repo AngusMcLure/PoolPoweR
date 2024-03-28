@@ -150,7 +150,7 @@ fi_pool_cluster <- function(pool_size,
   }
   
   log_one_minus_phi <- function(p){
-    #1 - varphi - (1 - psi - varphi) * (1 - p)^s
+    # log(1 - varphi - (1 - psi - varphi) * (1 - p)^s)
     if(p %in% 0:1){
       log1p(- (1 - (1 - p)^s) * varphi - (1 - p)^s * (1 - psi))
     }else if(varphi == 1){

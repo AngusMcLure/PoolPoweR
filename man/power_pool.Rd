@@ -100,15 +100,17 @@ determine whether population prevalence is different from a threshold.
 to achieve a specified power.
 }
 \examples{
-power_pool(
-  sample_size = 1000, pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02
-  )
+power_pool(sample_size = 1000, pool_size = 10, pool_number = 2,
+           prevalence_null = 0.01, prevalence_alt = 0.02)
 
-sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02)
+sample_size_pool(pool_size = 10, pool_number = 2,
+                 prevalence_null = 0.01, prevalence_alt = 0.02)
 
-power_pool(
-  sample_size = 1000, pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01
-  )
+power_pool(sample_size = 1000, pool_size = 10, pool_number = 2,
+           prevalence_null = 0.01, prevalence_alt = 0.02,
+           correlation = 0.01)
 
-sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
+sample_size_pool(pool_size = 10, pool_number = 2,
+                 prevalence_null = 0.01, prevalence_alt = 0.02,
+                 correlation = 0.01)
 }

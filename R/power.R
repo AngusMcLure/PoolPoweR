@@ -53,17 +53,19 @@
 #' @export
 #'
 #' @examples
-#' power_pool(
-#'   sample_size = 1000, pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02
-#'   )
+#' power_pool(sample_size = 1000, pool_size = 10, pool_number = 2,
+#'            prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
-#' sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02)
+#' sample_size_pool(pool_size = 10, pool_number = 2,
+#'                  prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
-#' power_pool(
-#'   sample_size = 1000, pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01
-#'   )
+#' power_pool(sample_size = 1000, pool_size = 10, pool_number = 2,
+#'            prevalence_null = 0.01, prevalence_alt = 0.02,
+#'            correlation = 0.01)
 #'
-#' sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
+#' sample_size_pool(pool_size = 10, pool_number = 2,
+#'                  prevalence_null = 0.01, prevalence_alt = 0.02,
+#'                  correlation = 0.01)
 
 
 power_pool <- function(sample_size, pool_size, pool_number, prevalence_null, prevalence_alt,

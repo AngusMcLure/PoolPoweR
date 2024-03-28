@@ -4,7 +4,6 @@
 ^Presentations*
 ^InProgress*
 ^Figures*
-^R/detection.R
 ^LICENSE\.md$
 ^dev_resources$
 ^\.github$

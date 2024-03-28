@@ -1,21 +1,23 @@
 #' Power and sample size calculations for estimating population prevalence from
 #' pooled samples
 #'
-#' `power_pool()` calculates the statistical power of a pooled survey design to
-#' determine whether population prevalence is different from a threshold.
-#' `sample_size_pool()` calculate the sample size required for a pooled survey
-#' to achieve a specified power.
+#' `detection_errors()` and `detection_errors_cluster()` calculate the typeI
+#' (false detection probability) and typeII error (false non-detection or
+#' 1-power of detection) for pool-tested surveys with a known number and size of
+#' pools. `detection_errors_random()` and `detection_errors_cluster_random()`
+#' calculate errors for surveys where the number of units is random.
+#' `detection_error()` and `detection_errors_random()` calculates the errors for
+#' simple random surveys. `detection_errors_cluster()` and
+#' `detection_errors_cluster_random()` calculate errors cluster survey designs.
 #'
-#' @param sample_size numeric The total number of units across the whole sample.
-#'   Should be greater than `pool_size * pool_number`
 #' @param pool_size numeric The number of units per pool. Must be a numeric
 #'   value or vector of values greater than 0.
 #' @param pool_number numeric The number of pools per cluster. Must be a integer
 #'   value or a vector of integer values greater than or equal to 1.
-#' @param prevalence_null,prevlanece_alt numeric The proportion of units that
-#'   carry the marker of interest (i.e. true positive). `prevalence_null` is the
-#'   threshold to compare to and `prevlanece_alt` is the design prevalence. Must
-#'   be be a numeric value between 0 and 1, inclusive of both.
+#' @param cluster_number numeric The number of clusters.
+#' @param prevalence numeric The proportion of units that carry the marker of
+#'   interest (i.e. true positive) that you want wish to assess your survey
+#'   against
 #' @param correlation numeric The correlation between test results within a
 #'   single cluster (units in different clusters are assumed to be
 #'   uncorrelated). Must be a numeric value between 0 and 1, inclusive of both.
@@ -31,121 +33,201 @@
 #'   a true negative. Must be a numeric value between 0 and 1, inclusive of
 #'   both. A value of 1 indicates that the test can perfectly identify all true
 #'   negatives.
-#' @param sig_level numeric Signifigance level for statistical test. Defaults to
-#'   0.05. Must be strictly between 0 and 1.
-#' @param alternative string The kind of comparison to make. If "greater"
-#'   (default) or "less" computes power of tests for one-sided comparisons that
-#'   population prevalence (`prevalence_alt`) is greater than or less than the
-#'   reference on threshold prevalence (`prevalence_null`) respectively. If
-#'   "two.sided" computes power for a two-sided comparison (`power_pool()`
-#'   only).
 #' @param form string The distribution used to model the cluster-level
 #'   prevalence and correlation of units within cluster. Select one of "beta",
 #'   "logitnorm" or "cloglognorm". See details.
-#' @param link string Transformation to be applied to prevalence estimates for
-#'   the purposes of calculating confidence intervals. Options are 'identity'
-#'   (i.e. no transformation), 'logit' (default), 'cloglog' and 'log'.
 #'
 #'
-#' @return The statistical power of the proposed design with regards to
-#'   comparing prevalence to a threshold (`power_pool()`)
+#' @return A list with the typeI (false detection probability) and typeII error
+#'   (false non-detection or 1-power of detection)
 #' @export
 #'
 #' @examples
-#' power_pool(sample_size = 1000, pool_size = 10, pool_number = 2,
-#'            prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
-#' sample_size_pool(pool_size = 10, pool_number = 2,
-#'                  prevalence_null = 0.01, prevalence_alt = 0.02)
+#' detection_errors(pool_size = 10, pool_number = 30,
+#'                  prevalence = 0.01,
+#'                  sensitivity = 1, specificity = 0.999)
 #'
-#' power_pool(sample_size = 1000, pool_size = 10,
-#'            pool_number = 2, prevalence_null = 0.01,
-#'            prevalence_alt = 0.02, correlation = 0.01)
-#'
-#' sample_size_pool(pool_size = 10, pool_number = 2,
-#'                 prevalence_null = 0.01, prevalence_alt = 0.02,
-#'                 correlation = 0.01)
+#' detection_errors_cluster(pool_size = 10, pool_number = 6, cluster_number = 5,
+#'                          prevalence = 0.01, correlation = 0.1,
+#'                          sensitivity = 1, specificity = 0.999
+#'                          )
 
 
-
-
-
-detection_errors <- function(prevalence, pool_size,N,M,sensitivity, specificity, correlation,
-                             periods_per_location, periods_total,
-                             catch.mean, catch.dispersion,
-                             form = 'beta', link = NULL){
-  rho <- correlation
+detection_errors <- function(pool_size, pool_number, prevalence,
+                             sensitivity = 1, specificity = 1){
   
-  link <- switch(form, logitnorm = qlogis, cloglognorm = cloglog, beta = function(x){x})
-  invlink <- switch(form, logitnorm = plogis, cloglognorm = cloglog_inv, beta = function(x){x})
+  #typeI <- 1 - specificity^pool_number
+  typeI <- -expm1(log(specificity)*pool_number) # equivalent to the above commented code, but more numerically stable for high specificity and large pool_number*cluster_number
   
-  if(form %in% c('logitnorm', 'cloglognorm')){
-    pars <- mu_sigma_linknorm(prevalence,prevalence * (1- prevalence) * rho, link, invlink)
-    mu <- pars[1]
-    sigma <- pars[2]
-    density <- function(x){dnorm(x, mean = mu, sd = sigma)}
-  }
-  if(form == 'beta'){
-    Alpha <- prevalence * (rho^-1 -1)
-    Beta <- (1-prevalence) * (rho^-1 -1)
-    density <- function(x){dbeta(x,Alpha, Beta)}
-  }
+  #might need to make some adjustments for numeric stability for extreme values
+  typeII <- (1 - (1 - sensitivity - specificity) *
+               (1-prevalence)^pool_size - sensitivity)^(pool_number)
   
-  if(missing(N) & missing(periods_per_location) & missing(periods_total)){
-    stop('One of the following must be provided:
-             N (the number of groups per location)
-             periods_per_location (the number of sampling periods per location)
-             periods_total (total the number of sampling periods across all locations)')
-  }
-  if(missing(N) & missing(periods_per_location)){
-    periods_per_location <- periods_total/M
-    if(periods_per_location%%1) warning('Inputs imply a fractional number of sampling periods per sampling location')
-  }
-  
-  if(rho == 0){
-    if(missing(N)){ #Case where we assume random (negative binomial) catch sizes at each location
-      warning('For correlation = 0, a heirarchical/cluster survey design with M locations and p sampling periods per location is approximately equivalent a simple random survey with p*M sampling periods per location')
-      const <- catch.dispersion/(catch.mean + catch.dispersion)
-      q <- (1 - (1 - sensitivity - specificity) * (1-prevalence)^pool_size - sensitivity) ^ (1/pool_size)
-      typeII <- (const/(1 - q * (1 - const)))^(M * periods_per_location * catch.dispersion)
-    }else{
-      warning('For correlation = 0, a heirarchical/cluster survey design with M locations and N groups per location is equivalent a simple random survey with N*M groups')
-      typeII <- (1 - (1 - sensitivity - specificity) * (1-prevalence)^pool_size - sensitivity)^(N*M)
-    }
-  }else{
-    if(missing(N)){ #Case where we assume random (negative binomial) catch sizes at each location
-      f <- function(x){
-        q <- (1 - (1 - sensitivity - specificity) * (1-invlink(x))^pool_size - sensitivity) ^ (1/pool_size)
-        density(x) *
-          (const/(1 - q * (1 - const)))^(periods_per_location * catch.dispersion)
-      }
-      typeI <- 1 - (const/(1 - specificity^(1/pool_size) * (1 - const)))^(periods_per_location * catch.dispersion * M)
-      
-    }else{ #Case with fixed number of pools per site
-      f <- function(x){
-        density(x) *
-          (1 - (1 - sensitivity - specificity) * (1-invlink(x))^pool_size - sensitivity)^N
-      }
-    }
-    #typeI <-   1- specificity^(N * M)
-    typeI <- -expm1(log(specificity)*N * M) # equivalent to the above commented code, but more numerically stable for high specificity and large N*M
-  }
-  
-  lb <- switch(form, logitnorm = -Inf, cloglognorm = -Inf, beta = 0)
-  ub <- switch(form, logitnorm = Inf, cloglognorm = Inf, beta = 1)
-  
-  
-  if(form == 'beta'){
-    if(missing(N)){stop('Have not implemented negative binomial sample size with form = beta. It has a nice closed form solution in terms of hypergeometric functions for the case with a perfec test. See paper notes')}
-    if(sensitivity ==1){
-      typeII <- exp((log(specificity) * N + lbeta(Alpha, Beta + pool_size * N) -  lbeta(Alpha, Beta)) * M)
-    }else{
-      z <- 0:N
-      summand <- (1-sensitivity)^N/beta(Alpha, Beta) * choose(N,z) * ((1-sensitivity - specificity)/(sensitivity - 1))^z * beta(Alpha, Beta + z * pool_size)
-      typeII <- sum(summand) ^ M
-    }
-  }else{
-    typeII <- stats::integrate(f, lb, ub)$value ^ M
-  }
   list(typeI = typeI, typeII = typeII)
 }
+
+
+#' @rdname detection_errors
+#' @export
+ 
+detection_errors_cluster <- function(pool_size, pool_number, cluster_number,
+                                     prevalence, correlation,
+                                     sensitivity = 1, specificity = 1,
+                                     form = 'beta'){
+  
+  if(correlation == 0){
+    warning('For correlation = 0, a heirarchical/cluster survey design with',
+            'cluster_number locations and pool_number groups per location is',
+            'equivalent a simple random survey with pool_number*cluster_number groups')
+    return(detection_errors(pool_size, pool_number * cluster_number,
+                            prevalence, sensitivity, specificity))
+  }
+  
+  if(form %in% c('logitnorm', 'cloglognorm')){
+    
+    link <- switch(form, logitnorm = stats::qlogis, cloglognorm = cloglog)
+    invlink <- switch(form, logitnorm = stats::plogis, cloglognorm = cloglog_inv)
+    
+    pars <- mu_sigma_linknorm(prevalence, prevalence * (1 - prevalence) * correlation,
+                              link, invlink)
+    mu <- pars[1]
+    sigma <- pars[2]
+    
+    f <- function(x){
+      #stats::dnorm(x, mean = mu, sd = sigma) * (1 - (1 - sensitivity - specificity) * (1-invlink(x))^pool_size - sensitivity)^pool_number
+      #equivalent to the above, but more numerically stable
+      exp(stats::dnorm(x, mean = mu, sd = sigma, log = TRUE) +
+            log_1_minus_phi(invlink(x), pool_size, sensitivity, specificity) * pool_number)
+    }
+    
+    typeII <- stats::integrate(f, -Inf, Inf)$value ^ cluster_number
+    
+    
+  }else if(form == 'beta'){
+    Alpha <-      prevalence  * (correlation^-1 - 1)
+    Beta  <- (1 - prevalence) * (correlation^-1 - 1)
+    
+    if(sensitivity == 1){
+      typeII <- exp(
+        cluster_number * (log(specificity) * pool_number +
+                            lbeta(Alpha, Beta + pool_size * pool_number) - 
+                            lbeta(Alpha, Beta)) 
+      )
+    }else{
+      z <- 0:pool_number
+      summand <- (1-sensitivity)^pool_number/beta(Alpha, Beta) * choose(pool_number,z) *
+        ((1-sensitivity - specificity)/(sensitivity - 1))^z *
+        beta(Alpha, Beta + z * pool_size)
+      typeII <- sum(summand) ^ cluster_number
+    }
+    
+  }else{
+    stop(form, 'is not a valid input for form. Supported values are "beta", "logitnorm", and "cloglognorm"')
+  }
+  
+  #typeI <-   1- specificity^(pool_number * cluster_number)
+  typeI <- -expm1(log(specificity)*pool_number * cluster_number) # equivalent to the above commented code, but more numerically stable for high specificity and large pool_number*cluster_number
+  
+  list(typeI = typeI, typeII = typeII)
+}
+
+# An old version which combined all the detection_errors functions into one
+# Still need to spin out the other functions
+
+# detection_errors <- function(pool_size, pool_number, cluster_number,
+#                                      prevalence, correlation,
+#                                      sensitivity = 1, specificity = 1,
+#                                      periods_per_location, periods_total,
+#                                      catch.mean, catch.dispersion,
+#                                      form = 'beta', link = NULL){
+#   
+#   link <- switch(form, logitnorm = stats::qlogis, cloglognorm = cloglog, beta = function(x){x})
+#   invlink <- switch(form, logitnorm = stats::plogis, cloglognorm = cloglog_inv, beta = function(x){x})
+#   
+#   if(form %in% c('logitnorm', 'cloglognorm')){
+#     pars <- mu_sigma_linknorm(prevalence, prevalence * (1 - prevalence) * correlation, link, invlink)
+#     mu <- pars[1]
+#     sigma <- pars[2]
+#     density <- function(x){stats::dnorm(x, mean = mu, sd = sigma)}
+#   }
+#   if(form == 'beta'){
+#     Alpha <- prevalence * (correlation^-1 -1)
+#     Beta <- (1-prevalence) * (correlation^-1 -1)
+#     density <- function(x){dbeta(x,Alpha, Beta)}
+#   }
+#   
+#   if(missing(pool_number) & missing(periods_per_location) & missing(periods_total)){
+#     stop('One of the following must be provided:
+#              pool_number (the number of groups per location)
+#              periods_per_location (the number of sampling periods per location)
+#              periods_total (total the number of sampling periods across all locations)')
+#   }
+#   if(missing(pool_number) & missing(periods_per_location)){
+#     periods_per_location <- periods_total/cluster_number
+#     if(periods_per_location%%1) warning('Inputs imply a fractional number of sampling periods per sampling location')
+#   }
+#   
+#   if(correlation == 0){
+#     if(missing(pool_number)){ #Case where we assume random (negative binomial) catch sizes at each location
+#       warning('For correlation = 0, a heirarchical/cluster survey design with cluster_number locations and p sampling periods per location is approximately equivalent a simple random survey with p*cluster_number sampling periods per location')
+#       const <- catch.dispersion/(catch.mean + catch.dispersion)
+#       q <- (1 - (1 - sensitivity - specificity) * (1-prevalence)^pool_size - sensitivity) ^ (1/pool_size)
+#       typeII <- (const/(1 - q * (1 - const)))^(cluster_number * periods_per_location * catch.dispersion)
+#     }else{
+#       warning('For correlation = 0, a heirarchical/cluster survey design with cluster_number locations and pool_number groups per location is equivalent a simple random survey with pool_number*cluster_number groups')
+#       typeII <- (1 - (1 - sensitivity - specificity) * (1-prevalence)^pool_size - sensitivity)^(pool_number*cluster_number)
+#     }
+#   }else{
+#     if(missing(pool_number)){ #Case where we assume random (negative binomial) catch sizes at each location
+#       f <- function(x){
+#         q <- (1 - (1 - sensitivity - specificity) * (1-invlink(x))^pool_size - sensitivity) ^ (1/pool_size)
+#         density(x) *
+#           (const/(1 - q * (1 - const)))^(periods_per_location * catch.dispersion)
+#       }
+#       typeI <- 1 - (const/(1 - specificity^(1/pool_size) * (1 - const)))^(periods_per_location * catch.dispersion * cluster_number)
+#       
+#     }else{ #Case with fixed number of pools per site
+#       f <- function(x){
+#         density(x) *
+#           (1 - (1 - sensitivity - specificity) * (1-invlink(x))^pool_size - sensitivity)^pool_number
+#       }
+#     }
+#     #typeI <-   1- specificity^(pool_number * cluster_number)
+#     typeI <- -expm1(log(specificity)*pool_number * cluster_number) # equivalent to the above commented code, but more numerically stable for high specificity and large pool_number*cluster_number
+#   }
+#   
+#   lb <- switch(form, logitnorm = -Inf, cloglognorm = -Inf, beta = 0)
+#   ub <- switch(form, logitnorm = Inf, cloglognorm = Inf, beta = 1)
+#   
+#   
+#   if(form == 'beta'){
+#     if(missing(pool_number)){stop('Have not implemented negative binomial sample size with form = beta. It has a nice closed form solution in terms of hypergeometric functions for the case with a perfec test. See paper notes')}
+#     if(sensitivity ==1){
+#       typeII <- exp((log(specificity) * pool_number + lbeta(Alpha, Beta + pool_size * pool_number) -  lbeta(Alpha, Beta)) * cluster_number)
+#     }else{
+#       z <- 0:pool_number
+#       summand <- (1-sensitivity)^pool_number/beta(Alpha, Beta) * choose(pool_number,z) * ((1-sensitivity - specificity)/(sensitivity - 1))^z * beta(Alpha, Beta + z * pool_size)
+#       typeII <- sum(summand) ^ cluster_number
+#     }
+#   }else{
+#     typeII <- stats::integrate(f, lb, ub)$value ^ cluster_number
+#   }
+#   list(typeI = typeI, typeII = typeII)
+# }
+
+
+# Helper function giving log of 1 minus the pool positivity probability for a
+# given prevalence (p), pool size (s), sensitivity (spec), and specificity
+# (spec). Not to be exported
+log_one_minus_phi <- function(p, s, sens, spec){
+  # log(1 - sens - (1 - spec - sens) * (1 - p)^s)
+  if(p %in% 0:1){
+    log1p(- (1 - (1 - p)^s) * sens - (1 - p)^s * (1 - spec))
+  }else if(sens == 1){
+    log1p(-p) * s + log(spec)
+  }else{
+    log(expm1(log1p(-p) * s) * (sens - 1) + exp(log1p(-p) * s) * spec)
+  }
+}
+
