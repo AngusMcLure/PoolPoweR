@@ -12,9 +12,9 @@
 #'   value or vector of values greater than 0.
 #' @param pool_number numeric The number of pools per cluster. Must be a integer
 #'   value or a vector of integer values greater than or equal to 1.
-#' @param prevalence_null,prevlanece_alt numeric The proportion of units that
+#' @param prevalence_null,prevalence_alt numeric The proportion of units that
 #'   carry the marker of interest (i.e. true positive). `prevalence_null` is the
-#'   threshold to compare to and `prevlanece_alt` is the design prevalence. Must
+#'   threshold to compare to and `prevalence_alt` is the design prevalence. Must
 #'   be be a numeric value between 0 and 1, inclusive of both.
 #' @param correlation numeric The correlation between test results within a
 #'   single cluster (units in different clusters are assumed to be
@@ -31,7 +31,8 @@
 #'   a true negative. Must be a numeric value between 0 and 1, inclusive of
 #'   both. A value of 1 indicates that the test can perfectly identify all true
 #'   negatives.
-#' @param sig_level numeric Signifigance level for statistical test. Defaults to
+#' @param power numeric The desired statistical power of the survey.
+#' @param sig_level numeric Significance level for statistical test. Defaults to
 #'   0.05. Must be strictly between 0 and 1.
 #' @param alternative string The kind of comparison to make. If "greater"
 #'   (default) or "less" computes power of tests for one-sided comparisons that
@@ -82,12 +83,12 @@ power_pool <- function(sample_size, pool_size, pool_number, prevalence_null, pre
   
   # if(real.scale & form %in% c('logitnorm', 'cloglognorm')){ g <- function(x){
   # #calculate mu from theta and rho .var <- correlation * x * (1-x)
-  # mu_sigma_linknorm(x,.var, link = switch(form, logitnorm = qlogis,
+  # mu_sigma_linknorm(x,.var, link = switch(form, logitnorm = stats::qlogis,
   # cloglognorm = cloglog), invlink = switch(form, logitnorm = plogis,
   # cloglognorm = cloglog_inv))[1] } gdivinv <- function(x){1}
   # }else{
   g <- switch(link,
-              logit = qlogis,
+              logit = stats::qlogis,
               cloglog = cloglog,
               log = log,
               identity = function(x){x})
@@ -119,10 +120,10 @@ power_pool <- function(sample_size, pool_size, pool_number, prevalence_null, pre
   #print(fi0)
   
   power <- switch(alternative,
-                  less = pnorm(((g(theta0) - g(thetaa))  - qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
-                  greater = pnorm(((g(thetaa) - g(theta0))  - qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
-                  two.sided = pnorm(((g(theta0) - g(thetaa))  - qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)) +
-                    pnorm(((g(thetaa) - g(theta0))  - qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)),
+                  less = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
+                  greater = stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
+                  two.sided = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)) +
+                    stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)),
                   stop('invalid alternative. options are less, greater, and two.sided')
   )
   power
@@ -134,7 +135,7 @@ power_pool <- function(sample_size, pool_size, pool_number, prevalence_null, pre
 sample_size_pool <- function(pool_size, pool_number,
                              prevalence_null, prevalence_alt,
                              correlation = 0, sensitivity = 1, specificity = 1,
-                             power = 0.8, sig.level = 0.05,
+                             power = 0.8, sig_level = 0.05,
                              alternative = 'greater',
                              form = 'beta',
                              link = 'logit'){
@@ -154,7 +155,7 @@ sample_size_pool <- function(pool_size, pool_number,
   }
   
   g <- switch(link,
-              logit = qlogis,
+              logit = stats::qlogis,
               cloglog = cloglog,
               log = log,
               identity = function(x){x})
@@ -183,5 +184,5 @@ sample_size_pool <- function(pool_size, pool_number,
                           form = form))[1,1]
   
   # Note that the below is correct for either kind of one-sided test, but not for two sided tests
-  ((qnorm(power)/sqrt(unit_fia) + qnorm(1 - sig.level)/sqrt(unit_fi0))/(g(theta0) - g(thetaa)))^2
+  ((stats::qnorm(power)/sqrt(unit_fia) + stats::qnorm(1 - sig_level)/sqrt(unit_fi0))/(g(theta0) - g(thetaa)))^2
 }

@@ -30,7 +30,7 @@ sample_size_pool(
   sensitivity = 1,
   specificity = 1,
   power = 0.8,
-  sig.level = 0.05,
+  sig_level = 0.05,
   alternative = "greater",
   form = "beta",
   link = "logit"
@@ -46,9 +46,9 @@ value or vector of values greater than 0.}
 \item{pool_number}{numeric The number of pools per cluster. Must be a integer
 value or a vector of integer values greater than or equal to 1.}
 
-\item{prevalence_null, prevlanece_alt}{numeric The proportion of units that
+\item{prevalence_null, prevalence_alt}{numeric The proportion of units that
 carry the marker of interest (i.e. true positive). `prevalence_null` is the
-threshold to compare to and `prevlanece_alt` is the design prevalence. Must
+threshold to compare to and `prevalence_alt` is the design prevalence. Must
 be be a numeric value between 0 and 1, inclusive of both.}
 
 \item{correlation}{numeric The correlation between test results within a
@@ -69,7 +69,7 @@ a true negative. Must be a numeric value between 0 and 1, inclusive of
 both. A value of 1 indicates that the test can perfectly identify all true
 negatives.}
 
-\item{sig_level}{numeric Signifigance level for statistical test. Defaults to
+\item{sig_level}{numeric Significance level for statistical test. Defaults to
 0.05. Must be strictly between 0 and 1.}
 
 \item{alternative}{string The kind of comparison to make. If "greater"
@@ -86,6 +86,8 @@ prevalence and correlation of units within cluster. Select one of "beta",
 \item{link}{string Transformation to be applied to prevalence estimates for
 the purposes of calculating confidence intervals. Options are 'identity'
 (i.e. no transformation), 'logit' (default), 'cloglog' and 'log'.}
+
+\item{power}{numeric The desired statistical power of the survey.}
 }
 \value{
 The statistical power of the proposed design with regards to

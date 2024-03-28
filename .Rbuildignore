@@ -4,9 +4,10 @@
 ^Presentations*
 ^InProgress*
 ^Figures*
-man/hello.Rd
+^R/detection.R
 ^LICENSE\.md$
 ^dev_resources$
 ^\.github$
 ^PoolPoweR\.Rproj$
 ^CHANGELOG.md$
+
