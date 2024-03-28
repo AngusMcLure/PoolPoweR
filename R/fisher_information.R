@@ -10,9 +10,9 @@
 #' designs.
 #'
 #' @param pool_size numeric The number of units per pool. Must be a numeric
-#'   value greater than or equal to 0.
-#' @param pool_number numeric The number of pools per cluster. Must be a numeric
-#'   value greater than or equal to 0.
+#'   value or vector of values greater than 0.
+#' @param pool_number numeric The number of pools per cluster. Must be a integer
+#'   value or a vector of integer values greater than or equal to 1.
 #' @param catch_dist An object of class `distribution` (e.g. produced by
 #'   `nb_catch()`) defining the distribution of the possible catch. For
 #'   `fi_pool_random` catch is for the whole survey. For

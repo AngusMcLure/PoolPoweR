@@ -26,7 +26,7 @@ fi_pool_random(
   prevalence,
   sensitivity,
   specificity,
-  max_iter = 1000,
+  max_iter = 10000,
   rel_tol = 1e-06
 )
 
@@ -45,7 +45,7 @@ fi_pool_cluster_random(
 }
 \arguments{
 \item{pool_size}{numeric The number of units per pool. Must be a numeric
-value greater than or equal to 0.}
+value or vector of values greater than 0.}
 
 \item{prevalence}{numeric The proportion of units that carry the marker of
 interest (i.e. true positive). Must be be a numeric value between 0 and 1,
@@ -61,8 +61,8 @@ a true negative. Must be a numeric value between 0 and 1, inclusive of
 both. A value of 1 indicates that the test can perfectly identify all true
 negatives.}
 
-\item{pool_number}{numeric The number of pools per cluster. Must be a numeric
-value greater than or equal to 0.}
+\item{pool_number}{numeric The number of pools per cluster. Must be a integer
+value or a vector of integer values greater than or equal to 1.}
 
 \item{correlation}{numeric The correlation between test results within a
 single cluster (units in different clusters are assumed to be
