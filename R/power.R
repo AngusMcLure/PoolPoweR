@@ -49,7 +49,9 @@
 #'
 #'
 #' @return The statistical power of the proposed design with regards to
-#'   comparing prevalence to a threshold (`power_pool()`)
+#'   comparing prevalence to a threshold (`power_pool()`) or a list with the
+#'   sample size (number of sites, pools, and units) required to achieve desired
+#'   power (`sample_size_pool()`)
 #' @export
 #'
 #' @examples
@@ -186,5 +188,12 @@ sample_size_pool <- function(pool_size, pool_number,
                           form = form))[1,1]
   
   # Note that the below is correct for either kind of one-sided test, but not for two sided tests
-  ((stats::qnorm(power)/sqrt(unit_fia) + stats::qnorm(1 - sig_level)/sqrt(unit_fi0))/(g(theta0) - g(thetaa)))^2
+  ssraw <- ((stats::qnorm(power)/sqrt(unit_fia) + stats::qnorm(1 - sig_level)/sqrt(unit_fi0))/(g(theta0) - g(thetaa)))^2
+  
+  total_sites <- ceiling(ssraw/(pool_number * pool_size))
+  total_pools <- total_sites * pool_number
+  total_units <- total_pools * pool_size
+  
+  return(list(sites = total_sites, pools = total_pools, units = total_units))
+
 }
