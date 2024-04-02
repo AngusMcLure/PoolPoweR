@@ -6,12 +6,21 @@
 #' `sample_size_pool()` calculate the sample size required for a pooled survey
 #' to achieve a specified power.
 #'
-#' @param sample_size numeric The total number of units across the whole sample.
-#'   Should be greater than `pool_size * pool_number`
 #' @param pool_size numeric The number of units per pool. Must be a numeric
 #'   value or vector of values greater than 0.
 #' @param pool_number numeric The number of pools per cluster. Must be a integer
 #'   value or a vector of integer values greater than or equal to 1.
+#' @param cluster_number numeric The total number of clusters in a cluster
+#'   survey design (should be greater than 1) or 1 surveys where all collection
+#'   happens at a single site or collected via simple random sampling from the
+#'   target population.
+#' @param catch_dist An object of class `distribution` (e.g. produced by
+#'   `nb_catch()`) defining the distribution of the possible catch.
+#' @param pool_strat function Defines a rule for how a number of units will be
+#'   divided into pools. Must take a single numeric argument and return a named
+#'   list of pool sizes and pool numbers. `pool_max_size()` and
+#'   `pool_target_number()` provide convenience functions for defining common
+#'   pooling strategies.
 #' @param prevalence_null,prevalence_alt numeric The proportion of units that
 #'   carry the marker of interest (i.e. true positive). `prevalence_null` is the
 #'   threshold to compare to and `prevalence_alt` is the design prevalence. Must
@@ -46,51 +55,66 @@
 #' @param link string Transformation to be applied to prevalence estimates for
 #'   the purposes of calculating confidence intervals. Options are 'identity'
 #'   (i.e. no transformation), 'logit' (default), 'cloglog' and 'log'.
+#' @param max_iter numeric Maximum number of iterations (possible catch sizes)
+#'   to consider when calculating expected FI over random catch sizes. Generally
+#'   needs to be large enough so that the nearly all catch sizes will be less
+#'   than `max_iter` otherwise algorithm will terminate early (with a warning)
+#' @param rel_tol numeric Relative tolerance for determining convergence when
+#'   calculating expected FI over random catch sizes. Must be positive and
+#'   should be much smaller than 1.
 #'
 #'
 #' @return The statistical power of the proposed design with regards to
 #'   comparing prevalence to a threshold (`power_pool()`) or a list with the
-#'   sample size (number of sites, pools, and units) required to achieve desired
-#'   power (`sample_size_pool()`)
+#'   sample size (number of clusters, pools, and units) required to achieve
+#'   desired power (`sample_size_pool()`)
 #' @export
 #'
 #' @examples
-#' power_pool(sample_size = 1000, pool_size = 10, pool_number = 2,
+#' power_pool(pool_size = 10, pool_number = 2, cluster_number = 50,
 #'            prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
 #' sample_size_pool(pool_size = 10, pool_number = 2,
 #'                  prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
-#' power_pool(sample_size = 1000, pool_size = 10, pool_number = 2,
+#' power_pool(pool_size = 10, pool_number = 2, cluster_number = 50,
 #'            prevalence_null = 0.01, prevalence_alt = 0.02,
 #'            correlation = 0.01)
-#'
+#' 
 #' sample_size_pool(pool_size = 10, pool_number = 2,
 #'                  prevalence_null = 0.01, prevalence_alt = 0.02,
 #'                  correlation = 0.01)
+#' 
+#' power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50,
+#'                   prevalence_null = 0.01, prevalence_alt = 0.02,
+#'                   correlation = 0.01)
+#' 
+#' sample_size_pool_random(nb_catch(20,25), pool_target_number(2),
+#'                         prevalence_null = 0.01, prevalence_alt = 0.02,
+#'                          correlation = 0.01)
 
 
-power_pool <- function(sample_size, pool_size, pool_number, prevalence_null, prevalence_alt,
+
+power_pool <- function(pool_size, pool_number, cluster_number,
+                       prevalence_null, prevalence_alt,
                        correlation = 0, sensitivity = 1, specificity = 1,
                        sig_level = 0.05, alternative = 'greater',
-                       form = 'beta', link = 'logit'){
-  if(sample_size < pool_size*pool_number){
-    stop('The total number of units in sample (sample_size) must be greater than the pool size times pool number (pool_size * pool_number)')
+                       form = 'logitnorm', link = 'logit'){
+  if(correlation > 0 & cluster_number <= 1){
+    stop('The number of clusters (cluster_number) must be (substantially) greater than 1 if there is non-zero correlation between units in a cluster')
   }
+  
+  if(correlation > 0 & cluster_number <= 10){
+    warning('Estimated power may be unreliable if number of clusters (cluster_number) is less than 10')
+  }
+  
+  if(correlation == 0 & cluster_number * pool_number <= 10){
+    warning('Estimated power may be unreliable if total number of pools (cluster_number * pool_number) is less than 10')
+  }
+  
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
   
-  # The idea here was that the hypothesis test would be for mu rather than theta, with
-  # the idea that this would be equivalent to a test on theta, i.e. if mu0 =
-  # g(theta0)<g(thetaa) = mua then theta0 < thetaa. However, this is not true
-  # since differences in rho/correlations allows for theta0 > thetaa
-  
-  # if(real.scale & form %in% c('logitnorm', 'cloglognorm')){ g <- function(x){
-  # #calculate mu from theta and rho .var <- correlation * x * (1-x)
-  # mu_sigma_linknorm(x,.var, link = switch(form, logitnorm = stats::qlogis,
-  # cloglognorm = cloglog), invlink = switch(form, logitnorm = plogis,
-  # cloglognorm = cloglog_inv))[1] } gdivinv <- function(x){1}
-  # }else{
   g <- switch(link,
               logit = stats::qlogis,
               cloglog = cloglog,
@@ -102,9 +126,8 @@ power_pool <- function(sample_size, pool_size, pool_number, prevalence_null, pre
                     cloglog = function(x){-log1p(-x) * (1-x)},
                     log = function(x){x},
                     identity = function(x){1})
-  # }
   
-  fia <- sample_size/(pool_size*pool_number) * gdivinv(thetaa)^2 /
+  fia <- cluster_number * gdivinv(thetaa)^2 /
     solve(fi_pool_cluster(pool_size = pool_size,
                           pool_number = pool_number,
                           prevalence = thetaa,
@@ -113,7 +136,7 @@ power_pool <- function(sample_size, pool_size, pool_number, prevalence_null, pre
                           specificity = specificity,
                           form = form))[1,1]
   #print(fia)
-  fi0 <- sample_size/(pool_size*pool_number) * gdivinv(theta0)^2 /
+  fi0 <- cluster_number * gdivinv(theta0)^2/
     solve(fi_pool_cluster(pool_size = pool_size,
                           pool_number = pool_number,
                           prevalence = theta0,  #should this be theta0 or thetaa?
@@ -136,12 +159,87 @@ power_pool <- function(sample_size, pool_size, pool_number, prevalence_null, pre
 #' @rdname power_pool
 #' @export
 
+power_pool_random <- function(catch_dist, pool_strat, cluster_number,
+                              prevalence_null, prevalence_alt,
+                              correlation = 0, sensitivity = 1, specificity = 1,
+                              sig_level = 0.05, alternative = 'greater',
+                              form = 'logitnorm', link = 'logit',
+                              max_iter = 10000, rel_tol = 1e-6){
+  
+  exp_pools <- ev(\(catch) sum(pool_strat(catch)$pool_number),
+                  catch_dist, max_iter, rel_tol) * cluster_number
+  
+  if(correlation > 0 & cluster_number <= 1){
+    stop('The number of clusters (cluster_number) must be (substantially) greater than 1 if there is non-zero correlation between units in a cluster')
+  }else if(cluster_number < 1){
+    stop('The number of clusters (cluster_number) must be at least 1.')
+  }
+  
+  if(correlation > 0 & cluster_number <= 10){
+    warning('Estimated power may be unreliable if number of clusters (cluster_number) is less than 10')
+  }
+  
+  if(correlation == 0 & exp_pools <= 10){
+    warning('The expected number of pools from this survey is less than ', ceiling(exp_pools),
+            '. Estimated power may be unreliable if total number of pools is less than 10')
+  }
+  
+  thetaa <- prevalence_alt
+  theta0 <- prevalence_null
+  
+  g <- switch(link,
+              logit = stats::qlogis,
+              cloglog = cloglog,
+              log = log,
+              identity = function(x){x})
+  
+  gdivinv <- switch(link,
+                    logit = function(x){x * (1-x)},
+                    cloglog = function(x){-log1p(-x) * (1-x)},
+                    log = function(x){x},
+                    identity = function(x){1})
+  
+  fia <- cluster_number * gdivinv(thetaa)^2 /
+    solve(fi_pool_cluster_random(catch_dist = catch_dist, 
+                                 pool_strat = pool_strat, 
+                                 prevalence = thetaa,
+                                 correlation = correlation,
+                                 sensitivity = sensitivity,
+                                 specificity = specificity,
+                                 form = form,
+                                 max_iter = max_iter,
+                                 rel_tol = rel_tol-6))[1,1]
+  
+  fi0 <- cluster_number * gdivinv(theta0)^2 /
+    solve(fi_pool_cluster_random(catch_dist = catch_dist, 
+                                 pool_strat = pool_strat, 
+                                 prevalence = theta0,  #should this be theta0 or thetaa?
+                                 correlation = correlation,
+                                 sensitivity = sensitivity,
+                                 specificity = specificity,
+                                 form = form,
+                                 max_iter = max_iter,
+                                 rel_tol = rel_tol-6))[1,1]
+
+  power <- switch(alternative,
+                  less    = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
+                  greater = stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
+                  two.sided = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)) +
+                    stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)),
+                  stop('invalid alternative. options are less, greater, and two.sided')
+  )
+  power
+}
+
+#' @rdname power_pool
+#' @export
+
 sample_size_pool <- function(pool_size, pool_number,
                              prevalence_null, prevalence_alt,
                              correlation = 0, sensitivity = 1, specificity = 1,
                              power = 0.8, sig_level = 0.05,
                              alternative = 'greater',
-                             form = 'beta',
+                             form = 'logitnorm',
                              link = 'logit'){
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
@@ -170,7 +268,7 @@ sample_size_pool <- function(pool_size, pool_number,
                     log = function(x){x},
                     identity = function(x){1})
   
-  unit_fia <- 1/(pool_size*pool_number) * gdivinv(thetaa)^2 /
+  fia <- gdivinv(thetaa)^2 /
     solve(fi_pool_cluster(pool_size = pool_size,
                           pool_number = pool_number,
                           prevalence = thetaa,
@@ -178,7 +276,7 @@ sample_size_pool <- function(pool_size, pool_number,
                           sensitivity = sensitivity,
                           specificity = specificity,
                           form = form))[1,1]
-  unit_fi0 <- 1/(pool_size*pool_number) * gdivinv(theta0)^2 /
+  fi0 <- gdivinv(theta0)^2 /
     solve(fi_pool_cluster(pool_size = pool_size,
                           pool_number = pool_number,
                           prevalence = theta0,
@@ -188,12 +286,88 @@ sample_size_pool <- function(pool_size, pool_number,
                           form = form))[1,1]
   
   # Note that the below is correct for either kind of one-sided test, but not for two sided tests
-  ssraw <- ((stats::qnorm(power)/sqrt(unit_fia) + stats::qnorm(1 - sig_level)/sqrt(unit_fi0))/(g(theta0) - g(thetaa)))^2
+  total_clusters_raw <- ((stats::qnorm(power)/sqrt(fia) + stats::qnorm(1 - sig_level)/sqrt(fi0))/(g(theta0) - g(thetaa)))^2
   
-  total_sites <- ceiling(ssraw/(pool_number * pool_size))
-  total_pools <- total_sites * pool_number
+  total_clusters <- ceiling(total_clusters_raw)
+  total_pools <- total_clusters * pool_number
   total_units <- total_pools * pool_size
   
-  return(list(sites = total_sites, pools = total_pools, units = total_units))
+  return(list(clusters = total_clusters, pools = total_pools, units = total_units))
+  
+}
 
+
+
+
+#' @rdname power_pool
+#' @export
+#' 
+
+sample_size_pool_random <- function(catch_dist, pool_strat,
+                                    prevalence_null, prevalence_alt,
+                                    correlation = 0, sensitivity = 1, specificity = 1,
+                                    power = 0.8, sig_level = 0.05,
+                                    alternative = 'greater',
+                                    form = 'logitnorm', link = 'logit',
+                                    max_iter = 10000, rel_tol = 1e-6){
+  thetaa <- prevalence_alt
+  theta0 <- prevalence_null
+  
+  if(!(alternative %in% c('less', 'greater'))){
+    stop('currently only supports one-sided tests. Valid options for alternative are less and greater')
+  }
+  
+  if(alternative == 'less' & theta0 < thetaa){
+    stop('If alternative == "less", then prevalence.altnerative must be less than or equal to prevalence_null' )
+  }
+  
+  if(alternative == 'greater' & theta0 > thetaa){
+    stop('If alternative == "greater", then prevalence.altnerative must be greater than or equal to prevalence_null' )
+  }
+  
+  g <- switch(link,
+              logit = stats::qlogis,
+              cloglog = cloglog,
+              log = log,
+              identity = function(x){x})
+  
+  gdivinv <- switch(link,
+                    logit = function(x){x * (1-x)},
+                    cloglog = function(x){-log1p(-x) * (1-x)},
+                    log = function(x){x},
+                    identity = function(x){1})
+  
+  fia <- gdivinv(thetaa)^2 /
+    solve(fi_pool_cluster_random(catch_dist = catch_dist, 
+                                 pool_strat = pool_strat, 
+                                 prevalence = thetaa,
+                                 correlation = correlation,
+                                 sensitivity = sensitivity,
+                                 specificity = specificity,
+                                 form = form,
+                                 max_iter = max_iter,
+                                 rel_tol = rel_tol-6))[1,1]
+  fi0 <- gdivinv(theta0)^2 /
+    solve(fi_pool_cluster_random(catch_dist = catch_dist, 
+                                 pool_strat = pool_strat, 
+                                 prevalence = theta0,  #should this be theta0 or thetaa?
+                                 correlation = correlation,
+                                 sensitivity = sensitivity,
+                                 specificity = specificity,
+                                 form = form,
+                                 max_iter = max_iter,
+                                 rel_tol = rel_tol-6))[1,1]
+  
+  # Note that the below is correct for either kind of one-sided test, but not for two sided tests
+  total_cluster_raw <- ((stats::qnorm(power)/sqrt(fia) + stats::qnorm(1 - sig_level)/sqrt(fi0))/(g(theta0) - g(thetaa)))^2
+  
+  total_clusters <- ceiling(total_cluster_raw)
+  exp_total_units <- round(mean(catch_dist) * total_clusters,1)
+  exp_total_pools <- round(ev(\(catch) sum(pool_strat(catch)$pool_number),
+                              catch_dist, max_iter, rel_tol) * total_clusters, 1)
+  
+  return(list(clusters = total_clusters,
+              expected_pools = exp_total_pools,
+              expected_units = exp_total_units))
+  
 }

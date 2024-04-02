@@ -2,14 +2,16 @@
 % Please edit documentation in R/power.R
 \name{power_pool}
 \alias{power_pool}
+\alias{power_pool_random}
 \alias{sample_size_pool}
+\alias{sample_size_pool_random}
 \title{Power and sample size calculations for estimating population prevalence from
 pooled samples}
 \usage{
 power_pool(
-  sample_size,
   pool_size,
   pool_number,
+  cluster_number,
   prevalence_null,
   prevalence_alt,
   correlation = 0,
@@ -17,8 +19,25 @@ power_pool(
   specificity = 1,
   sig_level = 0.05,
   alternative = "greater",
-  form = "beta",
+  form = "logitnorm",
   link = "logit"
+)
+
+power_pool_random(
+  catch_dist,
+  pool_strat,
+  cluster_number,
+  prevalence_null,
+  prevalence_alt,
+  correlation = 0,
+  sensitivity = 1,
+  specificity = 1,
+  sig_level = 0.05,
+  alternative = "greater",
+  form = "logitnorm",
+  link = "logit",
+  max_iter = 10000,
+  rel_tol = 1e-06
 )
 
 sample_size_pool(
@@ -32,19 +51,38 @@ sample_size_pool(
   power = 0.8,
   sig_level = 0.05,
   alternative = "greater",
-  form = "beta",
+  form = "logitnorm",
   link = "logit"
+)
+
+sample_size_pool_random(
+  catch_dist,
+  pool_strat,
+  prevalence_null,
+  prevalence_alt,
+  correlation = 0,
+  sensitivity = 1,
+  specificity = 1,
+  power = 0.8,
+  sig_level = 0.05,
+  alternative = "greater",
+  form = "logitnorm",
+  link = "logit",
+  max_iter = 10000,
+  rel_tol = 1e-06
 )
 }
 \arguments{
-\item{sample_size}{numeric The total number of units across the whole sample.
-Should be greater than `pool_size * pool_number`}
-
 \item{pool_size}{numeric The number of units per pool. Must be a numeric
 value or vector of values greater than 0.}
 
 \item{pool_number}{numeric The number of pools per cluster. Must be a integer
 value or a vector of integer values greater than or equal to 1.}
+
+\item{cluster_number}{numeric The total number of clusters in a cluster
+survey design (should be greater than 1) or 1 surveys where all collection
+happens at a single site or collected via simple random sampling from the
+target population.}
 
 \item{prevalence_null, prevalence_alt}{numeric The proportion of units that
 carry the marker of interest (i.e. true positive). `prevalence_null` is the
@@ -87,11 +125,31 @@ prevalence and correlation of units within cluster. Select one of "beta",
 the purposes of calculating confidence intervals. Options are 'identity'
 (i.e. no transformation), 'logit' (default), 'cloglog' and 'log'.}
 
+\item{catch_dist}{An object of class `distribution` (e.g. produced by
+`nb_catch()`) defining the distribution of the possible catch.}
+
+\item{pool_strat}{function Defines a rule for how a number of units will be
+divided into pools. Must take a single numeric argument and return a named
+list of pool sizes and pool numbers. `pool_max_size()` and
+`pool_target_number()` provide convenience functions for defining common
+pooling strategies.}
+
+\item{max_iter}{numeric Maximum number of iterations (possible catch sizes)
+to consider when calculating expected FI over random catch sizes. Generally
+needs to be large enough so that the nearly all catch sizes will be less
+than `max_iter` otherwise algorithm will terminate early (with a warning)}
+
+\item{rel_tol}{numeric Relative tolerance for determining convergence when
+calculating expected FI over random catch sizes. Must be positive and
+should be much smaller than 1.}
+
 \item{power}{numeric The desired statistical power of the survey.}
 }
 \value{
 The statistical power of the proposed design with regards to
-  comparing prevalence to a threshold (`power_pool()`)
+  comparing prevalence to a threshold (`power_pool()`) or a list with the
+  sample size (number of clusters, pools, and units) required to achieve
+  desired power (`sample_size_pool()`)
 }
 \description{
 `power_pool()` calculates the statistical power of a pooled survey design to
@@ -100,17 +158,25 @@ determine whether population prevalence is different from a threshold.
 to achieve a specified power.
 }
 \examples{
-power_pool(sample_size = 1000, pool_size = 10, pool_number = 2,
+power_pool(pool_size = 10, pool_number = 2, cluster_number = 50,
            prevalence_null = 0.01, prevalence_alt = 0.02)
 
 sample_size_pool(pool_size = 10, pool_number = 2,
                  prevalence_null = 0.01, prevalence_alt = 0.02)
 
-power_pool(sample_size = 1000, pool_size = 10, pool_number = 2,
+power_pool(pool_size = 10, pool_number = 2, cluster_number = 50,
            prevalence_null = 0.01, prevalence_alt = 0.02,
            correlation = 0.01)
 
 sample_size_pool(pool_size = 10, pool_number = 2,
                  prevalence_null = 0.01, prevalence_alt = 0.02,
                  correlation = 0.01)
+
+power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50,
+                  prevalence_null = 0.01, prevalence_alt = 0.02,
+                  correlation = 0.01)
+
+sample_size_pool_random(nb_catch(20,25), pool_target_number(2),
+                        prevalence_null = 0.01, prevalence_alt = 0.02,
+                         correlation = 0.01)
 }
