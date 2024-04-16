@@ -1,0 +1,29 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: PoolPoweR
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Angus
+    family-names: McLure
+    affiliation: The Australian National University
+    orcid: 'https://orcid.org/0000-0003-2890-2703'
+  - given-names: Frederick
+    family-names: Jaya
+    orcid: 'https://orcid.org/0000-0002-4019-7026'
+    affiliation: The Australian National University
+identifiers:
+  - type: url
+    value: 'https://github.com/AngusMcLure/PoolPoweR'
+repository-code: 'https://github.com/AngusMcLure/PoolPoweR'
+abstract: >-
+  Power and Sample Size Calculations for Surveys Using Pool
+  Testing
+keywords:
+  - R
+  - Pooled testing
+license: GPL-3.0+
