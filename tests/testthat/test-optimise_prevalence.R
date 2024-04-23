@@ -158,3 +158,52 @@ test_that("Bad inputs caught in optimise_s_prevalence()", {
   expect_error(optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10, max_s = 0),
                "0 is < 1")
 })
+
+test_that(
+  "optimise_random_prevalence() with pool_max_size from tutorial example", {
+    act <- optimise_random_prevalence(catch_mean = 10, catch_variance = 12, pool_strat_family = pool_max_size, prevalence = 0.005, cost_unit = 1, cost_pool = 2, cost_period = 10, cost_cluster = 4, correlation = 0.1, sensitivity = 1, specificity = 1, max_period = 10, form = "logitnorm")
+    expect_equal(act$periods, 1)
+    expect_equal(act$cost, 0.03157523, tolerance = 1e-6)
+    expect_equal(act$catch$mean, 10)
+    expect_equal(act$catch$variance, 12)
+    expect_equal(act$catch$distribution$size, 50)
+    expect_equal(act$catch$distribution$p, 0.833, tolerance  = 1e-2)
+    expect_equal(act$pool_strat_pars$max_size, 4)
+    
+    #expect_equal(act$pool_strat, "A pooling strategy that that places units in pools of size 4 with any remainder placed in a single smaller pool.")
+    # Have to unpack function
+    expect_equal(act$pool_strat(act$pool_strat_pars$max_size)$pool_size, 4)
+    expect_equal(act$pool_strat(act$pool_strat_pars$max_size)$pool_number, 1)
+  }
+)
+
+test_that(
+  "optimise_random_prevalence() with pool_max_size and no correlation", {
+    act <- optimise_random_prevalence(catch_mean = 10, catch_variance = 12, pool_strat_family = pool_max_size, prevalence = 0.005, cost_unit = 1, cost_pool = 2, cost_period = 10, cost_cluster = 4, correlation = NA, sensitivity = 1, specificity = 1, max_period = 10, form = "logitnorm")
+    expect_equal(act$periods, NA)
+    expect_equal(act$cost, 0.0112289, tolerance = 1e-6)
+    expect_equal(act$catch$mean, 10)
+    expect_equal(act$catch$variance, 12)
+    expect_equal(act$catch$distribution$size, 50)
+    expect_equal(act$catch$distribution$p, 0.8333, tolerance  = 1e-3)
+    expect_equal(act$pool_strat_pars$max_size, 33)
+    
+    #expect_equal(act$pool_strat, "A pooling strategy that that places units in pools of size 4 with any remainder placed in a single smaller pool.")
+    # Have to unpack function
+    expect_equal(act$pool_strat(act$pool_strat_pars$max_size)$pool_size, 33)
+    expect_equal(act$pool_strat(act$pool_strat_pars$max_size)$pool_number, 1)
+  }
+)
+
+test_that(
+  "optimise_random_prevalence() with pool_target_number from tutorial example", {
+    act <- optimise_random_prevalence(catch_mean = 10, catch_variance = 12, pool_strat_family = pool_target_number, prevalence = 0.005, cost_unit = 1, cost_pool = 2, cost_period = 10, cost_cluster = 4, correlation = 0.1, sensitivity = 1, specificity = 1, max_period = 10, form = "logitnorm")
+    expect_equal(act$periods, 1)
+    expect_equal(act$cost, 0.03115158, tolerance = 1e-6)
+    expect_equal(act$catch$mean, 10)
+    expect_equal(act$catch$variance, 12)
+    expect_equal(act$catch$distribution$size, 50)
+    expect_equal(act$catch$distribution$p, 0.8333, tolerance  = 1e-3)
+    expect_equal(act$pool_strat_pars$target_number, 3)
+  }
+)
