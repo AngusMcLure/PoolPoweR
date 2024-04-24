@@ -2,21 +2,23 @@ test_that(
   "power_pool()", {
   act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02)
   expect_equal(act, 0.7617911, tolerance = 1e-6) 
-
+  
+  # With correlation
   act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
   expect_equal(act, 0.6213165, tolerance = 1e-6)
   }
 )
 
 test_that(
-  "sample_size_pool()", {
-    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02)
-    exp <- list(clusters = 55, pools = 110, units = 1100)
-    expect_equal(act, exp)
-    
-    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
-    exp <- list(clusters = 74, pools = 148, units = 1480)
-    expect_equal(act, exp)
+  "power_pool() links", {
+  act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, link = "identity")
+  expect_equal(act, 0.8448746, tolerance = 1e-6) 
+  
+  act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, link = "log")
+  expect_equal(act, 0.7598709, tolerance = 1e-6) 
+  
+  act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, link = "cloglog")
+  expect_equal(act, 0.7608382, tolerance = 1e-6) 
   }
 )
 
@@ -28,9 +30,66 @@ test_that(
 )
 
 test_that(
+  "power_pool_random() with links", {
+    act <- power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "cloglog")
+    expect_equal(act, 0.6117088, tolerance = 1e-6)
+    
+    act <- power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "log")
+    expect_equal(act, 0.6100939, tolerance = 1e-6)
+    
+    act <- power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "identity")
+    expect_equal(act, 0.7568458, tolerance = 1e-6)
+  }
+)
+
+test_that(
+  "sample_size_pool()", {
+    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02)
+    exp <- list(clusters = 55, pools = 110, units = 1100)
+    expect_equal(act, exp)
+    
+    # Correlation
+    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
+    exp <- list(clusters = 74, pools = 148, units = 1480)
+    expect_equal(act, exp)
+  }
+)
+
+test_that(
+  "sample_size_pool() links", {
+    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, link = "identity")
+    exp <- list(clusters = 43, pools = 86, units = 860)
+    expect_equal(act, exp)
+    
+    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, link = "log")
+    exp <- list(clusters = 55, pools = 110, units = 1100) # same as link = "logit"
+    expect_equal(act, exp)
+    
+    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, link = "cloglog")
+    expect_equal(act, exp) # same as link = "logit"
+  }
+)
+
+test_that(
   "sample_size_pool_random()", {
     act <- sample_size_pool_random(nb_catch(20,25), pool_target_number(2), prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
     exp <- list(clusters = 75, expected_pools = 150, expected_units = 1500)
+    expect_equal(act, exp)
+  }
+)
+
+test_that(
+  "sample_size_pool_random() links", {
+    exp <- list(clusters = 75, expected_pools = 150, expected_units = 1500) 
+    
+    act <- sample_size_pool_random(nb_catch(20,25), pool_target_number(2), prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "cloglog")
+    expect_equal(act, exp) # same as logit 
+    
+    act <- sample_size_pool_random(nb_catch(20,25), pool_target_number(2), prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "log")
+    expect_equal(act, exp) # same as logit
+    
+    act <- sample_size_pool_random(nb_catch(20,25), pool_target_number(2), prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "identity")
+    exp <- list(clusters = 59, expected_pools = 118, expected_units = 1180) 
     expect_equal(act, exp)
   }
 )
