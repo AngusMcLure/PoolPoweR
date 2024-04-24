@@ -14,5 +14,7 @@ This package is under construction. Though we are fairly confident that implemen
 ```r
 # install.packages("devtools")
 devtools::install_github("AngusMcLure/PoolPoweR")
-```
+```  
 
+## Citation  
+> McLure, A., & Jaya, F. PoolPoweR [Computer software]. https://github.com/AngusMcLure/PoolPoweR  
