@@ -153,7 +153,19 @@ power_pool <- function(pool_size, pool_number, cluster_number,
                     stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)),
                   stop('invalid alternative. options are less, greater, and two.sided')
   )
-  power
+  
+  power_size_results(
+      pool_size = pool_size,
+      pool_number = pool_number,
+      cluster_number = cluster_number,
+      prev_null = theta0,
+      prev_alt = thetaa,
+      sig_level = sig_level,
+      power = power,
+      alternative = alternative,
+      target = "power"
+  )
+  
 }
 
 #' @rdname power_pool

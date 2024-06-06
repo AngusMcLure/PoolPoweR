@@ -1,24 +1,24 @@
 test_that(
   "power_pool()", {
   act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02)
-  expect_equal(act, 0.7617911, tolerance = 1e-6) 
+  expect_equal(act$power, 0.7617911, tolerance = 1e-6) 
   
   # With correlation
   act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
-  expect_equal(act, 0.6213165, tolerance = 1e-6)
+  expect_equal(act$power, 0.6213165, tolerance = 1e-6)
   }
 )
 
 test_that(
   "power_pool() links", {
   act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, link = "identity")
-  expect_equal(act, 0.8448746, tolerance = 1e-6) 
+  expect_equal(act$power, 0.8448746, tolerance = 1e-6) 
   
   act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, link = "log")
-  expect_equal(act, 0.7598709, tolerance = 1e-6) 
+  expect_equal(act$power, 0.7598709, tolerance = 1e-6) 
   
   act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, link = "cloglog")
-  expect_equal(act, 0.7608382, tolerance = 1e-6) 
+  expect_equal(act$power, 0.7608382, tolerance = 1e-6) 
   }
 )
 
