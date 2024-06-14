@@ -321,9 +321,39 @@ sample_size_pool <- function(pool_size, pool_number,
   total_clusters <- ceiling(total_clusters_raw)
   total_pools <- total_clusters * pool_number
   total_units <- total_pools * pool_size
+  if (sensitivity == 1 && specificity == 1) {
+    perf = "a perfect"
+  } else {
+    perf = "an imperfect"
+  }
+  text = paste0(
+    "A survey design using ", perf, 
+    " diagnostic test on pooled samples with the above parameters requires a total of ",
+    total_clusters, " clusters, ", 
+    total_pools, " total pools, and ", 
+    total_units, " total units."
+  )
   
-  return(list(clusters = total_clusters, pools = total_pools, units = total_units))
-  
+  power_size_results(  
+    sensitivity = sensitivity,
+    specificity = specificity,
+    # prevalence
+    prev_null = theta0,
+    prev_alt = thetaa,
+    correlation = correlation,
+    # statistical test
+    sig_level = sig_level,
+    power = power,
+    alternative = alternative,
+    # sample design
+    pool_size = pool_size,
+    pool_number = pool_number,
+    cluster_number = total_clusters,
+    total_pools = total_pools,
+    total_units = total_units,
+    # parsing
+    text = text
+  )
 }
 
 
