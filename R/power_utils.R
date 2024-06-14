@@ -4,8 +4,21 @@
 #' and `sample_size_pool`), this class and print method ensures that outputs are
 #' stored and displayed consistently, summarising calculations results and the
 #' inputs for context.
-#'
-#' @param ... Input and inferred variables from relevant functions.
+#' 
+#' @param sensitivity .
+#' @param specificity .
+#' @param prev_null .
+#' @param prev_alt .
+#' @param correlation .
+#' @param sig_level .
+#' @param power .
+#' @param alternative .
+#' @param pool_size .
+#' @param pool_number .
+#' @param cluster_number . 
+#' @param total_pools .
+#' @param total_units .
+#' @param text chr Explanatory summary text to be printed at the end
 #'
 #' @return An object of class \code{power_size_results} containing selected
 #'   input parameters and results.
