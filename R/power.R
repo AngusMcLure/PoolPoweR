@@ -154,16 +154,34 @@ power_pool <- function(pool_size, pool_number, cluster_number,
                   stop('invalid alternative. options are less, greater, and two.sided')
   )
   
-  power_size_results(
-      pool_size = pool_size,
-      pool_number = pool_number,
-      cluster_number = cluster_number,
-      prev_null = theta0,
-      prev_alt = thetaa,
-      sig_level = sig_level,
-      power = power,
-      alternative = alternative,
-      target = "power"
+  total_pools = cluster_number * pool_number
+  total_units = total_pools * pool_size
+  if (sensitivity == 1 && specificity == 1) {
+    perf = "a perfect"
+  } else {
+    perf = "an imperfect"
+  }
+  text = paste("A survey design using", perf, "diagnostic test on pooled samples with the above parameters has a statistical power of", round(power, 3))
+  
+  power_size_results(  
+    sensitivity = sensitivity,
+    specificity = specificity,
+    # prevalence
+    prev_null = theta0,
+    prev_alt = thetaa,
+    correlation = correlation,
+    # statistical test
+    sig_level = sig_level,
+    power = power,
+    alternative = alternative,
+    # sample design
+    pool_size = pool_size,
+    pool_number = pool_number,
+    cluster_number = cluster_number,
+    total_pools = total_pools,
+    total_units = total_units,
+    # parsing
+    text = text
   )
   
 }
