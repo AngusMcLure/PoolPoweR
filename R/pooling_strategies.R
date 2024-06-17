@@ -33,9 +33,9 @@ pool_max_size <- function(max_size){
       return(list(pool_size = c(catch%%max_size, max_size), pool_number = c(1, catch%/%max_size)))
     }
   }
-  pool_strat(strat,
-             match.call(),
-             paste('places units in pools of size', max_size, 'and any remainder in a single smaller pool.'))
+  pool_strat(strat = strat,
+             call = match.call(),
+             description = paste('places units in pools of size', max_size, 'and any remainder in a single smaller pool.'))
 }
 
 #' @rdname pooling_strategies

@@ -34,6 +34,7 @@ print.pool_strat <- function(x,...){
   }else{
     cat(paste0('A pooling strategy that ', attr(x, 'description')))
   }
+  invisible(x)
 }
 
 
