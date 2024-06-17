@@ -2,22 +2,59 @@
 % Please edit documentation in R/power_utils.R
 \name{power_size_results}
 \alias{power_size_results}
-\title{S3 Class and Methods for Power and Sample Size Calculation Outputs}
+\title{S3 class for power and sample size calculation outputs with pooled tests}
 \usage{
 power_size_results(
-  pool_size,
-  pool_number,
-  cluster_number,
+  sensitivity,
+  specificity,
   prev_null,
   prev_alt,
+  correlation,
   sig_level,
   power,
   alternative,
-  target
+  pool_size = NA,
+  pool_number = NA,
+  catch_dist = NA,
+  pool_strat = NA,
+  cluster_number,
+  total_pools,
+  total_units,
+  text
 )
 }
 \arguments{
-\item{...}{Input and inferred variables from relevant functions.}
+\item{sensitivity}{.}
+
+\item{specificity}{.}
+
+\item{prev_null}{.}
+
+\item{prev_alt}{.}
+
+\item{correlation}{.}
+
+\item{sig_level}{.}
+
+\item{power}{.}
+
+\item{alternative}{.}
+
+\item{pool_size}{required for power_pool and sample_size_pool}
+
+\item{pool_number}{required for power_pool and sample_size_pool}
+
+\item{catch_dist}{required for power_pool_random and sample_size_pool_random}
+
+\item{pool_strat}{required for power_pool_random and sample_size_pool_random}
+
+\item{cluster_number}{.}
+
+\item{total_pools}{.}
+
+\item{total_units}{.}
+
+\item{text}{chr Explanatory summary text to be printed at the end}
 }
 \value{
 An object of class \code{power_size_results} containing selected
@@ -31,8 +68,14 @@ inputs for context.
 }
 \examples{
 # For power_pool()
-result <- power_size_results(pool_size = pool_size, pool_number = pool_number, cluster_number = cluster_number,
-                             prev_null = theta0, prev_alt = theta0, sig_level = sig_level,
-                             power = power, alternative = alternative, target = "power")
-print(result)
+result <- power_size_results(
+  sensitivity = 1, specificity = 1, prev_null = 0.01, prev_alt = 0.02,
+  correlation = 0, sig_level = 0.05, power = 0.76, # rounded in e.g. only
+  alternative = "greater", pool_size = 10, pool_number = 2, 
+  cluster_number = 50, total_pools = 100, total_units = 1000,
+  text = "... has a statistical power of 0.762"
+)
+
+print(result) # pretty print
+result$stat_test$power
 }
