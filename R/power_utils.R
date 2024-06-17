@@ -13,8 +13,10 @@
 #' @param sig_level .
 #' @param power .
 #' @param alternative .
-#' @param pool_size .
-#' @param pool_number .
+#' @param pool_size required for power_pool and sample_size_pool
+#' @param pool_number required for power_pool and sample_size_pool
+#' @param catch_dist required for power_pool_random and sample_size_pool_random
+#' @param pool_strat required for power_pool_random and sample_size_pool_random
 #' @param cluster_number . 
 #' @param total_pools .
 #' @param total_units .
@@ -38,8 +40,9 @@
 #' result$stat_test$power
 power_size_results <- function(sensitivity, specificity, prev_null, prev_alt, 
                                correlation, sig_level, power, alternative,
-                               pool_size, pool_number, cluster_number, 
-                               total_pools, total_units, text) {
+                               pool_size = NA, pool_number = NA, catch_dist = NA, 
+                               pool_strat = NA, cluster_number, total_pools, 
+                               total_units, text) {
   
   # Group parameters to different lists for printing
   diag_test <- list(
@@ -62,13 +65,25 @@ power_size_results <- function(sensitivity, specificity, prev_null, prev_alt,
     alternative = alternative
   )
   
-  sample_design <- list(
-    title = "SAMPLE DESIGN",
-    pool_size = pool_size,
-    pool_number = pool_number,
-    cluster_number = cluster_number,
-    total_pools = total_pools,
-    total_units = total_units
+  if (!is.na(pool_size) && !is.na(pool_number)) {
+    temp_design <- list(
+      pool_size = pool_size,
+      pool_number = pool_number,
+      total_pools = total_pools,
+      total_units = total_units
+    )
+  } else { # *_random
+   temp_design <- list(
+      catch_mean = mean(catch_dist),
+      catch_variance = distributions3::variance(catch_dist),
+      pool_strat = pool_strat
+    )
+  }
+  
+  sample_design <- c(
+    list(title = "SAMPLE DESIGN"),
+    temp_design,
+    list(cluster_number = cluster_number)
   )
   
   results <- structure(

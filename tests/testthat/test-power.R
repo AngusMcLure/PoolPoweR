@@ -45,20 +45,20 @@ test_that(
 test_that(
   "power_pool_random()", {
     act <- power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
-    expect_equal(act, 0.613303, tolerance = 1e-6)
+    expect_equal(act$stat_test$power, 0.613303, tolerance = 1e-6)
   }
 )
 
 test_that(
   "power_pool_random() with links", {
     act <- power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "cloglog")
-    expect_equal(act, 0.6117088, tolerance = 1e-6)
+    expect_equal(act$stat_test$power, 0.6117088, tolerance = 1e-6)
     
     act <- power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "log")
-    expect_equal(act, 0.6100939, tolerance = 1e-6)
+    expect_equal(act$stat_test$power, 0.6100939, tolerance = 1e-6)
     
     act <- power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "identity")
-    expect_equal(act, 0.7568458, tolerance = 1e-6)
+    expect_equal(act$stat_test$power, 0.7568458, tolerance = 1e-6)
   }
 )
 

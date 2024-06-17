@@ -13,8 +13,10 @@ power_size_results(
   sig_level,
   power,
   alternative,
-  pool_size,
-  pool_number,
+  pool_size = NA,
+  pool_number = NA,
+  catch_dist = NA,
+  pool_strat = NA,
   cluster_number,
   total_pools,
   total_units,
@@ -38,9 +40,13 @@ power_size_results(
 
 \item{alternative}{.}
 
-\item{pool_size}{.}
+\item{pool_size}{required for power_pool and sample_size_pool}
 
-\item{pool_number}{.}
+\item{pool_number}{required for power_pool and sample_size_pool}
+
+\item{catch_dist}{required for power_pool_random and sample_size_pool_random}
+
+\item{pool_strat}{required for power_pool_random and sample_size_pool_random}
 
 \item{cluster_number}{.}
 
