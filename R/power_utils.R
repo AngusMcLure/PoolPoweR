@@ -41,8 +41,9 @@
 power_size_results <- function(sensitivity, specificity, prev_null, prev_alt, 
                                correlation, sig_level, power, alternative,
                                pool_size = NA, pool_number = NA, catch_dist = NA, 
-                               pool_strat = NA, cluster_number, total_pools, 
-                               total_units, text) {
+                               pool_strat = NA, cluster_number, total_pools = NA, 
+                               total_units = NA, exp_total_pools = NA, 
+                               exp_total_units = NA, text) {
   
   # Group parameters to different lists for printing
   diag_test <- list(
@@ -65,14 +66,20 @@ power_size_results <- function(sensitivity, specificity, prev_null, prev_alt,
     alternative = alternative
   )
   
-  if (!is.na(pool_size) && !is.na(pool_number)) {
+  # TODO: refactor so temp_design is passed as an arg to class
+  if (!is.na(pool_size) && !is.na(pool_number)) { # power_pool, sample_size_pool
     temp_design <- list(
       pool_size = pool_size,
       pool_number = pool_number,
       total_pools = total_pools,
       total_units = total_units
     )
-  } else { # *_random
+  } else if (!is.na(exp_total_pools) && !is.na(exp_total_units)) { # sample_size_pool_random
+    temp_design <- list(
+      exp_total_pools = exp_total_pools,
+      exp_total_units = exp_total_units
+    )
+  } else { # power_pool_random
    temp_design <- list(
       catch_mean = mean(catch_dist),
       catch_variance = distributions3::variance(catch_dist),
