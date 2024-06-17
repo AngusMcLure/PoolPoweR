@@ -123,3 +123,10 @@ print.power_size_results <- function(x, ...) {
   cat("\n", text)
   invisible(x)
 }
+
+is_perfect_test <- function(sensitivity, specificity) {
+  if (sensitivity == 1 && specificity == 1) {
+    return("a perfect")
+  }
+  return("an imperfect")
+}
