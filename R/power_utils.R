@@ -5,21 +5,23 @@
 #' stored and displayed consistently, summarising calculations results and the
 #' inputs for context.
 #' 
-#' @param sensitivity .
-#' @param specificity .
-#' @param prev_null .
-#' @param prev_alt .
-#' @param correlation .
-#' @param sig_level .
-#' @param power .
-#' @param alternative .
-#' @param pool_size required for power_pool and sample_size_pool
-#' @param pool_number required for power_pool and sample_size_pool
-#' @param catch_dist required for power_pool_random and sample_size_pool_random
-#' @param pool_strat required for power_pool_random and sample_size_pool_random
-#' @param cluster_number . 
-#' @param total_pools .
-#' @param total_units .
+#' @param sensitivity required
+#' @param specificity required
+#' @param prev_null required
+#' @param prev_alt required
+#' @param correlation required
+#' @param sig_level required
+#' @param power required
+#' @param alternative required
+#' @param pool_size required for power_pool and sample_size_pool or NA
+#' @param pool_number required for power_pool and sample_size_pool or NA
+#' @param catch_dist required for power_pool_random and sample_size_pool_random or NA
+#' @param pool_strat required for power_pool_random and sample_size_pool_random or NA
+#' @param cluster_number required 
+#' @param total_pools NA if sample_size_pool_random
+#' @param total_pools NA if unless sample_size_pool_random
+#' @param exp_total_pool required for sample_size_pool_random or NA
+#' @param exp_total_units required for sample_size_pool_random or NA
 #' @param text chr Explanatory summary text to be printed at the end
 #'
 #' @return An object of class \code{power_size_results} containing selected
