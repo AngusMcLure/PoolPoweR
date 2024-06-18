@@ -155,14 +155,14 @@ power_pool <- function(pool_size, pool_number, cluster_number,
   )
   
   # Prepare output
-  total_pools = cluster_number * pool_number
-  total_units = total_pools * pool_size
-  if (sensitivity == 1 && specificity == 1) {
-    perf = "a perfect"
-  } else {
-    perf = "an imperfect"
-  }
-  text = paste("A survey design using", perf, "diagnostic test on pooled samples with the above parameters has a statistical power of", round(power, 3))
+  total_pools <- cluster_number * pool_number
+  total_units <- total_pools * pool_size
+  text <- paste(
+    "A survey design using", 
+    is_perfect_test(sensitivity, specificity), 
+    "diagnostic test on pooled samples with the above parameters has a statistical power of", 
+    round(power, 3)
+  )
   
   power_size_results(  
     sensitivity = sensitivity,
@@ -266,7 +266,12 @@ power_pool_random <- function(catch_dist, pool_strat, cluster_number,
   } else {
     perf = "an imperfect"
   }
-  text = paste("A survey design using", perf, "diagnostic test on pooled samples with the above parameters has a statistical power of", round(power, 3))
+  text = paste(
+    "A survey design using", 
+    is_perfect_test(sensitivity, specificity), 
+    "diagnostic test on pooled samples with the above parameters has a statistical power of",
+    round(power, 3)
+  )
   
   power_size_results(  
     sensitivity = sensitivity,
@@ -348,13 +353,8 @@ sample_size_pool <- function(pool_size, pool_number,
   total_clusters <- ceiling(total_clusters_raw)
   total_pools <- total_clusters * pool_number
   total_units <- total_pools * pool_size
-  if (sensitivity == 1 && specificity == 1) {
-    perf = "a perfect"
-  } else {
-    perf = "an imperfect"
-  }
-  text = paste0(
-    "A survey design using ", perf, 
+  text <- paste0(
+    "A survey design using ", is_perfect_test(sensitivity, specificity), 
     " diagnostic test on pooled samples with the above parameters requires a total of ",
     total_clusters, " clusters, ", 
     total_pools, " total pools, and ", 
@@ -453,8 +453,34 @@ sample_size_pool_random <- function(catch_dist, pool_strat,
   exp_total_pools <- round(ev(\(catch) sum(pool_strat(catch)$pool_number),
                               catch_dist, max_iter, rel_tol) * total_clusters, 1)
   
-  return(list(clusters = total_clusters,
-              expected_pools = exp_total_pools,
-              expected_units = exp_total_units))
+  # Prepare output
+  text = paste0(
+    "A survey design using ", is_perfect_test(sensitivity, specificity), 
+    " diagnostic test on pooled samples with the above parameters requires a total of ",
+    total_clusters, " clusters, ", 
+    exp_total_pools, " expected total pools, and ", 
+    exp_total_units, " expected total units."
+  )
+  
+  power_size_results(  
+    sensitivity = sensitivity,
+    specificity = specificity,
+    # prevalence
+    prev_null = theta0,
+    prev_alt = thetaa,
+    correlation = correlation,
+    # statistical test
+    sig_level = sig_level,
+    power = power,
+    alternative = alternative,
+    # sample design
+    catch_dist = catch_dist,
+    pool_strat = as.character(pool_strat),
+    cluster_number = total_clusters,
+    exp_total_pools = exp_total_pools,
+    exp_total_units = exp_total_units,
+    # parsing
+    text = text
+  )
   
 }

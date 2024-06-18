@@ -18,43 +18,47 @@ power_size_results(
   catch_dist = NA,
   pool_strat = NA,
   cluster_number,
-  total_pools,
-  total_units,
+  total_pools = NA,
+  total_units = NA,
+  exp_total_pools = NA,
+  exp_total_units = NA,
   text
 )
 }
 \arguments{
-\item{sensitivity}{.}
+\item{sensitivity}{required}
 
-\item{specificity}{.}
+\item{specificity}{required}
 
-\item{prev_null}{.}
+\item{prev_null}{required}
 
-\item{prev_alt}{.}
+\item{prev_alt}{required}
 
-\item{correlation}{.}
+\item{correlation}{required}
 
-\item{sig_level}{.}
+\item{sig_level}{required}
 
-\item{power}{.}
+\item{power}{required}
 
-\item{alternative}{.}
+\item{alternative}{required}
 
-\item{pool_size}{required for power_pool and sample_size_pool}
+\item{pool_size}{required for power_pool and sample_size_pool or NA}
 
-\item{pool_number}{required for power_pool and sample_size_pool}
+\item{pool_number}{required for power_pool and sample_size_pool or NA}
 
-\item{catch_dist}{required for power_pool_random and sample_size_pool_random}
+\item{catch_dist}{required for power_pool_random and sample_size_pool_random or NA}
 
-\item{pool_strat}{required for power_pool_random and sample_size_pool_random}
+\item{pool_strat}{required for power_pool_random and sample_size_pool_random or NA}
 
-\item{cluster_number}{.}
+\item{cluster_number}{required}
 
-\item{total_pools}{.}
+\item{total_pools}{NA if unless sample_size_pool_random}
 
-\item{total_units}{.}
+\item{exp_total_units}{required for sample_size_pool_random or NA}
 
 \item{text}{chr Explanatory summary text to be printed at the end}
+
+\item{exp_total_pool}{required for sample_size_pool_random or NA}
 }
 \value{
 An object of class \code{power_size_results} containing selected

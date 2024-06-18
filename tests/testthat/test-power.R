@@ -1,3 +1,10 @@
+exp1 <- function(act) {
+  # Common output across tests
+  expect_equal(act$sample_design$cluster_number, 75)
+  expect_equal(act$sample_design$exp_total_pools, 150)
+  expect_equal(act$sample_design$exp_total_units, 1500)
+}
+
 test_that(
   "power_pool() no corr", {
     act <- power_pool(pool_size = 10, pool_number = 2, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02)
@@ -127,23 +134,21 @@ test_that(
 test_that(
   "sample_size_pool_random()", {
     act <- sample_size_pool_random(nb_catch(20,25), pool_target_number(2), prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
-    exp <- list(clusters = 75, expected_pools = 150, expected_units = 1500)
-    expect_equal(act, exp)
+    exp1(act)
   }
 )
 
 test_that(
   "sample_size_pool_random() links", {
-    exp <- list(clusters = 75, expected_pools = 150, expected_units = 1500) 
-    
     act <- sample_size_pool_random(nb_catch(20,25), pool_target_number(2), prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "cloglog")
-    expect_equal(act, exp) # same as logit 
+    exp1(act)
     
     act <- sample_size_pool_random(nb_catch(20,25), pool_target_number(2), prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "log")
-    expect_equal(act, exp) # same as logit
+    exp1(act)
     
     act <- sample_size_pool_random(nb_catch(20,25), pool_target_number(2), prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01, link = "identity")
-    exp <- list(clusters = 59, expected_pools = 118, expected_units = 1180) 
-    expect_equal(act, exp)
+    expect_equal(act$sample_design$cluster_number, 59)
+    expect_equal(act$sample_design$exp_total_pools, 118)
+    expect_equal(act$sample_design$exp_total_units, 1180)
   }
 )

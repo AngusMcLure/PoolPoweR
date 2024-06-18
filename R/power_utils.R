@@ -5,21 +5,23 @@
 #' stored and displayed consistently, summarising calculations results and the
 #' inputs for context.
 #' 
-#' @param sensitivity .
-#' @param specificity .
-#' @param prev_null .
-#' @param prev_alt .
-#' @param correlation .
-#' @param sig_level .
-#' @param power .
-#' @param alternative .
-#' @param pool_size required for power_pool and sample_size_pool
-#' @param pool_number required for power_pool and sample_size_pool
-#' @param catch_dist required for power_pool_random and sample_size_pool_random
-#' @param pool_strat required for power_pool_random and sample_size_pool_random
-#' @param cluster_number . 
-#' @param total_pools .
-#' @param total_units .
+#' @param sensitivity required
+#' @param specificity required
+#' @param prev_null required
+#' @param prev_alt required
+#' @param correlation required
+#' @param sig_level required
+#' @param power required
+#' @param alternative required
+#' @param pool_size required for power_pool and sample_size_pool or NA
+#' @param pool_number required for power_pool and sample_size_pool or NA
+#' @param catch_dist required for power_pool_random and sample_size_pool_random or NA
+#' @param pool_strat required for power_pool_random and sample_size_pool_random or NA
+#' @param cluster_number required 
+#' @param total_pools NA if sample_size_pool_random
+#' @param total_pools NA if unless sample_size_pool_random
+#' @param exp_total_pool required for sample_size_pool_random or NA
+#' @param exp_total_units required for sample_size_pool_random or NA
 #' @param text chr Explanatory summary text to be printed at the end
 #'
 #' @return An object of class \code{power_size_results} containing selected
@@ -41,8 +43,9 @@
 power_size_results <- function(sensitivity, specificity, prev_null, prev_alt, 
                                correlation, sig_level, power, alternative,
                                pool_size = NA, pool_number = NA, catch_dist = NA, 
-                               pool_strat = NA, cluster_number, total_pools, 
-                               total_units, text) {
+                               pool_strat = NA, cluster_number, total_pools = NA, 
+                               total_units = NA, exp_total_pools = NA, 
+                               exp_total_units = NA, text) {
   
   # Group parameters to different lists for printing
   diag_test <- list(
@@ -65,14 +68,20 @@ power_size_results <- function(sensitivity, specificity, prev_null, prev_alt,
     alternative = alternative
   )
   
-  if (!is.na(pool_size) && !is.na(pool_number)) {
+  # TODO: refactor so temp_design is passed as an arg to class
+  if (!is.na(pool_size) && !is.na(pool_number)) { # power_pool, sample_size_pool
     temp_design <- list(
       pool_size = pool_size,
       pool_number = pool_number,
       total_pools = total_pools,
       total_units = total_units
     )
-  } else { # *_random
+  } else if (!is.na(exp_total_pools) && !is.na(exp_total_units)) { # sample_size_pool_random
+    temp_design <- list(
+      exp_total_pools = exp_total_pools,
+      exp_total_units = exp_total_units
+    )
+  } else { # power_pool_random
    temp_design <- list(
       catch_mean = mean(catch_dist),
       catch_variance = distributions3::variance(catch_dist),
@@ -122,4 +131,11 @@ print.power_size_results <- function(x, ...) {
   }
   cat("\n", text)
   invisible(x)
+}
+
+is_perfect_test <- function(sensitivity, specificity) {
+  if (sensitivity == 1 && specificity == 1) {
+    return("a perfect")
+  }
+  return("an imperfect")
 }
