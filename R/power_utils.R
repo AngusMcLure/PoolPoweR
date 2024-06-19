@@ -19,8 +19,8 @@
 #' @param pool_strat required for power_pool_random and sample_size_pool_random or NA
 #' @param cluster_number required 
 #' @param total_pools NA if sample_size_pool_random
-#' @param total_pools NA if unless sample_size_pool_random
-#' @param exp_total_pool required for sample_size_pool_random or NA
+#' @param total_units required for power_pool and sample_size_pool or NA
+#' @param exp_total_pools required for sample_size_pool_random or NA
 #' @param exp_total_units required for sample_size_pool_random or NA
 #' @param text chr Explanatory summary text to be printed at the end
 #'

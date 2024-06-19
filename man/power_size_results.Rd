@@ -52,13 +52,15 @@ power_size_results(
 
 \item{cluster_number}{required}
 
-\item{total_pools}{NA if unless sample_size_pool_random}
+\item{total_pools}{NA if sample_size_pool_random}
+
+\item{total_units}{required for power_pool and sample_size_pool or NA}
+
+\item{exp_total_pools}{required for sample_size_pool_random or NA}
 
 \item{exp_total_units}{required for sample_size_pool_random or NA}
 
 \item{text}{chr Explanatory summary text to be printed at the end}
-
-\item{exp_total_pool}{required for sample_size_pool_random or NA}
 }
 \value{
 An object of class \code{power_size_results} containing selected
