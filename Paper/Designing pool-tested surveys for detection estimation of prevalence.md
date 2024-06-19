@@ -808,7 +808,7 @@ $$
 
 where $\gamma$ is the variance of standard logistic random variable (i.e. $\pi^2/3$). (See Goldstein et al 2002)
 
-The advantage of this version of the ICC, in addition to ease of computation, is independence of $\theta$. Therefore in a mixed effect model, the ICCs are the same for every combination of fixed effects. The major downside is that while their names would suggest that ICCs should approximate $\rho_1$ and $\rho_2$, when prevalence is low (or high) the ICCs are potentially orders of magnitude larger than the latter. Nevertheless, if the 'correlation coefficients' reported in the literature are going to be of the type calculated by STATA, and these are going to be used as a starting point for sample size calculations, then it is worth considering parameterising our Fisher information calculations in terms of $\theta$ and $ICC$.
+The advantage of this version of the ICC, in addition to ease of computation, is independence of $\theta$. Therefore in a mixed effect model, the ICCs are the same for every combination of fixed effects. The major downside is that while their names would suggest that ICCs should approximate $\rho_1$ and $\rho_2$, whenever prevalence is close to 0 (or 1) the ICCs are potentially orders of magnitude larger than the latter. Nevertheless, if the 'correlation coefficients' reported in the literature are going to be of the type calculated by STATA, and these are going to be used as a starting point for sample size calculations, then it is worth considering parameterising our Fisher information calculations in terms of $\theta$ and $ICC$.
 
 This can be done fairly straightforwardly as we have in the previous sections with a change of variables.
 

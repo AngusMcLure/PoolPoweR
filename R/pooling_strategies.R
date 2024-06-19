@@ -33,10 +33,9 @@ pool_max_size <- function(max_size){
       return(list(pool_size = c(catch%%max_size, max_size), pool_number = c(1, catch%/%max_size)))
     }
   }
-  attr(strat, 'call') <- match.call()
-  attr(strat, 'description') <- paste('that places units in pools of size', max_size, 'with any remainder placed in a single smaller pool.')
-  class(strat) <- 'pool_strat'
-  strat
+  pool_strat(strat = strat,
+             call = match.call(),
+             description = paste('places units in pools of size', max_size, 'and any remainder in a single smaller pool.'))
 }
 
 #' @rdname pooling_strategies
@@ -54,10 +53,13 @@ pool_target_number <- function(target_number){
       return(list(pool_size = c(base_size, base_size + 1), pool_number = c(base_number, target_number-base_number)))
     }
   }
-  attr(strat, 'call') <- match.call()
-  attr(strat, 'description') <- paste(if(target_number == 1){'places all units in 1 pool,'}else{paste('aims to distribute units into', target_number, 'equally sized pools,')},'with no maximum pool size')
-  class(strat) <- 'pool_strat'
-  strat
+  pool_strat(strat,
+             match.call(),
+             paste(if(target_number == 1){
+               'places all units in 1 pool,'}
+               else{
+                 paste('aims to distribute units into', target_number, 'equally sized pools,')
+                 },'with no maximum pool size'))
 }
 
 

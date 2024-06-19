@@ -153,7 +153,38 @@ power_pool <- function(pool_size, pool_number, cluster_number,
                     stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)),
                   stop('invalid alternative. options are less, greater, and two.sided')
   )
-  power
+  
+  # Prepare output
+  total_pools <- cluster_number * pool_number
+  total_units <- total_pools * pool_size
+  text <- paste(
+    "A survey design using", 
+    is_perfect_test(sensitivity, specificity), 
+    "diagnostic test on pooled samples with the above parameters has a statistical power of", 
+    round(power, 3)
+  )
+  
+  power_size_results(  
+    sensitivity = sensitivity,
+    specificity = specificity,
+    # prevalence
+    prev_null = theta0,
+    prev_alt = thetaa,
+    correlation = correlation,
+    # statistical test
+    sig_level = sig_level,
+    power = power,
+    alternative = alternative,
+    # sample design
+    pool_size = pool_size,
+    pool_number = pool_number,
+    cluster_number = cluster_number,
+    total_pools = total_pools,
+    total_units = total_units,
+    # parsing
+    text = text
+  )
+  
 }
 
 #' @rdname power_pool
@@ -228,7 +259,38 @@ power_pool_random <- function(catch_dist, pool_strat, cluster_number,
                     stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)),
                   stop('invalid alternative. options are less, greater, and two.sided')
   )
-  power
+  
+  # Prepare output
+  if (sensitivity == 1 && specificity == 1) {
+    perf = "a perfect"
+  } else {
+    perf = "an imperfect"
+  }
+  text = paste(
+    "A survey design using", 
+    is_perfect_test(sensitivity, specificity), 
+    "diagnostic test on pooled samples with the above parameters has a statistical power of",
+    round(power, 3)
+  )
+  
+  power_size_results(  
+    sensitivity = sensitivity,
+    specificity = specificity,
+    # prevalence
+    prev_null = theta0,
+    prev_alt = thetaa,
+    correlation = correlation,
+    # statistical test
+    sig_level = sig_level,
+    power = power,
+    alternative = alternative,
+    # sample design
+    catch_dist = catch_dist,
+    pool_strat = as.character(pool_strat),
+    cluster_number = cluster_number,
+    # parsing
+    text = text
+  )
 }
 
 #' @rdname power_pool
@@ -291,9 +353,34 @@ sample_size_pool <- function(pool_size, pool_number,
   total_clusters <- ceiling(total_clusters_raw)
   total_pools <- total_clusters * pool_number
   total_units <- total_pools * pool_size
+  text <- paste0(
+    "A survey design using ", is_perfect_test(sensitivity, specificity), 
+    " diagnostic test on pooled samples with the above parameters requires a total of ",
+    total_clusters, " clusters, ", 
+    total_pools, " total pools, and ", 
+    total_units, " total units."
+  )
   
-  return(list(clusters = total_clusters, pools = total_pools, units = total_units))
-  
+  power_size_results(  
+    sensitivity = sensitivity,
+    specificity = specificity,
+    # prevalence
+    prev_null = theta0,
+    prev_alt = thetaa,
+    correlation = correlation,
+    # statistical test
+    sig_level = sig_level,
+    power = power,
+    alternative = alternative,
+    # sample design
+    pool_size = pool_size,
+    pool_number = pool_number,
+    cluster_number = total_clusters,
+    total_pools = total_pools,
+    total_units = total_units,
+    # parsing
+    text = text
+  )
 }
 
 
@@ -366,8 +453,34 @@ sample_size_pool_random <- function(catch_dist, pool_strat,
   exp_total_pools <- round(ev(\(catch) sum(pool_strat(catch)$pool_number),
                               catch_dist, max_iter, rel_tol) * total_clusters, 1)
   
-  return(list(clusters = total_clusters,
-              expected_pools = exp_total_pools,
-              expected_units = exp_total_units))
+  # Prepare output
+  text = paste0(
+    "A survey design using ", is_perfect_test(sensitivity, specificity), 
+    " diagnostic test on pooled samples with the above parameters requires a total of ",
+    total_clusters, " clusters, ", 
+    exp_total_pools, " expected total pools, and ", 
+    exp_total_units, " expected total units."
+  )
+  
+  power_size_results(  
+    sensitivity = sensitivity,
+    specificity = specificity,
+    # prevalence
+    prev_null = theta0,
+    prev_alt = thetaa,
+    correlation = correlation,
+    # statistical test
+    sig_level = sig_level,
+    power = power,
+    alternative = alternative,
+    # sample design
+    catch_dist = catch_dist,
+    pool_strat = as.character(pool_strat),
+    cluster_number = total_clusters,
+    exp_total_pools = exp_total_pools,
+    exp_total_units = exp_total_units,
+    # parsing
+    text = text
+  )
   
 }
