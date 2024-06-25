@@ -7,7 +7,7 @@
 \alias{fi_pool_cluster_random}
 \title{Fisher information for population prevalence (and intra-cluster correlation)}
 \usage{
-fi_pool(x, ...)
+fi_pool(pool_size, prevalence, sensitivity, specificity)
 
 fi_pool_cluster(
   pool_size,
@@ -47,20 +47,9 @@ fi_pool_cluster_random(
 \item{pool_size}{numeric The number of units per pool. Must be a numeric
 value or vector of values greater than 0.}
 
-\item{pool_number}{numeric The number of pools per cluster. Must be a integer
-value or a vector of integer values greater than or equal to 1.}
-
 \item{prevalence}{numeric The proportion of units that carry the marker of
 interest (i.e. true positive). Must be be a numeric value between 0 and 1,
 inclusive of both.}
-
-\item{correlation}{numeric The correlation between test results within a
-single cluster (units in different clusters are assumed to be
-uncorrelated). Must be a numeric value between 0 and 1, inclusive of both.
-A value of 1 indicates that units within clusters are perfectly correlated
-(there are no differences units within a single cluster). A value of 0
-indicates that units within clusters are no more correlated than units in
-different clusters.}
 
 \item{sensitivity}{numeric The probability that the test correctly identifies
 a true positive. Must be a numeric value between 0 and 1, inclusive of
@@ -71,6 +60,17 @@ positives.}
 a true negative. Must be a numeric value between 0 and 1, inclusive of
 both. A value of 1 indicates that the test can perfectly identify all true
 negatives.}
+
+\item{pool_number}{numeric The number of pools per cluster. Must be a integer
+value or a vector of integer values greater than or equal to 1.}
+
+\item{correlation}{numeric The correlation between test results within a
+single cluster (units in different clusters are assumed to be
+uncorrelated). Must be a numeric value between 0 and 1, inclusive of both.
+A value of 1 indicates that units within clusters are perfectly correlated
+(there are no differences units within a single cluster). A value of 0
+indicates that units within clusters are no more correlated than units in
+different clusters.}
 
 \item{form}{string The distribution used to model the cluster-level
 prevalence and correlation of units within cluster. Select one of "beta",
