@@ -27,7 +27,6 @@
 #' @param form string The distribution used to model the cluster-level
 #'   prevalence and correlation of units within cluster. Select one of "beta",
 #'   "logitnorm" or "cloglognorm".
-#' @param ... additional parameters
 #'
 #' @return A numeric value of the design effect `D`.
 #' @export
@@ -37,7 +36,7 @@
 #' 
 #' vd <- variable_design(nb_catch(10, 13), pool_target_number(20))
 #' design_effect(vd, prevalence = 0.01, correlation = 0.05)
-design_effect <- function(x, prevalence, correlation, form, ...) {
+design_effect <- function(x, prevalence, correlation, form) {
   check_in_range2(prevalence)
   check_in_range2(correlation)
   # No input check for form as done in downstream functions/methods

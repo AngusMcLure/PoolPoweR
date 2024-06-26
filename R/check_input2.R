@@ -13,7 +13,7 @@ check_in_range2 <- function(val) {
   if(!is.numeric(val)) {
     stop(glue::glue("{name} must be numeric, not {class(val)}."))
   }
-  if(val < 0 | val > 1) {
+  if (val < 0 | val > 1) {
     message(glue::glue("{name} must be a numeric value between 0 and 1, inclusive."))
     stop(glue::glue("{name} = {val}"))
   }

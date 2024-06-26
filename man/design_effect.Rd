@@ -30,8 +30,6 @@ different clusters.}
 \item{form}{string The distribution used to model the cluster-level
 prevalence and correlation of units within cluster. Select one of "beta",
 "logitnorm" or "cloglognorm".}
-
-\item{...}{additional parameters}
 }
 \value{
 A numeric value of the design effect `D`.
