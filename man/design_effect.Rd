@@ -6,7 +6,7 @@
 \alias{design_effect.variable_design}
 \title{Calculate the design effect for pooled testing.}
 \usage{
-design_effect(x, prevalence, correlation, form, ...)
+design_effect(x, prevalence, correlation, form)
 
 \method{design_effect}{fixed_design}(x, prevalence, correlation, form = "beta")
 
