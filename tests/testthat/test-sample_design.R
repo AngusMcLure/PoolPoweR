@@ -30,7 +30,6 @@ test_that("fixed_design bad inputs caught", {
 
 # variable_design ----
 ## fixtures ----
-
 var_target <- variable_design(
   catch_dist = nb_catch(5, 10), 
   pool_strat = pool_target_number(20)

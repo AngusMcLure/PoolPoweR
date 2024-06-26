@@ -13,7 +13,7 @@
 #' (`design_effect(fixed_design, ...)`) or variable sample sizes 
 #' (`design_effect(variable_design, ...)`).
 #'
-#' @param x sample_design
+#' @param x a sample_design object 
 #' @param prevalence numeric The proportion of units that carry the marker of
 #'   interest (i.e. true positive). Must be be a numeric value between 0 and 1,
 #'   inclusive of both.
@@ -26,15 +26,21 @@
 #'   different clusters.
 #' @param form string The distribution used to model the cluster-level
 #'   prevalence and correlation of units within cluster. Select one of "beta",
-#'   "logitnorm" or "cloglognorm". See details.
-#' @param ... 
+#'   "logitnorm" or "cloglognorm".
+#' @param ... additional parameters
 #'
 #' @return A numeric value of the design effect `D`.
 #' @export
 #' 
 #' @examples
 #' design_effect(fixed_design(10, 2), prevalence = 0.01, correlation = 0.05)
-design_effect <- function(x, ...) {
+#' 
+#' vd <- variable_design(nb_catch(10, 13), pool_target_number(20))
+#' design_effect(vd, prevalence = 0.01, correlation = 0.05)
+design_effect <- function(x, prevalence, correlation, form, ...) {
+  check_in_range2(prevalence)
+  check_in_range2(correlation)
+  # No input check for form as done in downstream functions/methods
   UseMethod("design_effect")
 }
 
@@ -46,10 +52,6 @@ design_effect.fixed_design <- function(x,
                                        correlation,
                                        form = "beta") {
   
-  check_in_range2(prevalence)
-  check_in_range2(correlation)
-  # No input check for form as done in downstream functions/methods
-
   x$pool_number * x$pool_size * fi_pool(pool_size = 1, prevalence, x$sensitivity, x$specificity) *
     solve(fi_pool_cluster(
       x$pool_size, x$pool_number, prevalence,
@@ -58,18 +60,16 @@ design_effect.fixed_design <- function(x,
 }
 
 #' @rdname design_effect
+#' @method design_effect variable_design
 #' @export
-design_effect_random <- function(catch_dist,
-                                 pool_strat,
-                                 prevalence,
-                                 correlation,
-                                 sensitivity,
-                                 specificity,
-                                 form = "beta") {
+design_effect.variable_design <- function(x,
+                                          prevalence,
+                                          correlation,
+                                          form = "beta") {
   
-  mean(catch_dist) * fi_pool(pool_size = 1, prevalence, sensitivity, specificity) *
+  mean(x$catch_dist) * fi_pool(pool_size = 1, prevalence, x$sensitivity, x$specificity) *
     solve(fi_pool_cluster_random(
-      catch_dist, pool_strat, prevalence,
-      correlation, sensitivity, specificity, form)
+      x$catch_dist, x$pool_strat, prevalence,
+      correlation, x$sensitivity, x$specificity, form)
     )[1, 1]
 }

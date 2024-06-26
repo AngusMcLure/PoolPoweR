@@ -3,27 +3,17 @@
 \name{design_effect}
 \alias{design_effect}
 \alias{design_effect.fixed_design}
-\alias{design_effect_random}
+\alias{design_effect.variable_design}
 \title{Calculate the design effect for pooled testing.}
 \usage{
-design_effect(x, ...)
+design_effect(x, prevalence, correlation, form, ...)
 
 \method{design_effect}{fixed_design}(x, prevalence, correlation, form = "beta")
 
-design_effect_random(
-  catch_dist,
-  pool_strat,
-  prevalence,
-  correlation,
-  sensitivity,
-  specificity,
-  form = "beta"
-)
+\method{design_effect}{variable_design}(x, prevalence, correlation, form = "beta")
 }
 \arguments{
-\item{x}{sample_design}
-
-\item{...}{}
+\item{x}{a sample_design object}
 
 \item{prevalence}{numeric The proportion of units that carry the marker of
 interest (i.e. true positive). Must be be a numeric value between 0 and 1,
@@ -39,7 +29,9 @@ different clusters.}
 
 \item{form}{string The distribution used to model the cluster-level
 prevalence and correlation of units within cluster. Select one of "beta",
-"logitnorm" or "cloglognorm". See details.}
+"logitnorm" or "cloglognorm".}
+
+\item{...}{additional parameters}
 }
 \value{
 A numeric value of the design effect `D`.
@@ -60,4 +52,7 @@ imperfect tests, and either fixed sample sizes
 }
 \examples{
 design_effect(fixed_design(10, 2), prevalence = 0.01, correlation = 0.05)
+
+vd <- variable_design(nb_catch(10, 13), pool_target_number(20))
+design_effect(vd, prevalence = 0.01, correlation = 0.05)
 }

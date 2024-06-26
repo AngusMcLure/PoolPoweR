@@ -1,10 +1,9 @@
-# fixtures ----
+# fixed_design ----
 fd <- fixed_design(
   pool_size = 5, pool_number = 10, sensitivity = 0.99, specificity = 0.95
 )
 
-# fixed_design ----
-test_that("design_effect() gives consistent output for basic tests", {
+test_that("fixed design_effect() gives consistent output for basic tests", {
   # This one has reasonable inputs
   expect_equal(
     design_effect(fd, prevalence = 0.01, correlation = 0.05),
@@ -33,5 +32,18 @@ test_that("design_effect() fails for some very unusual parameters because integr
   )
 })
 
-### design_effect_random() ----
+### variable_design() ----
+vd_target <- variable_design(nb_catch(5, 7), pool_target_number(10))
+vd_max <- variable_design(nb_catch(5, 7), pool_max_size(10))
+
+test_that("variable design_effect()", {
+  expect_equal(
+    design_effect(vd_target, prevalence = 0.01, correlation = 0.05),
+    1.256262, tolerance = 1e-6
+  )
+  expect_equal(
+    design_effect(vd_max, prevalence = 0.01, correlation = 0.05),
+    3.726256, tolerance = 1e-6
+  )
+})
 
