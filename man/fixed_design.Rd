@@ -2,7 +2,8 @@
 % Please edit documentation in R/sample_design.R
 \name{fixed_design}
 \alias{fixed_design}
-\title{fixed_design s3 constructor}
+\alias{variable_design}
+\title{S3 sample_design constructors}
 \usage{
 fixed_design(
   pool_size = NULL,
@@ -10,13 +11,15 @@ fixed_design(
   sensitivity = 1,
   specificity = 1
 )
+
+variable_design(catch_dist, pool_strat, sensitivity = 1, specificity = 1)
 }
 \arguments{
 \item{pool_size}{numeric/NULL The number of units per pool. Must be a numeric
-value greater than 0.}
+value greater than 0. `fixed_design` only.}
 
 \item{pool_number}{numeric/NULL The number of pools per cluster. Numeric
-inputs must be an integer greater than or equal to 1.}
+inputs must be an integer greater than or equal to 1. `fixed_design` only.}
 
 \item{sensitivity}{numeric The probability that the test correctly identifies
 a true positive. Must be a numeric value between 0 and 1, inclusive of
@@ -27,18 +30,47 @@ positives.}
 a true negative. Must be a numeric value between 0 and 1, inclusive of
 both. A value of 1 indicates that the test can perfectly identify all true
 negatives.}
+
+\item{catch_dist}{An object of class `distribution` (e.g. produced by
+`nb_catch()`) defining the distribution of the possible catch. If
+`correlation = 0` the catch is for the whole survey. For `correlation > 0`
+the catch is per cluster (i.e. cluster size). `variable_design` only.}
+
+\item{pool_strat}{function Defines a rule for how a number of units will be
+divided into pools. Must take a single numeric argument and return a named
+list of pool sizes and pool numbers. `pool_max_size()` and
+`pool_target_number` provide convenience functions for defining common
+pooling strategies. `variable_design` only.}
 }
 \value{
 An object of class \code{sample_design}
 }
 \description{
 Stores parameters related to the sampling design. Aims to reduce having to
-input each param separately across functions (e.g. power/optimise).
+input each param separately across functions (e.g. power/optimise). Can
+either be of class `fixed_design` or `variable_design`.
 }
 \examples{
-perfect <- fixed_design(pool_size = 10)
+fd_perfect <- fixed_design(pool_size = 10)
 
-imperfect <- fixed_design(
+fd_imperfect <- fixed_design(
   pool_size = 10, pool_number = NULL, sensitivity = 0.95, specificity = 0.99
+)
+
+vd_target <- variable_design(
+  catch_dist = nb_catch(10, 11),
+  pool_strat = pool_target_number(20)
+)
+
+vd_max <- variable_design(
+  catch_dist = nb_catch(10, 11),
+  pool_strat = pool_max_size(20)
+)
+
+vd_max_imperfect <- variable_design(
+  catch_dist = nb_catch(10, 11),
+  pool_strat = pool_max_size(20),
+  sensitivity = 0.95,
+  specificity = 0.98
 )
 }
