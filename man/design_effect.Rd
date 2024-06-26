@@ -2,18 +2,13 @@
 % Please edit documentation in R/design_effect.R
 \name{design_effect}
 \alias{design_effect}
+\alias{design_effect.fixed_design}
 \alias{design_effect_random}
 \title{Calculate the design effect for pooled testing.}
 \usage{
-design_effect(
-  pool_size,
-  pool_number,
-  prevalence,
-  correlation,
-  sensitivity,
-  specificity,
-  form = "beta"
-)
+design_effect(x, ...)
+
+\method{design_effect}{fixed_design}(x, prevalence, correlation, form = "beta")
 
 design_effect_random(
   catch_dist,
@@ -26,11 +21,9 @@ design_effect_random(
 )
 }
 \arguments{
-\item{pool_size}{numeric The number of units per pool. Must be a numeric
-value greater than or equal to 0.}
+\item{x}{sample_design}
 
-\item{pool_number}{numeric The number of pools per cluster. Must be a numeric
-value greater than or equal to 0.}
+\item{...}{}
 
 \item{prevalence}{numeric The proportion of units that carry the marker of
 interest (i.e. true positive). Must be be a numeric value between 0 and 1,
@@ -44,30 +37,9 @@ A value of 1 indicates that units within clusters are perfectly correlated
 indicates that units within clusters are no more correlated than units in
 different clusters.}
 
-\item{sensitivity}{numeric The probability that the test correctly identifies
-a true positive. Must be a numeric value between 0 and 1, inclusive of
-both. A value of 1 indicates that the test can perfectly identify all true
-positives.}
-
-\item{specificity}{numeric The probability that the test correctly identifies
-a true negative. Must be a numeric value between 0 and 1, inclusive of
-both. A value of 1 indicates that the test can perfectly identify all true
-negatives.}
-
 \item{form}{string The distribution used to model the cluster-level
 prevalence and correlation of units within cluster. Select one of "beta",
 "logitnorm" or "cloglognorm". See details.}
-
-\item{catch_dist}{An object of class `distribution` (e.g. produced by
-`nb_catch()`) defining the distribution of the possible catch. If
-`correlation = 0` the catch is for the whole survey. For `correlation > 0`
-the catch is per cluster (i.e. cluster size).}
-
-\item{pool_strat}{function Defines a rule for how a number of units will be
-divided into pools. Must take a single numeric argument and return a named
-list of pool sizes and pool numbers. `pool_max_size()` and
-`pool_target_number` provide convenience functions for defining common
-pooling strategies.}
 }
 \value{
 A numeric value of the design effect `D`.
@@ -82,12 +54,10 @@ effect `D>1` (`D<1`) indicates that the pooling/sampling strategy reduces
 to be multiplied by a factor of D to achieve the same degree of precision in
 estimating prevalence as a simple random survey with individual tests. The
 functions support cluster and simple random sampling with perfect or
-imperfect tests, and either fixed sample sizes (`design_effect()`) or random
-sample sizes (`design_effect_random()`).
+imperfect tests, and either fixed sample sizes 
+(`design_effect(fixed_design, ...)`) or variable sample sizes 
+(`design_effect(variable_design, ...)`).
 }
 \examples{
-design_effect(
-  pool_size = 5, pool_number = 10, prevalence = 0.01,
-  correlation = 0.05, sensitivity = 0.99, specificity = 0.95
-  )
+design_effect(fixed_design(10, 2), prevalence = 0.01, correlation = 0.05)
 }
