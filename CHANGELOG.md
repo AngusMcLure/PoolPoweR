@@ -14,26 +14,33 @@ and this project adheres to
 ### [v1.0.0]
 - CRAN release
 - Add pkgdown site (#20)  
-- Implement codecov.io (#5)
+- ~~Implement codecov.io (#5)~~  
 - Add PoolPoweR-package.R (#18)  
 - Configure and optimise GHA workflows
 
-### [vX]
-**Focus:** Enhancements  
-- Refactor functions i.e. break down into smaller ones for readability (#26)
-
-### [v0.1.3] - 2023-12-22
+### [v0.2.3]
 **Focus:** Documentation
 - Revise documentation so majority @inheritParams fi_pool (#28)
 - Rename interval (#13)  
 - Update docs with cluster and non-cluster cases (#14) 
 - Move descriptions to details  
 
-### [v0.1.2] - 2023-12-15  
+### [v0.2.2]
 - Implement warnings for input checks (#3, #27)
 - Include tests with expected inputs (#27, #34)  
 
 ## [Available]  
+
+### [v0.2.0] - 2024-06-28  
+
+#### Added  
+- Power and sample size calculations for fixed and variable designs.  
+- S3 objects for sample_design data clumps.  
+- Initial detection error functions.  
+
+#### Changed  
+- design_effect functions converted to sample_design methods.  
+- check_input rework.  
 
 ### [v0.1.1] - 2023-12-07  
 
