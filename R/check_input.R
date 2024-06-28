@@ -1,3 +1,5 @@
+# NOTE: Will discontinue - use check_input2.R 
+
 check_input <- function(argument_name, input_value) {
   # Wrapper function to triage arguments, so one function can be used for all
   # inputs instead of remembering which one to use.
