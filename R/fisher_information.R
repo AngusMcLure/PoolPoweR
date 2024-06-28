@@ -149,18 +149,6 @@ fi_pool_cluster <- function(pool_size,
     }
   }
   
-  log_one_minus_phi <- function(p){
-    # log(1 - varphi - (1 - psi - varphi) * (1 - p)^s)
-    if(p %in% 0:1){
-      log1p(- (1 - (1 - p)^s) * varphi - (1 - p)^s * (1 - psi))
-    }else if(varphi == 1){
-      log1p(-p) * s + log(psi)
-    }else{
-      log(expm1(log1p(-p) * s) * (varphi - 1) + exp(log1p(-p) * s) * psi)
-    }
-  }
-  
-
   if (form %in% c("discrete", "beta")) {
     # In these cases Fisher information matrix is calculated directly in terms
     # of theta and rho and checks on sums of likelihoods and likelihood
@@ -429,7 +417,7 @@ fi_pool_cluster <- function(pool_size,
         }else{
           out[j] <- stats::dnorm(zj, mean = mu, sd = sigma, log = TRUE) +
             sum(log(phi(pj)) * y) +
-            sum(log_one_minus_phi(pj) * (N - y))
+            sum(log_one_minus_phi(pj, s, varphi, psi) * (N - y))
         }
       }
       out <- exp(out)

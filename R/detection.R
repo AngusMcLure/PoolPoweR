@@ -98,7 +98,7 @@ detection_errors_cluster <- function(pool_size, pool_number, cluster_number,
       #stats::dnorm(x, mean = mu, sd = sigma) * (1 - (1 - sensitivity - specificity) * (1-invlink(x))^pool_size - sensitivity)^pool_number
       #equivalent to the above, but more numerically stable
       exp(stats::dnorm(x, mean = mu, sd = sigma, log = TRUE) +
-            log_1_minus_phi(invlink(x), pool_size, sensitivity, specificity) * pool_number)
+            log_one_minus_phi(invlink(x), pool_size, sensitivity, specificity) * pool_number)
     }
     
     typeII <- stats::integrate(f, -Inf, Inf)$value ^ cluster_number
@@ -215,19 +215,3 @@ detection_errors_cluster <- function(pool_size, pool_number, cluster_number,
 #   }
 #   list(typeI = typeI, typeII = typeII)
 # }
-
-
-# Helper function giving log of 1 minus the pool positivity probability for a
-# given prevalence (p), pool size (s), sensitivity (spec), and specificity
-# (spec). Not to be exported
-log_one_minus_phi <- function(p, s, sens, spec){
-  # log(1 - sens - (1 - spec - sens) * (1 - p)^s)
-  if(p %in% 0:1){
-    log1p(- (1 - (1 - p)^s) * sens - (1 - p)^s * (1 - spec))
-  }else if(sens == 1){
-    log1p(-p) * s + log(spec)
-  }else{
-    log(expm1(log1p(-p) * s) * (sens - 1) + exp(log1p(-p) * s) * spec)
-  }
-}
-

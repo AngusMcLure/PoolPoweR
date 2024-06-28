@@ -8,6 +8,20 @@ cloglog_inv <- function(x){
   - expm1(-exp(x))
 }
 
+# Helper function giving log of 1 minus the pool positivity probability for a
+# given prevalence (p), pool size (s), sensitivity (spec), and specificity
+# (spec). Not to be exported
+log_one_minus_phi <- function(p, s, sens, spec){
+  # log(1 - sens - (1 - spec - sens) * (1 - p)^s)
+  if(p %in% 0:1){
+    log1p(- (1 - (1 - p)^s) * sens - (1 - p)^s * (1 - spec))
+  }else if(sens == 1){
+    log1p(-p) * s + log(spec)
+  }else{
+    log(expm1(log1p(-p) * s) * (sens - 1) + exp(log1p(-p) * s) * spec)
+  }
+}
+
 # Calculating parameters for link-normal style distributions
 
 mu_sigma_linknorm <- function(.mean, .var,link,invlink){
