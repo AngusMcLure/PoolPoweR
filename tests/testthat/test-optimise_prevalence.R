@@ -3,7 +3,7 @@ test_that("optimise_sN_prevalence() gives consistent output for basic tests", {
   expect_true(all.equal(
     optimise_sN_prevalence(
       prevalence = 0.01, cost_unit = 5, cost_pool = 10,
-      cost_cluster = 100, correlation = 0.05
+      cost_cluster = 100, correlation = 0.05, form = "beta"
     ), list(s=5,cost =0.2513798, catch=20, N=4),tolerance=1e-7))
   # Rest not so much
   expect_true(all.equal(

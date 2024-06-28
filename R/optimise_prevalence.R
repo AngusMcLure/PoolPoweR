@@ -97,7 +97,7 @@ optimise_s_prevalence <- function(pool_number = 1,
                                   sensitivity = 1,
                                   specificity = 1,
                                   max_s = 50,
-                                  form = "beta",
+                                  form = "logitnorm",
                                   interval = 0) {
   check_input("prevalence", prevalence)
   check_input("cost_unit", cost_unit)
@@ -227,7 +227,7 @@ optimise_sN_prevalence <- function(prevalence,
                                    specificity = 1,
                                    max_s = 50,
                                    max_N = 20,
-                                   form = "beta") {
+                                   form = "logitnorm") {
 
   # max_N is the only argument that optimise_s_prevalence doesn't use
   # The rest of the input_checks are in optimise_s_prevalence
@@ -279,7 +279,7 @@ optimise_random_prevalence <- function(catch_mean, catch_variance,
                                        cost_unit, cost_pool, cost_period, cost_cluster = NA,
                                        correlation = NA,
                                        sensitivity = 1, specificity = 1,
-                                       max_period = 10, form = "beta",
+                                       max_period = 10, form = "logitnorm",
                                        verbose = FALSE) {
   
   strat_par_names <- names(formals(pool_strat_family))
@@ -385,7 +385,7 @@ cost_fi_cluster <- function(pool_size, pool_number,
                             prevalence, correlation,
                             sensitivity, specificity,
                             cost_unit, cost_pool, cost_cluster,
-                            form = "beta") {
+                            form = "logitnorm") {
   s <- pool_size
   N <- pool_number
 
@@ -412,7 +412,7 @@ cost_fi_cluster_random <- function(catch_dist, pool_strat,
                                    prevalence, correlation,
                                    sensitivity, specificity,
                                    cost_unit, cost_pool, cost_cluster,
-                                   form = "beta"){
+                                   form = "logitnorm"){
 
   fn <- function(catch){
     pooling <- pool_strat(catch)

@@ -107,7 +107,7 @@ fi_pool_cluster <- function(pool_size,
                             correlation,
                             sensitivity,
                             specificity,
-                            form = "beta",
+                            form = "logitnorm",
                             real_scale = FALSE) {
 
   check_input("form", form)
@@ -578,7 +578,7 @@ fi_pool_cluster_random <- function(catch_dist,
                                    correlation,
                                    sensitivity,
                                    specificity,
-                                   form = 'beta',
+                                   form = "logitnorm",
                                    real_scale = FALSE,
                                    max_iter = 1000,
                                    rel_tol = 1e-6){

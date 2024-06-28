@@ -49,7 +49,7 @@ design_effect <- function(x, prevalence, correlation, form) {
 design_effect.fixed_design <- function(x,
                                        prevalence,
                                        correlation,
-                                       form = "beta") {
+                                       form = "logitnorm") {
   
   x$pool_number * x$pool_size * fi_pool(pool_size = 1, prevalence, x$sensitivity, x$specificity) *
     solve(fi_pool_cluster(
@@ -64,7 +64,7 @@ design_effect.fixed_design <- function(x,
 design_effect.variable_design <- function(x,
                                           prevalence,
                                           correlation,
-                                          form = "beta") {
+                                          form = "logitnorm") {
   
   mean(x$catch_dist) * fi_pool(pool_size = 1, prevalence, x$sensitivity, x$specificity) *
     solve(fi_pool_cluster_random(

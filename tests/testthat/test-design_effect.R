@@ -6,16 +6,16 @@ fd <- fixed_design(
 test_that("fixed design_effect() gives consistent output for basic tests", {
   # This one has reasonable inputs
   expect_equal(
-    design_effect(fd, prevalence = 0.01, correlation = 0.05),
+    design_effect(fd, prevalence = 0.01, correlation = 0.05, form = "beta"),
     0.7240988, tolerance = 1e-7
   )
   expect_equal(
-    design_effect(fixed_design(10, 10), prevalence = 0.9, correlation = 0.9),
+    design_effect(fixed_design(10, 10), prevalence = 0.9, correlation = 0.9, form = "beta"),
     118.9243, tolerance = 1e-4
   )
   expect_equal(
     design_effect(
-      fixed_design(10, 10, 0.9, 0.8), prevalence = 0.2, correlation = 0.2), 
+      fixed_design(10, 10, 0.9, 0.8), prevalence = 0.2, correlation = 0.2, form = "beta"), 
       26.50055, tolerance = 1e-5
   )
 })
@@ -38,11 +38,11 @@ vd_max <- variable_design(nb_catch(5, 7), pool_max_size(10))
 
 test_that("variable design_effect()", {
   expect_equal(
-    design_effect(vd_target, prevalence = 0.01, correlation = 0.05),
+    design_effect(vd_target, prevalence = 0.01, correlation = 0.05, form = "beta"),
     1.256262, tolerance = 1e-6
   )
   expect_equal(
-    design_effect(vd_max, prevalence = 0.01, correlation = 0.05),
+    design_effect(vd_max, prevalence = 0.01, correlation = 0.05, form = "beta"),
     3.726256, tolerance = 1e-6
   )
 })

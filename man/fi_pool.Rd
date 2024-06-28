@@ -16,7 +16,7 @@ fi_pool_cluster(
   correlation,
   sensitivity,
   specificity,
-  form = "beta",
+  form = "logitnorm",
   real_scale = FALSE
 )
 
@@ -37,7 +37,7 @@ fi_pool_cluster_random(
   correlation,
   sensitivity,
   specificity,
-  form = "beta",
+  form = "logitnorm",
   real_scale = FALSE,
   max_iter = 1000,
   rel_tol = 1e-06

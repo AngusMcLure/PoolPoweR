@@ -8,9 +8,9 @@
 \usage{
 design_effect(x, prevalence, correlation, form)
 
-\method{design_effect}{fixed_design}(x, prevalence, correlation, form = "beta")
+\method{design_effect}{fixed_design}(x, prevalence, correlation, form = "logitnorm")
 
-\method{design_effect}{variable_design}(x, prevalence, correlation, form = "beta")
+\method{design_effect}{variable_design}(x, prevalence, correlation, form = "logitnorm")
 }
 \arguments{
 \item{x}{a sample_design object}

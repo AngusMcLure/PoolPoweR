@@ -50,7 +50,7 @@
 #'
 #' detection_errors_cluster(pool_size = 10, pool_number = 6, cluster_number = 5,
 #'                          prevalence = 0.01, correlation = 0.1,
-#'                          sensitivity = 1, specificity = 0.999
+#'                          sensitivity = 1, specificity = 0.999, form = "beta"
 #'                          )
 
 
@@ -74,7 +74,7 @@ detection_errors <- function(pool_size, pool_number, prevalence,
 detection_errors_cluster <- function(pool_size, pool_number, cluster_number,
                                      prevalence, correlation,
                                      sensitivity = 1, specificity = 1,
-                                     form = 'beta'){
+                                     form = 'logitnorm'){
   
   if(correlation == 0){
     warning('For correlation = 0, a heirarchical/cluster survey design with',

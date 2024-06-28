@@ -16,7 +16,7 @@ optimise_s_prevalence(
   sensitivity = 1,
   specificity = 1,
   max_s = 50,
-  form = "beta",
+  form = "logitnorm",
   interval = 0
 )
 
@@ -30,7 +30,7 @@ optimise_sN_prevalence(
   specificity = 1,
   max_s = 50,
   max_N = 20,
-  form = "beta"
+  form = "logitnorm"
 )
 
 optimise_random_prevalence(
@@ -46,7 +46,7 @@ optimise_random_prevalence(
   sensitivity = 1,
   specificity = 1,
   max_period = 10,
-  form = "beta",
+  form = "logitnorm",
   verbose = FALSE
 )
 }

@@ -22,7 +22,7 @@ detection_errors_cluster(
   correlation,
   sensitivity = 1,
   specificity = 1,
-  form = "beta"
+  form = "logitnorm"
 )
 }
 \arguments{
@@ -82,6 +82,6 @@ detection_errors(pool_size = 10, pool_number = 30,
 
 detection_errors_cluster(pool_size = 10, pool_number = 6, cluster_number = 5,
                          prevalence = 0.01, correlation = 0.1,
-                         sensitivity = 1, specificity = 0.999
+                         sensitivity = 1, specificity = 0.999, form = "beta"
                          )
 }
