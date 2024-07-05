@@ -57,6 +57,7 @@ fixed_design <- function(pool_size = NULL,
                          sensitivity = 1,
                          specificity = 1) {
 
+  ## Input checks ----
   # allow NULLs for optimise functions to identify which 
   # variable should be optimised
   if (!is.null(pool_size)) {
@@ -69,14 +70,28 @@ fixed_design <- function(pool_size = NULL,
   check_in_range2(sensitivity)
   check_in_range2(specificity)
 
+  ## Subclasses for optimisation ----
+  # To dispatch optimise() based on NULLs 
+  opt_class <- get_optimise_subclass(pool_size, pool_number)
+  
+  ## Parse total parameters ----
+  # TODO: Add total_pools here once number of clusters is added
+  if (opt_class == "complete_params") {
+    total_units = pool_size * pool_number
+  } else {
+    total_units = NA
+  }
+  
+  ## Output ----
   structure(
     list(
       pool_size = pool_size,
       pool_number = pool_number,
+      total_units = total_units,
       sensitivity = sensitivity,
       specificity = specificity
     ),
-    class = c("fixed_design", "sample_design")
+    class = c(opt_class, "fixed_design", "sample_design")
   )
 }
 
@@ -100,4 +115,17 @@ variable_design <- function(catch_dist,
     ),
     class = c("variable_design", "sample_design")
   )
+}
+
+
+get_optimise_subclass <- function(pool_size, pool_number) {
+  if (is.null(pool_size) && is.null(pool_number)) {
+    return("need_sN")
+  } else if (is.null(pool_size)) {
+    return("need_s")
+  } else if (is.null(pool_number)) {
+    return("need_N")
+  } else {
+    return("complete_params")
+  }
 }
