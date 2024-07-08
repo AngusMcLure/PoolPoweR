@@ -9,7 +9,7 @@ fixed_null <- fixed_design() # sens/spec == 1, pool_size/num == NULL
 ## test ----
 test_that("fixed_design constructor", {
   expect_equal(length(fixed_perfect), 5)
-  expect_equal(class(fixed_perfect), c("need_N", "fixed_design", "sample_design"))
+  expect_equal(class(fixed_perfect), c("fixed_N", "fixed_design", "sample_design"))
   expect_equal(fixed_perfect$pool_size, 10)
   expect_equal(fixed_perfect$pool_number, NULL)
   expect_equal(fixed_perfect$sensitivity, 1)
@@ -17,7 +17,7 @@ test_that("fixed_design constructor", {
 })
 
 test_that("fixed_design default", {
-  expect_equal(class(fixed_null), c("need_sN", "fixed_design", "sample_design"))
+  expect_equal(class(fixed_null), c("fixed_sN", "fixed_design", "sample_design"))
   expect_equal(fixed_null$pool_size, NULL)
   expect_equal(fixed_null$pool_number, NULL)
   expect_equal(fixed_null$sensitivity, 1)
@@ -61,8 +61,8 @@ test_that("null variable_design", {
 })
 
 # Helpers ----
-test_that("get_optimise_subclass", {
-  expect_equal(get_optimise_subclass(NULL, NULL), "need_sN")
-  expect_equal(get_optimise_subclass(1, NULL), "need_N")
-  expect_equal(get_optimise_subclass(NULL, 1), "need_s")
+test_that("null_pools", {
+  expect_equal(null_pools(NULL, NULL), "sN")
+  expect_equal(null_pools(1, NULL), "N")
+  expect_equal(null_pools(NULL, 1), "s")
 })
