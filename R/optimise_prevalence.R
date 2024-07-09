@@ -56,7 +56,6 @@
 #'   numeric value greater than or equal to 0. For `optimise_s_prevalence()`,
 #'   this can be ignored if correlation is NA.
 #' @param max_s numeric The maximum number of units per pool (pool size).
-#' @param max_N numeric The maximum number of pools per cluster (pool number).
 #' @param max_period numeric The maximum number of collection periods (per
 #'   cluster if `correlation` is not `NA`)
 #' @param form string The distribution used to model the cluster-level
@@ -78,16 +77,16 @@
 #'   sampling periods; the unit cost of Fisher information; the mean, variance,
 #'   and distribution of the number of units caught across all sampling
 #'   periods(per cluster where applicable); and the optimal pooling strategy.
-#' @rdname optimise_prevalence
 #' @export
 #'
 #' @examples
 #' optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10)
-#'
-#' optimise_sN_prevalence(
+#' 
+#' optimise_prevalence(
+#'   fixed_design(), 
 #'   prevalence = 0.01, cost_unit = 5, cost_pool = 10,
-#'   cost_cluster = 100, correlation = 0.05
-#'   )
+#'   cost_cluster = 100, correlation = 0.05, form = "beta"
+#' )
 optimise_s_prevalence <- function(pool_number = 1,
                                   prevalence,
                                   cost_unit,
@@ -222,7 +221,30 @@ optimise_s_prevalence <- function(pool_number = 1,
   out
 }
 
+#' Optimise prevalence
+#' 
+#' Placeholder documentation to track params for the refactor.
+#' 
+#' @inheritParams design_effect
+#' @param cost_unit numeric The cost to process a single unit. Must be a numeric
+#'   value greater than or equal to 0.
+#' @param cost_pool numeric The cost to process a single pool. Must be a numeric
+#'   value greater than or equal to 0.
+#' @param cost_cluster numeric/NA The cost to process a cluster. Must be a
+#'   numeric value greater than or equal to 0. For `optimise_s_prevalence()`,
+#'   this can be ignored if correlation is NA.
+#' @param max_s numeric The maximum number of units per pool (pool size).
+#' @param ... Additional arguments passed to methods.
+#' @export
+optimise_prevalence <- function(x, ...) {
+  UseMethod("optimise_prevalence")
+}
+
 #' @rdname optimise_prevalence
+#' 
+#' @inheritParams optimise_prevalence
+#' @param max_N numeric The maximum number of pools per cluster (pool number).
+#' @method optimise_prevalence fixed_sN
 #' @export
 optimise_prevalence.fixed_sN <- function(x, 
                                          prevalence,
@@ -296,7 +318,7 @@ optimise_prevalence.fixed_sN <- function(x,
   )
 }
 
-#' @rdname optimise_prevalence
+#' @rdname optimise_s_prevalence
 #' @export
 optimise_random_prevalence <- function(catch_mean, catch_variance,
                                        pool_strat_family,
