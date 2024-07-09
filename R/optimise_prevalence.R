@@ -99,26 +99,25 @@ optimise_s_prevalence <- function(pool_number = 1,
                                   max_s = 50,
                                   form = "logitnorm",
                                   interval = 0) {
-  check_input("prevalence", prevalence)
-  check_input("cost_unit", cost_unit)
-  check_input("cost_pool", cost_pool)
-  check_input("cost_cluster", cost_cluster)
-  check_input("correlation", correlation)
-  check_input("sensitivity", sensitivity)
-  check_input("specificity", specificity)
-  check_input("max_s", max_s)
-
   N <- pool_number
+
+  # Input checks ----
+  check_geq2(cost_unit, 0) 
+  check_geq2(cost_pool, 0) 
+  check_geq2(interval, 0) 
+  check_geq2(max_s, 1, allow_na = TRUE)
+  check_geq2(cost_cluster, 0, allow_na = TRUE)
+  check_in_range2(prevalence)
+  check_in_range2(correlation, allow_na = TRUE)
 
   if (form == "discrete") {
     stop('When form = "discrete" the cost of unit information function with
          respect to s often has mulitple minima and therefore the discrete
          distribution is not currently supported for optimisation')
   }
-  if (interval < 0) stop("interval must be 0 or higher")
 
-  invalid_cost <- FALSE # trigger for when costs are infinite to ensure that there's no cost output in these cases
-  # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max_s = max_s))
+  # Cost handling ----
+  invalid_cost <- FALSE # ensure that there's no cost output when costs = Inf
 
   ## The case cost_pool == Inf (or equivalently cost_unit = 0) is helpful because
   ## the s in this case (s_opt) is the largest you would ever want
@@ -145,25 +144,30 @@ optimise_s_prevalence <- function(pool_number = 1,
     cost_unit <- 1
     invalid_cost <- TRUE
   }
+
+  # Assign clustered/unclustered function ----
   if (is.na(correlation)) {
     cost <- function(s) {
-      ufc <- cost_fi(s, prevalence, sensitivity, specificity, cost_unit, cost_pool)
-      ufc
+      cost_fi(s, prevalence, sensitivity, specificity, cost_unit, cost_pool)
     }
   } else {
     cost <- function(s) {
-      ufc <- cost_fi_cluster(
-        pool_size = s, pool_number = N, prevalence = prevalence,
+      cost_fi_cluster(
+        pool_size = s, 
+        pool_number = N, 
+        prevalence = prevalence,
         correlation = correlation,
         sensitivity = sensitivity,
         specificity = specificity,
-        cost_unit = cost_unit, cost_pool = cost_pool,
-        cost_cluster = cost_cluster, form = form
+        cost_unit = cost_unit, 
+        cost_pool = cost_pool,
+        cost_cluster = cost_cluster, 
+        form = form
       )
-      ufc
     }
   }
 
+  # Optimise cost and interval ----
   opt <- stats::optimise(cost, c(1, max_s))
   cost_opt_ceiling <- cost(ceiling(opt$minimum))
   cost_opt_floor <- cost(floor(opt$minimum))
@@ -176,7 +180,9 @@ optimise_s_prevalence <- function(pool_number = 1,
     opt_cost <- cost_opt_floor
   }
 
-  if (s == max_s) warning("Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max_s")
+  if (s == max_s) {
+      warning("Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max_s")
+  }
 
   if (interval == 0) {
     if (invalid_cost) opt_cost <- NA
