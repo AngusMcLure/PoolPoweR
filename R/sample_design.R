@@ -8,6 +8,8 @@
 #'   value greater than 0. `fixed_design` only.
 #' @param pool_number numeric/NULL The number of pools per cluster. Numeric
 #'   inputs must be an integer greater than or equal to 1. `fixed_design` only.
+#' @param total_units numeric/NULL internal use only for cases when this needs
+#' to be Inf.
 #' @param catch_dist An object of class `distribution` (e.g. produced by
 #'   `nb_catch()`) defining the distribution of the possible catch. If
 #'   `correlation = 0` the catch is for the whole survey. For `correlation > 0`
@@ -55,7 +57,8 @@
 fixed_design <- function(pool_size = NULL,
                          pool_number = NULL,
                          sensitivity = 1,
-                         specificity = 1) {
+                         specificity = 1,
+                         total_units = NULL) {
 
   ## Input checks ----
   # allow NULLs for optimise functions to identify which 
@@ -65,6 +68,9 @@ fixed_design <- function(pool_size = NULL,
   }
   if (!is.null(pool_number)) {
     check_geq2(pool_number, 0)
+  }
+  if (!is.null(total_units)) {
+    check_geq2(total_units, 0)
   }
   # sens and spec cannot be NULL
   check_in_range2(sensitivity)
@@ -77,8 +83,14 @@ fixed_design <- function(pool_size = NULL,
 
   ## Parse total parameters ----
   # TODO: Add total_pools here once number of clusters is added
-  if (opt_class == "complete_params") {
-    total_units = pool_size * pool_number
+  if (opt_class == "fixed_complete_params") {
+    if (is.null(total_units)) {
+      # When pool_size and pool_number are filled
+      total_units = pool_size * pool_number
+    }
+    # Ensure that manually input total_units matches. 
+    # TODO: Best to replace total_units arg with ...
+    stopifnot(total_units == pool_size * pool_number || total_units == Inf)
   } else {
     total_units = NA
   }

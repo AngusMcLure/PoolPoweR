@@ -12,6 +12,7 @@ test_that("fixed_design constructor", {
   expect_equal(class(fixed_perfect), c("fixed_N", "fixed_design", "sample_design"))
   expect_equal(fixed_perfect$pool_size, 10)
   expect_equal(fixed_perfect$pool_number, NULL)
+  expect_equal(fixed_perfect$total_units, NA)
   expect_equal(fixed_perfect$sensitivity, 1)
   expect_equal(fixed_perfect$specificity, 1)
 })
@@ -20,6 +21,7 @@ test_that("fixed_design default", {
   expect_equal(class(fixed_null), c("fixed_sN", "fixed_design", "sample_design"))
   expect_equal(fixed_null$pool_size, NULL)
   expect_equal(fixed_null$pool_number, NULL)
+  expect_equal(fixed_null$total_units, NA)
   expect_equal(fixed_null$sensitivity, 1)
   expect_equal(fixed_null$specificity, 1)
 }) 
@@ -28,6 +30,15 @@ test_that("fixed_design default", {
 test_that("fixed_design bad inputs caught", {
   expect_error(fixed_design(pool_size = -1))
   expect_error(fixed_design(pool_number = -1))
+})
+
+test_that("total_units handled correctly", {
+  act <- fixed_design(total_units = 1)
+  expect_equal(act$total_units, NA)
+  
+  expect_error(
+    fixed_design(pool_size = 10, pool_number = 10, total_units = 1)
+  )
 })
 
 # variable_design ----

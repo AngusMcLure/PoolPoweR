@@ -9,7 +9,8 @@ fixed_design(
   pool_size = NULL,
   pool_number = NULL,
   sensitivity = 1,
-  specificity = 1
+  specificity = 1,
+  total_units = NULL
 )
 
 variable_design(catch_dist, pool_strat, sensitivity = 1, specificity = 1)
@@ -30,6 +31,9 @@ positives.}
 a true negative. Must be a numeric value between 0 and 1, inclusive of
 both. A value of 1 indicates that the test can perfectly identify all true
 negatives.}
+
+\item{total_units}{numeric/NULL internal use only for cases when this needs
+to be Inf.}
 
 \item{catch_dist}{An object of class `distribution` (e.g. produced by
 `nb_catch()`) defining the distribution of the possible catch. If
