@@ -224,57 +224,76 @@ optimise_s_prevalence <- function(pool_number = 1,
 
 #' @rdname optimise_prevalence
 #' @export
-optimise_sN_prevalence <- function(prevalence,
-                                   cost_unit,
-                                   cost_pool,
-                                   cost_cluster,
-                                   correlation,
-                                   sensitivity = 1,
-                                   specificity = 1,
-                                   max_s = 50,
-                                   max_N = 20,
-                                   form = "logitnorm") {
+optimise_prevalence.fixed_sN <- function(x, 
+                                         prevalence,
+                                         cost_unit,
+                                         cost_pool,
+                                         cost_cluster,
+                                         correlation,
+                                         max_s = 50,
+                                         max_N = 20,
+                                         form = "logitnorm",
+                                         ...) {
 
   # max_N is the only argument that optimise_s_prevalence doesn't use
   # The rest of the input_checks are in optimise_s_prevalence
-  check_input("max_N", max_N)
+  check_geq2(max_N, 1)
 
-  # print(c(theta = prevalence, sens = sensitivity, spec = specificity, unit = cost_unit, test = cost_pool, location =cost_cluster , rho = correlation, N = N, form = form, max.s = max.s))
-
-  if (is.na(correlation) || correlation == 0) { # for simple random sampling there is no optimal N and for no correlation cluster survey the optimal approach is to infinite pools at one site (i.e. a simple random survey)
+  # Simple random sampling ----
+  ## for simple random sampling there is no optimal N and for no correlation
+  ## cluster survey the optimal approach is to infinite pools at one site
+  ## (i.e. a simple random survey)
+  if (is.na(correlation) || correlation == 0) { 
     opt <- optimise_s_prevalence(
       pool_number = 1, prevalence, cost_unit, cost_pool, cost_cluster,
-      correlation = NA, sensitivity, specificity, max_s, form
+      correlation = NA, x$sensitivity, x$specificity, max_s, form
     )
 
-    opt$N <- ifelse(is.na(correlation), NA, Inf)
-    opt$catch <- opt$N
-  } else {
-    Nopt <- 1
-    opt <- list(cost = Inf)
-    while (Nopt < max_N) {
-      opt_new <- optimise_s_prevalence(
-        pool_number = Nopt + 1, prevalence, cost_unit, cost_pool, cost_cluster,
-        correlation, sensitivity, specificity, max_s, form
-      )
-      # print(opt_new)
-      if (opt_new$cost > opt$cost) {
-        break
-      } else {
-        Nopt <- Nopt + 1
-        opt <- opt_new
-      }
-    }
-    opt$N <- Nopt
-    if (opt$N == max_N) {
-      warning("Maximum cost effectivness is achieved at or above the maximum number of pools allowed. Consider increasing max_N")
-    }
-    if (opt$s == max_s) {
-      warning("Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max_s")
+    na_or_inf <- ifelse(is.na(correlation), NA, Inf)
+    
+    out <- fixed_design(
+      pool_size = opt$s,
+      pool_number = na_or_inf,
+      total_units = na_or_inf,
+      sensitivity = x$sensitivity,
+      specificity = x$specificity
+    )
+    
+    return(out)
+  }
+
+  # Iterate to find optimal N ----
+  N <- 1
+  opt <- list(cost = Inf)
+  while (N < max_N) {
+    opt_new <- optimise_s_prevalence(
+      pool_number = N + 1, prevalence, cost_unit, cost_pool, cost_cluster,
+      correlation, x$sensitivity, x$specificity, max_s, form
+    )
+    if (opt_new$cost > opt$cost) {
+      break
+    } else {
+      N <- N + 1
+      opt <- opt_new
     }
   }
 
-  opt
+  # Warnings ----
+  opt$N <- N
+  if (opt$N == max_N) {
+    warning("Maximum cost effectivness is achieved at or above the maximum number of pools allowed. Consider increasing max_N")
+  }
+  if (opt$s == max_s) {
+    warning("Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max_s")
+  }
+
+  # Output optimal results ----
+  fixed_design(
+    pool_size = opt$s,
+    pool_number = opt$N,
+    sensitivity = x$sensitivity,
+    specificity = x$specificity
+  )
 }
 
 #' @rdname optimise_prevalence
