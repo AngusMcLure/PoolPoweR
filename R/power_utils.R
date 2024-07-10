@@ -133,9 +133,29 @@ print.power_size_results <- function(x, ...) {
   invisible(x)
 }
 
-is_perfect_test <- function(sensitivity, specificity) {
+g_switch <- function(link) {
+  switch(link,
+         logit = stats::qlogis,
+         cloglog = cloglog,
+         log = log,
+         identity = function(x){x}
+         )
+}
+
+gdivinv_switch <- function(link) {
+  switch(link,
+         logit = function(x){x * (1-x)},
+         cloglog = function(x){-log1p(-x) * (1-x)},
+         log = function(x){x},
+         identity = function(x){1})
+}
+
+is_perfect_test_temp <- function(sensitivity, specificity) {
+  # TODO: replace usage with is_perfect_test(sample_design) method
   if (sensitivity == 1 && specificity == 1) {
     return("a perfect")
   }
   return("an imperfect")
 }
+
+

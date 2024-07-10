@@ -9,14 +9,11 @@
 pooled samples}
 \usage{
 power_pool(
-  pool_size,
-  pool_number,
+  fixed_design,
   cluster_number,
   prevalence_null,
   prevalence_alt,
   correlation = 0,
-  sensitivity = 1,
-  specificity = 1,
   sig_level = 0.05,
   alternative = "greater",
   form = "logitnorm",
@@ -73,11 +70,7 @@ sample_size_pool_random(
 )
 }
 \arguments{
-\item{pool_size}{numeric The number of units per pool. Must be a numeric
-value or vector of values greater than 0.}
-
-\item{pool_number}{numeric The number of pools per cluster. Must be a integer
-value or a vector of integer values greater than or equal to 1.}
+\item{fixed_design}{placeholder.}
 
 \item{cluster_number}{numeric The total number of clusters in a cluster
 survey design (should be greater than 1) or 1 surveys where all collection
@@ -96,16 +89,6 @@ A value of 1 indicates that units within clusters are perfectly correlated
 (there are no differences units within a single cluster). A value of 0
 indicates that units within clusters are no more correlated than units in
 different clusters.}
-
-\item{sensitivity}{numeric The probability that the test correctly identifies
-a true positive. Must be a numeric value between 0 and 1, inclusive of
-both. A value of 1 indicates that the test can perfectly identify all true
-positives.}
-
-\item{specificity}{numeric The probability that the test correctly identifies
-a true negative. Must be a numeric value between 0 and 1, inclusive of
-both. A value of 1 indicates that the test can perfectly identify all true
-negatives.}
 
 \item{sig_level}{numeric Significance level for statistical test. Defaults to
 0.05. Must be strictly between 0 and 1.}
@@ -134,6 +117,16 @@ list of pool sizes and pool numbers. `pool_max_size()` and
 `pool_target_number()` provide convenience functions for defining common
 pooling strategies.}
 
+\item{sensitivity}{numeric The probability that the test correctly identifies
+a true positive. Must be a numeric value between 0 and 1, inclusive of
+both. A value of 1 indicates that the test can perfectly identify all true
+positives.}
+
+\item{specificity}{numeric The probability that the test correctly identifies
+a true negative. Must be a numeric value between 0 and 1, inclusive of
+both. A value of 1 indicates that the test can perfectly identify all true
+negatives.}
+
 \item{max_iter}{numeric Maximum number of iterations (possible catch sizes)
 to consider when calculating expected FI over random catch sizes. Generally
 needs to be large enough so that the nearly all catch sizes will be less
@@ -142,6 +135,12 @@ than `max_iter` otherwise algorithm will terminate early (with a warning)}
 \item{rel_tol}{numeric Relative tolerance for determining convergence when
 calculating expected FI over random catch sizes. Must be positive and
 should be much smaller than 1.}
+
+\item{pool_size}{numeric The number of units per pool. Must be a numeric
+value or vector of values greater than 0.}
+
+\item{pool_number}{numeric The number of pools per cluster. Must be a integer
+value or a vector of integer values greater than or equal to 1.}
 
 \item{power}{numeric The desired statistical power of the survey.}
 }
@@ -158,13 +157,14 @@ determine whether population prevalence is different from a threshold.
 to achieve a specified power.
 }
 \examples{
-power_pool(pool_size = 10, pool_number = 2, cluster_number = 50,
+fd <- fixed_design(pool_size = 10, pool_number = 2)
+power_pool(fd, cluster_number = 50,
            prevalence_null = 0.01, prevalence_alt = 0.02)
 
 sample_size_pool(pool_size = 10, pool_number = 2,
                  prevalence_null = 0.01, prevalence_alt = 0.02)
 
-power_pool(pool_size = 10, pool_number = 2, cluster_number = 50,
+power_pool(fd, cluster_number = 50,
            prevalence_null = 0.01, prevalence_alt = 0.02,
            correlation = 0.01)
 

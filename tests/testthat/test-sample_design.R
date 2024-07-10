@@ -77,3 +77,22 @@ test_that("null_pools", {
   expect_equal(null_pools(1, NULL), "N")
   expect_equal(null_pools(NULL, 1), "s")
 })
+
+test_that("is_perfect_test.sample_design true", {
+  expect_true(
+    is_perfect_test(fixed_design())
+  )
+  expect_true(
+    is_perfect_test(var_target)
+  )
+})
+
+test_that("is_perfect_test.sample_design false", {
+  expect_false(
+    is_perfect_test(fixed_design(sensitivity = 0.9))
+  )
+  vd <- variable_design(nb_catch(5, 10), pool_max_size(20), 0.9, 0.99)
+  expect_false(
+    is_perfect_test(vd)
+  )
+})

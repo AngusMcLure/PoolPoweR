@@ -142,3 +142,17 @@ null_pools <- function(pool_size, pool_number) {
     return("complete_params")
   }
 }
+
+is_perfect_test <- function(x, ...) {
+  UseMethod("is_perfect_test")
+}
+
+#' @method is_perfect_test sample_design 
+#' @export
+#' @noRd
+is_perfect_test.sample_design <- function(x, ...) {
+  if (x$sensitivity == 1 && x$specificity == 1) {
+    return(TRUE)
+  }
+  return(FALSE)
+}
