@@ -6,7 +6,7 @@
 #' `sample_size_pool()` calculate the sample size required for a pooled survey
 #' to achieve a specified power.
 #'
-#' @param fixed_design placeholder.
+#' @param x sample_design object.
 #' @param pool_size numeric The number of units per pool. Must be a numeric
 #'   value or vector of values greater than 0.
 #' @param pool_number numeric The number of pools per cluster. Must be a integer
@@ -63,7 +63,7 @@
 #' @param rel_tol numeric Relative tolerance for determining convergence when
 #'   calculating expected FI over random catch sizes. Must be positive and
 #'   should be much smaller than 1.
-#'
+#' @param ... Additional parameters.
 #'
 #' @return The statistical power of the proposed design with regards to
 #'   comparing prevalence to a threshold (`power_pool()`) or a list with the
@@ -73,13 +73,13 @@
 #'
 #' @examples
 #' fd <- fixed_design(pool_size = 10, pool_number = 2)
-#' power_pool(fd, cluster_number = 50,
+#' pool_power(fd, cluster_number = 50,
 #'            prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
 #' sample_size_pool(pool_size = 10, pool_number = 2,
 #'                  prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
-#' power_pool(fd, cluster_number = 50,
+#' pool_power(fd, cluster_number = 50,
 #'            prevalence_null = 0.01, prevalence_alt = 0.02,
 #'            correlation = 0.01)
 #' 
@@ -94,25 +94,41 @@
 #' sample_size_pool_random(nb_catch(20,25), pool_target_number(2),
 #'                         prevalence_null = 0.01, prevalence_alt = 0.02,
 #'                          correlation = 0.01)
-power_pool <- function(fixed_design,
+pool_power <- function(x, 
                        cluster_number,
                        prevalence_null, 
                        prevalence_alt,
-                       correlation = 0, 
-                       sig_level = 0.05, 
-                       alternative = 'greater',
-                       form = 'logitnorm', 
-                       link = 'logit' ) {
+                       correlation,
+                       sig_level,
+                       alternative,
+                       form,
+                       link,
+                       ...) {
+  UseMethod("pool_power")
+}
+
+#' @method pool_power fixed_design
+#' @export
+pool_power.fixed_design <- function(x,
+                                    cluster_number,
+                                    prevalence_null, 
+                                    prevalence_alt,
+                                    correlation = 0, 
+                                    sig_level = 0.05, 
+                                    alternative = 'greater',
+                                    form = 'logitnorm', 
+                                    link = 'logit',
+                                    ...) {
   # Input checks ----
-  if(correlation > 0 & cluster_number <= 1){
+  if (correlation > 0 & cluster_number <= 1) {
     stop('The number of clusters (cluster_number) must be (substantially) greater than 1 if there is non-zero correlation between units in a cluster')
   }
   
-  if(correlation > 0 & cluster_number <= 10){
+  if (correlation > 0 & cluster_number <= 10) {
     warning('Estimated power may be unreliable if number of clusters (cluster_number) is less than 10')
   }
   
-  if(correlation == 0 & cluster_number * fixed_design$pool_number <= 10){
+  if (correlation == 0 & cluster_number * x$pool_number <= 10) {
     warning('Estimated power may be unreliable if total number of pools (cluster_number * pool_number) is less than 10')
   }
   
@@ -123,22 +139,23 @@ power_pool <- function(fixed_design,
   g <- g_switch(link)
   gdivinv <- gdivinv_switch(link)
   
+  # Calculate Fisher information
   fia <- cluster_number * gdivinv(thetaa)^2 /
-    solve(fi_pool_cluster(pool_size = fixed_design$pool_size,
-                          pool_number = fixed_design$pool_number,
+    solve(fi_pool_cluster(pool_size = x$pool_size,
+                          pool_number = x$pool_number,
                           prevalence = thetaa,
                           correlation = correlation,
-                          sensitivity = fixed_design$sensitivity,
-                          specificity = fixed_design$specificity,
+                          sensitivity = x$sensitivity,
+                          specificity = x$specificity,
                           form = form))[1,1]
 
   fi0 <- cluster_number * gdivinv(theta0)^2/
-    solve(fi_pool_cluster(pool_size = fixed_design$pool_size,
-                          pool_number = fixed_design$pool_number,
+    solve(fi_pool_cluster(pool_size = x$pool_size,
+                          pool_number = x$pool_number,
                           prevalence = theta0,  #should this be theta0 or thetaa?
                           correlation = correlation,
-                          sensitivity = fixed_design$sensitivity,
-                          specificity = fixed_design$specificity,
+                          sensitivity = x$sensitivity,
+                          specificity = x$specificity,
                           form = form))[1,1]
   
   power <- switch(alternative,
@@ -150,22 +167,22 @@ power_pool <- function(fixed_design,
   )
   
   # Prepare output ----
-  total_pools <- cluster_number * fixed_design$pool_number
+  total_pools <- cluster_number * x$pool_number
   total_units <- # leaving verbose as cluster_number to be added to fixed_design
     cluster_number * 
-    fixed_design$pool_number * 
-    fixed_design$pool_size
+    x$pool_number * 
+    x$pool_size
   
   text <- paste(
     "A survey design using", 
-    ifelse(is_perfect_test(fixed_design), "a perfect", "an imperfect"), 
+    ifelse(is_perfect_test(x), "a perfect", "an imperfect"), 
     "diagnostic test on pooled samples with the above parameters has a statistical power of", 
     round(power, 3)
   )
   
   power_size_results(  
-    sensitivity = fixed_design$sensitivity,
-    specificity = fixed_design$specificity,
+    sensitivity = x$sensitivity,
+    specificity = x$specificity,
     # prevalence
     prev_null = theta0,
     prev_alt = thetaa,
@@ -175,8 +192,8 @@ power_pool <- function(fixed_design,
     power = power,
     alternative = alternative,
     # sample design
-    pool_size = fixed_design$pool_size,
-    pool_number = fixed_design$pool_number,
+    pool_size = x$pool_size,
+    pool_number = x$pool_number,
     cluster_number = cluster_number,
     total_pools = total_pools,
     total_units = total_units,
@@ -186,7 +203,7 @@ power_pool <- function(fixed_design,
   
 }
 
-#' @rdname power_pool
+#' @rdname pool_power
 #' @export
 
 power_pool_random <- function(catch_dist, pool_strat, cluster_number,
@@ -279,7 +296,7 @@ power_pool_random <- function(catch_dist, pool_strat, cluster_number,
   )
 }
 
-#' @rdname power_pool
+#' @rdname pool_power
 #' @export
 
 sample_size_pool <- function(pool_size, pool_number,
@@ -364,7 +381,7 @@ sample_size_pool <- function(pool_size, pool_number,
 
 
 
-#' @rdname power_pool
+#' @rdname pool_power
 #' @export
 #' 
 
