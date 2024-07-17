@@ -20,8 +20,9 @@ variable_design(catch_dist, pool_strat, sensitivity = 1, specificity = 1)
 \item{pool_size}{numeric/NULL The number of units per pool. Must be a numeric
 value greater than 0. `fixed_design` only.}
 
-\item{pool_number}{numeric/NULL The number of pools per cluster. Numeric
-inputs must be an integer greater than or equal to 1. `fixed_design` only.}
+\item{pool_number}{numeric/NULL/NA The number of pools per cluster. Numeric
+inputs must be an integer greater than or equal to 1. Can be NA in cases
+where  `fixed_design` only.}
 
 \item{cluster_number}{numeric The total number of clusters in a cluster
 survey design. Set to 1 for unclustered analyses, i.e. where all collection

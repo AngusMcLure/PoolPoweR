@@ -6,10 +6,11 @@
 #'
 #' @param pool_size numeric/NULL The number of units per pool. Must be a numeric
 #'   value greater than 0. `fixed_design` only.
-#' @param pool_number numeric/NULL The number of pools per cluster. Numeric
-#'   inputs must be an integer greater than or equal to 1. `fixed_design` only.
-#' @param total_units numeric/NULL internal use only for cases when this needs
-#' to be Inf.
+#' @param pool_number numeric/NULL/NA/Inf The number of pools per cluster. 
+#'   Numeric inputs must be an integer greater than or equal to 1. Can be NA/Inf 
+#'   in cases where `optimise_prevalence(correlation = NA)`. `fixed_design` only.
+#' @param total_units numeric/NULL/NA/Inf internal use only. Can be NA/Inf in
+#' cases where `optimise_prevalence(correlation = NA)`.
 #' @param cluster_number numeric The total number of clusters in a cluster
 #'   survey design. Set to 1 for unclustered analyses, i.e. where all collection
 #'   happens at a single site or collected via simple random sampling from the
@@ -74,14 +75,15 @@ fixed_design <- function(pool_size = NULL,
   if (!is.null(pool_size)) {
     check_geq2(pool_size, 0)
   }
-  if (!is.null(pool_number)) {
+  # Allow NA/Inf for optimise_prevalence(correlation = NA)
+  if (is_not_null_na(pool_number)) {
     check_geq2(pool_number, 0)
   }
-  if (!is.null(total_units)) {
+  if (is_not_null_na(total_units)) {
     check_geq2(total_units, 0)
   }
+  
   check_geq2(cluster_number, 1)
-  # sens and spec cannot be NULL
   check_in_range2(sensitivity)
   check_in_range2(specificity)
 
@@ -91,17 +93,29 @@ fixed_design <- function(pool_size = NULL,
   opt_class <- paste0("fixed_design_optimise_", opt_class)
 
   ## Parse total parameters ----
-  total_pools <- ifelse(!is.null(pool_number), pool_number * cluster_number, NA)
+  total_pools <- ifelse(
+    is_not_null_na(pool_number), 
+    pool_number * cluster_number, 
+    NA
+  )
+  
+  print(opt_class)
   if (opt_class == "fixed_design_optimise_complete_params") {
     if (is.null(total_units)) {
       # When pool_size and pool_number are filled
       total_units = pool_size * pool_number * cluster_number
     }
     # Ensure that manually input total_units matches. 
-    # TODO: Best to replace total_units arg with ...
     stopifnot(total_units == pool_size * pool_number * cluster_number || total_units == Inf)
   } else {
-    total_units = NA
+    # ugly but required to ensure that incorrect values of total_units are coerced to NA
+    if (is.null(total_units)) {
+      total_units = NA
+    } else if (is.infinite(total_units)) {
+      total_units = Inf
+    } else {
+      total_units = NA
+    }
   }
   
   ## Generate message/prose ----
@@ -191,4 +205,12 @@ design_msg <- function(pool_size, pool_number, cluster_number) {
   } else {
     paste0(pre, pool_size, " ", p_units, " per pool." )
   }
+}
+
+is_not_null_na <- function(x) {
+  ifelse(
+    !is.null(x) && !is.na(x),
+    TRUE,
+    FALSE
+  )
 }

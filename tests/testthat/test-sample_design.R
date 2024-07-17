@@ -45,6 +45,31 @@ test_that("total_units handled correctly", {
   )
 })
 
+test_that("Allow NA/Inf", {
+  act <- fixed_design(pool_number = NA, cluster_number = 2)
+  expect_true(is.na(act$pool_number))
+  expect_true(is.na(act$total_units))
+  expect_true(is.na(act$total_pools))
+  
+  act <- fixed_design(pool_number = Inf, cluster_number = 2)
+  expect_true(is.infinite(act$pool_number))
+  expect_true(is.na(act$total_units))
+  expect_true(is.infinite(act$total_pools))
+  
+  act <- fixed_design(total_units = NA, cluster_number = 2)
+  expect_true(is.null(act$pool_number))
+  expect_true(is.na(act$total_units))
+  
+  act <- fixed_design(total_units = Inf, cluster_number = 2)
+  expect_true(is.null(act$pool_number))
+  expect_true(is.infinite(act$total_units))
+  
+})
+
+test_that("pool_number NA with pool_size", {
+  act <- fixed_design(pool_size=10, pool_number=NA, cluster_number=2)
+})
+
 test_that("total_units and total_pools calculated correctly", {
   act <- fixed_design(10, 5, cluster_number = 1)
   expect_equal(act$total_units, 10*5)
