@@ -79,11 +79,11 @@ fixed_design <- function(pool_size = NULL,
   ## Subclasses for optimisation ----
   # To dispatch optimise() based on NULLs 
   opt_class <- null_pools(pool_size, pool_number)
-  opt_class <- paste0("fixed_", opt_class)
+  opt_class <- paste0("fixed_design_optimise_", opt_class)
 
   ## Parse total parameters ----
-  # TODO: Add total_pools here once number of clusters is added
-  if (opt_class == "fixed_complete_params") {
+  total_pools <- ifelse(!is.null(pool_number), pool_number * cluster_number, NA)
+  if (opt_class == "fixed_design_optimise_complete_params") {
     if (is.null(total_units)) {
       # When pool_size and pool_number are filled
       total_units = pool_size * pool_number

@@ -244,18 +244,18 @@ optimise_prevalence <- function(x, ...) {
 #' 
 #' @inheritParams optimise_prevalence
 #' @param max_N numeric The maximum number of pools per cluster (pool number).
-#' @method optimise_prevalence fixed_sN
+#' @method optimise_prevalence fixed_design_optimise_sN
 #' @export
-optimise_prevalence.fixed_sN <- function(x, 
-                                         prevalence,
-                                         cost_unit,
-                                         cost_pool,
-                                         cost_cluster,
-                                         correlation,
-                                         max_s = 50,
-                                         max_N = 20,
-                                         form = "logitnorm",
-                                         ...) {
+optimise_prevalence.fixed_design_optimise_sN <- function(x, 
+                                                         prevalence,
+                                                         cost_unit,
+                                                         cost_pool,
+                                                         cost_cluster,
+                                                         correlation,
+                                                         max_s = 50,
+                                                         max_N = 20,
+                                                         form = "logitnorm",
+                                                         ...) {
 
   # max_N is the only argument that optimise_s_prevalence doesn't use
   # The rest of the input_checks are in optimise_s_prevalence

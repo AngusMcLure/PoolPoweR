@@ -1,11 +1,11 @@
-# optimise_prevalence.fixed_sN ----
-test_that("optimise_prevalence fixed_sN",{
+# optimise_prevalence.fixed_design_optimise_sN ----
+test_that("optimise_prevalence fixed_sN", {
   act <- optimise_prevalence(
     fixed_design(), # pool size and number NA
     prevalence = 0.01, cost_unit = 5, cost_pool = 10,
     cost_cluster = 100, correlation = 0.05, form = "beta"
   )
-  expect_equal(class(act), c("fixed_complete_params", "fixed_design", "sample_design"))
+  expect_equal(class(act), c("fixed_design_optimise_complete_params", "fixed_design", "sample_design"))
   expect_equal(act$pool_size, 5)
   expect_equal(act$pool_number, 4)
   expect_equal(act$total_units, 20)
@@ -17,7 +17,7 @@ test_that("optimise_prevalence fixed_sN correlation = 0",{
     prevalence = 0.01, cost_unit = 5, cost_pool = 10,
     cost_cluster = 100, correlation = 0, form = "beta"
   )
-  expect_equal(class(act), c("fixed_complete_params", "fixed_design", "sample_design"))
+  expect_equal(class(act), c("fixed_design_optimise_complete_params", "fixed_design", "sample_design"))
   expect_equal(act$pool_size, 19)
   expect_equal(act$pool_number, Inf)
   expect_equal(act$total_units, Inf)

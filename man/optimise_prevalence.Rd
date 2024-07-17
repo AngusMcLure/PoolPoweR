@@ -2,12 +2,12 @@
 % Please edit documentation in R/optimise_prevalence.R
 \name{optimise_prevalence}
 \alias{optimise_prevalence}
-\alias{optimise_prevalence.fixed_sN}
+\alias{optimise_prevalence.fixed_design_optimise_sN}
 \title{Optimise prevalence}
 \usage{
 optimise_prevalence(x, ...)
 
-\method{optimise_prevalence}{fixed_sN}(
+\method{optimise_prevalence}{fixed_design_optimise_sN}(
   x,
   prevalence,
   cost_unit,
