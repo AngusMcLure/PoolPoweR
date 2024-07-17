@@ -1,19 +1,19 @@
 # optimise_prevalence.fixed_design_optimise_sN ----
 test_that("optimise_prevalence fixed_sN", {
   act <- optimise_prevalence(
-    fixed_design(), # pool size and number NA
+    fixed_design(cluster_number = 2), # pool size and number NA
     prevalence = 0.01, cost_unit = 5, cost_pool = 10,
     cost_cluster = 100, correlation = 0.05, form = "beta"
   )
   expect_equal(class(act), c("fixed_design_optimise_complete_params", "fixed_design", "sample_design"))
   expect_equal(act$pool_size, 5)
   expect_equal(act$pool_number, 4)
-  expect_equal(act$total_units, 20)
+  expect_equal(act$total_units, 5*4*2)
 })
 
 test_that("optimise_prevalence fixed_sN correlation = 0",{
   act <- optimise_prevalence(
-    fixed_design(), # pool size and number NA
+    fixed_design(cluster_number = 2), # pool size and number NA
     prevalence = 0.01, cost_unit = 5, cost_pool = 10,
     cost_cluster = 100, correlation = 0, form = "beta"
   )
@@ -27,7 +27,7 @@ test_that("optimise_prevalence fixed_sN correlation = NA", {
   # TODO: Needs to be addressed, see: 
   # https://github.com/AngusMcLure/PoolPoweR/issues/43#issuecomment-2212918446
   optimise_prevalence(
-    fixed_design(),
+    fixed_design(cluster_number = 2),
     prevalence = 0.01, cost_unit = 5, cost_pool = 10,
     cost_cluster = 100, correlation = NA, form = "beta"
   )
@@ -36,7 +36,7 @@ test_that("optimise_prevalence fixed_sN correlation = NA", {
 test_that("optimise_sN_prevalence() when opt$N == max_N", {
   expect_warning(
     optimise_prevalence(
-      fixed_design(),
+      fixed_design(cluster_number = 2),
       prevalence = 0.01, cost_unit = 5, cost_pool = 10,
       cost_cluster = 100, correlation = 0.05, max_N = 4),
     "Maximum cost effectivness is achieved at or above the maximum number of pools allowed. Consider increasing max_N")
@@ -45,12 +45,12 @@ test_that("optimise_sN_prevalence() when opt$N == max_N", {
 test_that("Bad max_n inputs caught in optimise_sN_prevalence()", {
   expect_error(
     optimise_prevalence(
-      fixed_design(),
+      fixed_design(cluster_number = 2),
       prevalence = 0.01, cost_unit = 5, cost_pool = 10,
       cost_cluster = 100, correlation = 0.05, max_N = 0
     ), "max_N must be >= 1")
   expect_error(optimise_prevalence(
-    fixed_design(),
+    fixed_design(cluster_number = 2),
     prevalence = 0.01, cost_unit = 5, cost_pool = 10,
     cost_cluster = 100, correlation = 0.05, max_N = NA
   ), "max_N must be numeric, not logical")
@@ -58,7 +58,9 @@ test_that("Bad max_n inputs caught in optimise_sN_prevalence()", {
 
 # other ----
 test_that("Bad inputs caught in optimise_s_prevalence()", {
-  expect_error(optimise_s_prevalence(fixed_design(), prevalence = NA, correlation = 0.1, cost_unit = 5, cost_pool = 10, cost_cluster = 100), "prevalence must be numeric, not logical")
+  expect_error(optimise_s_prevalence(
+    prevalence = NA, correlation = 0.1, cost_unit = 5, cost_pool = 10, cost_cluster = 100
+  ), "prevalence must be numeric, not logical")
   expect_error(optimise_s_prevalence(
     prevalence = 0.01, cost_unit = -1, cost_pool = 10,
     cost_cluster = 100, correlation = 0.05

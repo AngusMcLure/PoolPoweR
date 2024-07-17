@@ -136,8 +136,9 @@ strategy.
 optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10)
 
 optimise_prevalence(
-  fixed_design(), 
+  fixed_design(cluster_number = 20), 
   prevalence = 0.01, cost_unit = 5, cost_pool = 10,
   cost_cluster = 100, correlation = 0.05, form = "beta"
 )
+
 }
