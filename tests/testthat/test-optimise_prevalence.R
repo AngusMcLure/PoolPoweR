@@ -5,10 +5,20 @@ test_that("optimise_prevalence fixed_sN", {
     prevalence = 0.01, cost_unit = 5, cost_pool = 10,
     cost_cluster = 100, correlation = 0.05, form = "beta"
   )
-  expect_equal(class(act), c("fixed_design_optimise_complete_params", "fixed_design", "sample_design"))
-  expect_equal(act$pool_size, 5)
-  expect_equal(act$pool_number, 4)
-  expect_equal(act$total_units, 20)
+  expect_equal(class(act), c("optimised_results"))
+  expect_equal(act$sample_design$pool_size, 5)
+  expect_equal(act$sample_design$pool_number, 4)
+  expect_equal(act$sample_design$total_units, 20)
+  expect_equal(act$prevalence, 0.01)
+  expect_equal(act$cost_unit, 5)
+  expect_equal(act$cost_pool, 10)
+  expect_equal(act$cost_period, NA)
+  expect_equal(act$cost_cluster, 100)
+  expect_equal(act$correlation, 0.05)
+  expect_equal(
+    act$message, 
+    "The optimal design is to sample 20 units per collection site, across 4 pools with 5 units each pool."
+  )
 })
 
 test_that("optimise_prevalence fixed_sN correlation = 0",{
@@ -17,19 +27,32 @@ test_that("optimise_prevalence fixed_sN correlation = 0",{
     prevalence = 0.01, cost_unit = 5, cost_pool = 10,
     cost_cluster = 100, correlation = 0, form = "beta"
   )
-  expect_equal(class(act), c("fixed_design_optimise_complete_params", "fixed_design", "sample_design"))
-  expect_equal(act$pool_size, 19)
-  expect_equal(act$pool_number, Inf)
-  expect_equal(act$total_units, Inf)
+  expect_equal(class(act), c("optimised_results"))
+  expect_equal(act$sample_design$pool_size, 19)
+  expect_equal(act$sample_design$pool_number, Inf)
+  expect_equal(act$sample_design$total_units, Inf)
+  expect_equal(act$cost_period, NA)
+  expect_equal(act$correlation, 0)
+  expect_equal(
+    act$message, 
+    "The optimal design is to sample 19 units per pool."
+  )
 })
 
 test_that("optimise_prevalence fixed_sN correlation = NA", {
-  # TODO: Needs to be addressed, see: 
-  # https://github.com/AngusMcLure/PoolPoweR/issues/43#issuecomment-2212918446
-  optimise_prevalence(
+  act <- optimise_prevalence(
     fixed_design(),
     prevalence = 0.01, cost_unit = 5, cost_pool = 10,
     cost_cluster = 100, correlation = NA, form = "beta"
+  )
+  expect_equal(act$sample_design$pool_size, 19)
+  expect_equal(act$sample_design$pool_number, NA)
+  expect_equal(act$sample_design$total_units, NA)
+  expect_equal(act$cost_period, NA)
+  expect_equal(act$correlation, NA)
+  expect_equal(
+    act$message, 
+    "The optimal design is to sample 19 units per pool."
   )
 })
 
