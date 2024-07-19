@@ -273,7 +273,7 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
 
     na_or_inf <- ifelse(is.na(correlation), NA, Inf)
     
-    out <- fixed_design(
+    fd <- fixed_design(
       pool_size = opt$s,
       pool_number = na_or_inf,
       total_units = na_or_inf,
@@ -281,6 +281,14 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
       specificity = x$specificity
     )
     
+    out <- optimised_results(
+      sample_design = fd,
+      prevalence = prevalence,
+      cost_unit = cost_unit,
+      cost_pool = cost_pool,
+      cost_cluster = cost_cluster,
+      correlation = correlation
+    )
     return(out)
   }
 
@@ -310,11 +318,20 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
   }
 
   # Output optimal results ----
-  fixed_design(
+  fd <- fixed_design(
     pool_size = opt$s,
     pool_number = opt$N,
     sensitivity = x$sensitivity,
     specificity = x$specificity
+  )
+  
+  optimised_results(
+    sample_design = fd,
+    prevalence = prevalence,
+    cost_unit = cost_unit,
+    cost_pool = cost_pool,
+    cost_cluster = cost_cluster,
+    correlation = correlation
   )
 }
 

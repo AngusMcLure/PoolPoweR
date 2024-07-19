@@ -66,10 +66,11 @@ fixed_design <- function(pool_size = NULL,
   if (!is.null(pool_size)) {
     check_geq2(pool_size, 0)
   }
-  if (!is.null(pool_number)) {
+  # Allow NA when optimise_prevalence(correlation = 0)
+  if (!is.null(pool_number) && !is.na(pool_number)) {
     check_geq2(pool_number, 0)
   }
-  if (!is.null(total_units)) {
+  if (!is.null(total_units) && !is.na(total_units)) {
     check_geq2(total_units, 0)
   }
   # sens and spec cannot be NULL
@@ -82,7 +83,6 @@ fixed_design <- function(pool_size = NULL,
   opt_class <- paste0("fixed_design_optimise_", opt_class)
 
   ## Parse total parameters ----
-  total_pools <- ifelse(!is.null(pool_number), pool_number * cluster_number, NA)
   if (opt_class == "fixed_design_optimise_complete_params") {
     if (is.null(total_units)) {
       # When pool_size and pool_number are filled
@@ -90,7 +90,7 @@ fixed_design <- function(pool_size = NULL,
     }
     # Ensure that manually input total_units matches. 
     # TODO: Best to replace total_units arg with ...
-    stopifnot(total_units == pool_size * pool_number || total_units == Inf)
+    stopifnot(total_units == pool_size * pool_number || total_units == Inf || is.na(total_units))
   } else {
     total_units = NA
   }
