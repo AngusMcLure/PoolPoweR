@@ -72,13 +72,16 @@
 #' @export
 #'
 #' @examples
-#' fd <- fixed_design(pool_size = 10, pool_number = 2, cluster_number = 50)
-#' pool_power(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
+#' fd <- fixed_design(pool_size = 10, pool_number = 2)
+#' pool_power(fd, cluster_number = 50,
+#'            prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
 #' sample_size_pool(pool_size = 10, pool_number = 2,
 #'                  prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
-#' pool_power(fd, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
+#' pool_power(fd, cluster_number = 50,
+#'            prevalence_null = 0.01, prevalence_alt = 0.02,
+#'            correlation = 0.01)
 #' 
 #' sample_size_pool(pool_size = 10, pool_number = 2,
 #'                  prevalence_null = 0.01, prevalence_alt = 0.02,
@@ -92,6 +95,7 @@
 #'                         prevalence_null = 0.01, prevalence_alt = 0.02,
 #'                          correlation = 0.01)
 pool_power <- function(x, 
+                       cluster_number,
                        prevalence_null, 
                        prevalence_alt,
                        correlation,
@@ -106,6 +110,7 @@ pool_power <- function(x,
 #' @method pool_power fixed_design
 #' @export
 pool_power.fixed_design <- function(x,
+                                    cluster_number,
                                     prevalence_null, 
                                     prevalence_alt,
                                     correlation = 0, 
@@ -115,15 +120,15 @@ pool_power.fixed_design <- function(x,
                                     link = 'logit',
                                     ...) {
   # Input checks ----
-  if (correlation > 0 & x$cluster_number <= 1) {
+  if (correlation > 0 & cluster_number <= 1) {
     stop('The number of clusters (cluster_number) must be (substantially) greater than 1 if there is non-zero correlation between units in a cluster')
   }
   
-  if (correlation > 0 & x$cluster_number <= 10) {
+  if (correlation > 0 & cluster_number <= 10) {
     warning('Estimated power may be unreliable if number of clusters (cluster_number) is less than 10')
   }
   
-  if (correlation == 0 & x$cluster_number * x$pool_number <= 10) {
+  if (correlation == 0 & cluster_number * x$pool_number <= 10) {
     warning('Estimated power may be unreliable if total number of pools (cluster_number * pool_number) is less than 10')
   }
   
@@ -135,7 +140,7 @@ pool_power.fixed_design <- function(x,
   gdivinv <- gdivinv_switch(link)
   
   # Calculate Fisher information
-  fia <- x$cluster_number * gdivinv(thetaa)^2 /
+  fia <- cluster_number * gdivinv(thetaa)^2 /
     solve(fi_pool_cluster(pool_size = x$pool_size,
                           pool_number = x$pool_number,
                           prevalence = thetaa,
@@ -144,7 +149,7 @@ pool_power.fixed_design <- function(x,
                           specificity = x$specificity,
                           form = form))[1,1]
 
-  fi0 <- x$cluster_number * gdivinv(theta0)^2/
+  fi0 <- cluster_number * gdivinv(theta0)^2/
     solve(fi_pool_cluster(pool_size = x$pool_size,
                           pool_number = x$pool_number,
                           prevalence = theta0,  #should this be theta0 or thetaa?
@@ -162,9 +167,9 @@ pool_power.fixed_design <- function(x,
   )
   
   # Prepare output ----
-  total_pools <- x$cluster_number * x$pool_number
+  total_pools <- cluster_number * x$pool_number
   total_units <- # leaving verbose as cluster_number to be added to fixed_design
-    x$cluster_number * 
+    cluster_number * 
     x$pool_number * 
     x$pool_size
   
@@ -189,7 +194,7 @@ pool_power.fixed_design <- function(x,
     # sample design
     pool_size = x$pool_size,
     pool_number = x$pool_number,
-    cluster_number = x$cluster_number,
+    cluster_number = cluster_number,
     total_pools = total_pools,
     total_units = total_units,
     # parsing

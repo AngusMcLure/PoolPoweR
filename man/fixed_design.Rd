@@ -8,7 +8,6 @@
 fixed_design(
   pool_size = NULL,
   pool_number = NULL,
-  cluster_number,
   sensitivity = 1,
   specificity = 1,
   total_units = NULL
@@ -22,11 +21,6 @@ value greater than 0. `fixed_design` only.}
 
 \item{pool_number}{numeric/NULL The number of pools per cluster. Numeric
 inputs must be an integer greater than or equal to 1. `fixed_design` only.}
-
-\item{cluster_number}{numeric The total number of clusters in a cluster
-survey design. Set to 1 for unclustered analyses, i.e. where all collection
-happens at a single site or collected via simple random sampling from the
-target population.}
 
 \item{sensitivity}{numeric The probability that the test correctly identifies
 a true positive. Must be a numeric value between 0 and 1, inclusive of
@@ -61,14 +55,11 @@ input each param separately across functions (e.g. power/optimise). Can
 either be of class `fixed_design` or `variable_design`.
 }
 \examples{
-fd_perfect <- fixed_design(pool_size = 10, cluster_number = 1)
+fd_perfect <- fixed_design(pool_size = 10)
 
 fd_imperfect <- fixed_design(
-  pool_size = 10, pool_number = NULL, cluster_number = 1, 
-  sensitivity = 0.95, specificity = 0.99
+  pool_size = 10, pool_number = NULL, sensitivity = 0.95, specificity = 0.99
 )
-
-fd_clustered <- fixed_design(cluster_number = 20)
 
 vd_target <- variable_design(
   catch_dist = nb_catch(10, 11),

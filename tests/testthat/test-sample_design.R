@@ -1,10 +1,10 @@
 # fixed_design ----
 ## fixtures ----
 fixed_perfect <- fixed_design(
-  pool_size = 10, pool_number = NULL, cluster_number = 1, sensitivity = 1, specificity = 1
+  pool_size = 10, pool_number = NULL, sensitivity = 1, specificity = 1
 )
 
-fixed_null <- fixed_design(cluster_number = 1) # sens/spec == 1, pool_size/num == NULL
+fixed_null <- fixed_design() # sens/spec == 1, pool_size/num == NULL
 
 ## test ----
 test_that("fixed_design constructor", {
@@ -15,8 +15,6 @@ test_that("fixed_design constructor", {
   expect_equal(fixed_perfect$total_units, NA)
   expect_equal(fixed_perfect$sensitivity, 1)
   expect_equal(fixed_perfect$specificity, 1)
-  expect_equal(fixed_perfect$cluster_number, 1)
-  expect_equal(fixed_perfect$message, "Run optimise_prevalence() to get the optimal study design.")
 })
 
 test_that("fixed_design default", {
@@ -26,8 +24,6 @@ test_that("fixed_design default", {
   expect_equal(fixed_null$total_units, NA)
   expect_equal(fixed_null$sensitivity, 1)
   expect_equal(fixed_null$specificity, 1)
-  expect_equal(fixed_perfect$cluster_number, 1)
-  expect_equal(fixed_perfect$message, "Run optimise_prevalence() to get the optimal study design.")
 }) 
 
 
@@ -37,34 +33,12 @@ test_that("fixed_design bad inputs caught", {
 })
 
 test_that("total_units handled correctly", {
-  act <- fixed_design(cluster_number = 1, total_units = 1)
+  act <- fixed_design(total_units = 1)
   expect_equal(act$total_units, NA)
   
   expect_error(
     fixed_design(pool_size = 10, pool_number = 10, total_units = 1)
   )
-})
-
-test_that("total_units and total_pools calculated correctly", {
-  act <- fixed_design(10, 5, cluster_number = 1)
-  expect_equal(act$total_units, 10*5)
-  expect_equal(act$total_pools, 5)
-  expect_equal(
-    act$message, 
-    "The optimal design is to sample 10 units per pool."
-  )
-  
-  act <- fixed_design(10, 5, cluster_number = 20)
-  expect_equal(act$total_units, 10*5*20)
-  expect_equal(act$total_pools, 5*20)
-  expect_equal(
-    act$message, 
-    "The optimal design is to sample 50 units per collection site, across 5 pools with 10 units each pool."
-  )
-  
-  act <- fixed_design(pool_number = 10, cluster_number = 20)
-  expect_true(is.na(act$total_units))
-  expect_equal(act$total_pools, 10*20)
 })
 
 # variable_design ----
@@ -106,7 +80,7 @@ test_that("null_pools", {
 
 test_that("is_perfect_test.sample_design true", {
   expect_true(
-    is_perfect_test(fixed_design(cluster_number = 1))
+    is_perfect_test(fixed_design())
   )
   expect_true(
     is_perfect_test(var_target)
@@ -115,7 +89,7 @@ test_that("is_perfect_test.sample_design true", {
 
 test_that("is_perfect_test.sample_design false", {
   expect_false(
-    is_perfect_test(fixed_design(cluster_number = 1, sensitivity = 0.9))
+    is_perfect_test(fixed_design(sensitivity = 0.9))
   )
   vd <- variable_design(nb_catch(5, 10), pool_max_size(20), 0.9, 0.99)
   expect_false(

@@ -83,11 +83,10 @@
 #' optimise_s_prevalence(prevalence = 0.01, cost_unit = 5, cost_pool = 10)
 #' 
 #' optimise_prevalence(
-#'   fixed_design(cluster_number = 20), 
+#'   fixed_design(), 
 #'   prevalence = 0.01, cost_unit = 5, cost_pool = 10,
 #'   cost_cluster = 100, correlation = 0.05, form = "beta"
 #' )
-#' 
 optimise_s_prevalence <- function(pool_number = 1,
                                   prevalence,
                                   cost_unit,
@@ -277,7 +276,6 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
     out <- fixed_design(
       pool_size = opt$s,
       pool_number = na_or_inf,
-      cluster_number = x$cluster_number,
       total_units = na_or_inf,
       sensitivity = x$sensitivity,
       specificity = x$specificity
@@ -315,7 +313,6 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
   fixed_design(
     pool_size = opt$s,
     pool_number = opt$N,
-    cluster_number = x$cluster_number,
     sensitivity = x$sensitivity,
     specificity = x$specificity
   )

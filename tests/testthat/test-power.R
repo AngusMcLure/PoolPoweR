@@ -6,13 +6,13 @@ exp1 <- function(act) {
   expect_equal(act$sample_design$exp_total_units, 1500)
 }
 
-fd <- fixed_design(pool_size = 10, pool_number = 2, cluster_number = 50)
-fd_imp <- fixed_design(15, 3, 20, 0.99, 0.98)
+fd <- fixed_design(pool_size = 10, pool_number = 2)
+fd_imp <- fixed_design(pool_size = 15, pool_number = 3, 0.99, 0.98)
 
 # power_pool ----
 test_that(
   "power_pool() no corr", {
-    act <- pool_power(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
+    act <- pool_power(fd, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02)
     expect_equal(act$stat_test$power, 0.7617911, tolerance = 1e-6) 
     # tests for totals as they aren't direct inputs
     expect_equal(act$sample_design$total_pools, 100) 
@@ -23,7 +23,7 @@ test_that(
 
 test_that(
   "power_pool() with corr", {
-    act <- pool_power(fd, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
+    act <- pool_power(fd, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
     expect_equal(act$stat_test$power, 0.6213165, tolerance = 1e-6)
     expect_equal(act$sample_design$total_pools, 100) 
     expect_equal(act$sample_design$total_units, 1000) 
@@ -33,7 +33,7 @@ test_that(
 
 test_that(
   "power_pool() imperfect", {
-    act <- pool_power(fd_imp, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
+    act <- pool_power(fd_imp, cluster_number = 20, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
     expect_equal(act$stat_test$power, 0.4350865, tolerance = 1e-6)
     expect_equal(act$sample_design$total_pools, 60) 
     expect_equal(act$sample_design$total_units, 900) 
@@ -43,13 +43,13 @@ test_that(
 
 test_that(
   "power_pool() links", {
-  act <- pool_power(fd, prevalence_null = 0.01, prevalence_alt = 0.02, link = "identity")
+  act <- pool_power(fd, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, link = "identity")
   expect_equal(act$stat_test$power, 0.8448746, tolerance = 1e-6) 
   
-  act <- pool_power(fd, prevalence_null = 0.01, prevalence_alt = 0.02, link = "log")
+  act <- pool_power(fd, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, link = "log")
   expect_equal(act$stat_test$power, 0.7598709, tolerance = 1e-6) 
   
-  act <- pool_power(fd, prevalence_null = 0.01, prevalence_alt = 0.02, link = "cloglog")
+  act <- pool_power(fd, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02, link = "cloglog")
   expect_equal(act$stat_test$power, 0.7608382, tolerance = 1e-6) 
   }
 )

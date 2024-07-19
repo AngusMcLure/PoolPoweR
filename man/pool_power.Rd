@@ -10,6 +10,7 @@ pooled samples}
 \usage{
 pool_power(
   x,
+  cluster_number,
   prevalence_null,
   prevalence_alt,
   correlation,
@@ -72,6 +73,11 @@ sample_size_pool_random(
 \arguments{
 \item{x}{sample_design object.}
 
+\item{cluster_number}{numeric The total number of clusters in a cluster
+survey design (should be greater than 1) or 1 surveys where all collection
+happens at a single site or collected via simple random sampling from the
+target population.}
+
 \item{prevalence_null, prevalence_alt}{numeric The proportion of units that
 carry the marker of interest (i.e. true positive). `prevalence_null` is the
 threshold to compare to and `prevalence_alt` is the design prevalence. Must
@@ -114,11 +120,6 @@ list of pool sizes and pool numbers. `pool_max_size()` and
 `pool_target_number()` provide convenience functions for defining common
 pooling strategies.}
 
-\item{cluster_number}{numeric The total number of clusters in a cluster
-survey design (should be greater than 1) or 1 surveys where all collection
-happens at a single site or collected via simple random sampling from the
-target population.}
-
 \item{sensitivity}{numeric The probability that the test correctly identifies
 a true positive. Must be a numeric value between 0 and 1, inclusive of
 both. A value of 1 indicates that the test can perfectly identify all true
@@ -159,13 +160,16 @@ determine whether population prevalence is different from a threshold.
 to achieve a specified power.
 }
 \examples{
-fd <- fixed_design(pool_size = 10, pool_number = 2, cluster_number = 50)
-pool_power(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
+fd <- fixed_design(pool_size = 10, pool_number = 2)
+pool_power(fd, cluster_number = 50,
+           prevalence_null = 0.01, prevalence_alt = 0.02)
 
 sample_size_pool(pool_size = 10, pool_number = 2,
                  prevalence_null = 0.01, prevalence_alt = 0.02)
 
-pool_power(fd, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
+pool_power(fd, cluster_number = 50,
+           prevalence_null = 0.01, prevalence_alt = 0.02,
+           correlation = 0.01)
 
 sample_size_pool(pool_size = 10, pool_number = 2,
                  prevalence_null = 0.01, prevalence_alt = 0.02,

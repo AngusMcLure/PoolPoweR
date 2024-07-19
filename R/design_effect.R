@@ -32,7 +32,7 @@
 #' @export
 #' 
 #' @examples
-#' design_effect(fixed_design(10, 2, cluster_number = 1), prevalence = 0.01, correlation = 0.05)
+#' design_effect(fixed_design(10, 2), prevalence = 0.01, correlation = 0.05)
 #' 
 #' vd <- variable_design(nb_catch(10, 13), pool_target_number(20))
 #' design_effect(vd, prevalence = 0.01, correlation = 0.05)

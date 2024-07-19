@@ -1,8 +1,6 @@
 # fixed_design ----
-# cluster_number isn't used in design_effect functions
 fd <- fixed_design(
-  pool_size = 5, pool_number = 10, cluster_number = 2, 
-  sensitivity = 0.99, specificity = 0.95
+  pool_size = 5, pool_number = 10, sensitivity = 0.99, specificity = 0.95
 )
 
 test_that("fixed design_effect() gives consistent output for basic tests", {
@@ -12,12 +10,12 @@ test_that("fixed design_effect() gives consistent output for basic tests", {
     0.7240988, tolerance = 1e-7
   )
   expect_equal(
-    design_effect(fixed_design(10, 10, cluster_number = 1), prevalence = 0.9, correlation = 0.9, form = "beta"),
+    design_effect(fixed_design(10, 10), prevalence = 0.9, correlation = 0.9, form = "beta"),
     118.9243, tolerance = 1e-4
   )
   expect_equal(
     design_effect(
-      fixed_design(10, 10, 1, 0.9, 0.8), prevalence = 0.2, correlation = 0.2, form = "beta"), 
+      fixed_design(10, 10, 0.9, 0.8), prevalence = 0.2, correlation = 0.2, form = "beta"), 
       26.50055, tolerance = 1e-5
   )
 })
@@ -25,7 +23,7 @@ test_that("fixed design_effect() gives consistent output for basic tests", {
 test_that("design_effect() fails for some very unusual parameters because integral in call to fi_pool_cluster() appears starts to have numeric issues", {
   expect_error(
     design_effect(
-      fixed_design(100, 10, 1, 1, 0.7),
+      fixed_design(100, 10, 1, 0.7),
       prevalence = 0.8,
       correlation = 0.8,
       form = "cloglognorm"
