@@ -3,7 +3,7 @@
 \name{pool_power}
 \alias{pool_power}
 \alias{power_pool_random}
-\alias{sample_size_pool}
+\alias{sample_size}
 \alias{sample_size_pool_random}
 \title{Power and sample size calculations for estimating population prevalence from
 pooled samples}
@@ -38,19 +38,17 @@ power_pool_random(
   rel_tol = 1e-06
 )
 
-sample_size_pool(
-  pool_size,
-  pool_number,
+sample_size(
+  x,
   prevalence_null,
   prevalence_alt,
-  correlation = 0,
-  sensitivity = 1,
-  specificity = 1,
-  power = 0.8,
-  sig_level = 0.05,
-  alternative = "greater",
-  form = "logitnorm",
-  link = "logit"
+  correlation,
+  power,
+  sig_level,
+  alternative,
+  form,
+  link,
+  ...
 )
 
 sample_size_pool_random(

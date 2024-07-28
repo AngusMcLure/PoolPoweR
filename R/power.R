@@ -298,14 +298,31 @@ power_pool_random <- function(catch_dist, pool_strat, cluster_number,
 
 #' @rdname pool_power
 #' @export
+sample_size <- function(x, 
+                        prevalence_null, 
+                        prevalence_alt,
+                        correlation,
+                        power, 
+                        sig_level,
+                        alternative,
+                        form,
+                        link,
+                        ...) {
+  UseMethod("sample_size")
+}
 
-sample_size_pool <- function(pool_size, pool_number,
-                             prevalence_null, prevalence_alt,
-                             correlation = 0, sensitivity = 1, specificity = 1,
-                             power = 0.8, sig_level = 0.05,
-                             alternative = 'greater',
-                             form = 'logitnorm',
-                             link = 'logit'){
+#' @method sample_size fixed_design 
+#' @export
+sample_size.fixed_design <- function(x,
+                                     prevalence_null,
+                                     prevalence_alt,
+                                     correlation = 0,
+                                     power = 0.8,
+                                     sig_level = 0.05,
+                                     alternative = "greater",
+                                     form = "logitnorm",
+                                     link = "logit",
+                                     ...) {
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
   
@@ -326,30 +343,31 @@ sample_size_pool <- function(pool_size, pool_number,
   gdivinv <- gdivinv_switch(link)
   
   fia <- gdivinv(thetaa)^2 /
-    solve(fi_pool_cluster(pool_size = pool_size,
-                          pool_number = pool_number,
+    solve(fi_pool_cluster(pool_size = x$pool_size,
+                          pool_number = x$pool_number,
                           prevalence = thetaa,
                           correlation = correlation,
-                          sensitivity = sensitivity,
-                          specificity = specificity,
+                          sensitivity = x$sensitivity,
+                          specificity = x$specificity,
                           form = form))[1,1]
   fi0 <- gdivinv(theta0)^2 /
-    solve(fi_pool_cluster(pool_size = pool_size,
-                          pool_number = pool_number,
+    solve(fi_pool_cluster(pool_size = x$pool_size,
+                          pool_number = x$pool_number,
                           prevalence = theta0,
                           correlation = correlation,
-                          sensitivity = sensitivity,
-                          specificity = specificity,
+                          sensitivity = x$sensitivity,
+                          specificity = x$specificity,
                           form = form))[1,1]
   
   # Note that the below is correct for either kind of one-sided test, but not for two sided tests
   total_clusters_raw <- ((stats::qnorm(power)/sqrt(fia) + stats::qnorm(1 - sig_level)/sqrt(fi0))/(g(theta0) - g(thetaa)))^2
   
   total_clusters <- ceiling(total_clusters_raw)
-  total_pools <- total_clusters * pool_number
-  total_units <- total_pools * pool_size
+  total_pools <- total_clusters * x$pool_number
+  # sample_design$total_units is per-cluster
+  total_units <- total_pools * x$pool_size
   text <- paste0(
-    "A survey design using ", is_perfect_test_temp(sensitivity, specificity), 
+    "A survey design using ", is_perfect_test_temp(x$sensitivity, x$specificity), 
     " diagnostic test on pooled samples with the above parameters requires a total of ",
     total_clusters, " clusters, ", 
     total_pools, " total pools, and ", 
@@ -357,8 +375,8 @@ sample_size_pool <- function(pool_size, pool_number,
   )
   
   power_size_results(  
-    sensitivity = sensitivity,
-    specificity = specificity,
+    sensitivity = x$sensitivity,
+    specificity = x$specificity,
     # prevalence
     prev_null = theta0,
     prev_alt = thetaa,
@@ -368,8 +386,8 @@ sample_size_pool <- function(pool_size, pool_number,
     power = power,
     alternative = alternative,
     # sample design
-    pool_size = pool_size,
-    pool_number = pool_number,
+    pool_size = x$pool_size,
+    pool_number = x$pool_number,
     cluster_number = total_clusters,
     total_pools = total_pools,
     total_units = total_units,
