@@ -9,7 +9,7 @@ exp1 <- function(act) {
 fd <- fixed_design(pool_size = 10, pool_number = 2)
 fd_imp <- fixed_design(pool_size = 15, pool_number = 3, 0.99, 0.98)
 
-# power_pool ----
+# pool_power.fixed_design ----
 test_that(
   "power_pool() no corr", {
     act <- pool_power(fd, cluster_number = 50, prevalence_null = 0.01, prevalence_alt = 0.02)
@@ -75,9 +75,10 @@ test_that(
   }
 )
 
+# sample_size.fixed_design ----
 test_that(
-  "sample_size_pool()", {
-    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02)
+  "sample_size.fixed_design", {
+    act <- sample_size(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
     expect_equal(act$sample_design$cluster_number, 55)
     expect_equal(act$sample_design$total_pools, 110)
     expect_equal(act$sample_design$total_units, 1100)
@@ -89,9 +90,8 @@ test_that(
 )
     
 test_that(
-  "sample_size_pool with corr", {
-    # Correlation
-    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
+  "sample_size.fixed_design with clusters", {
+    act <- sample_size(fd, prevalence_null = 0.01, prevalence_alt = 0.02, correlation = 0.01)
     expect_equal(act$sample_design$cluster_number, 74)
     expect_equal(act$sample_design$total_pools, 148)
     expect_equal(act$sample_design$total_units, 1480)
@@ -103,33 +103,33 @@ test_that(
 )
 
 test_that(
-  "sample_size_pool imperfect test", {
-    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, sensitivity = 0.98, specificity = 0.99)
-    expect_equal(act$sample_design$cluster_number, 61)
-    expect_equal(act$sample_design$total_pools, 122)
-    expect_equal(act$sample_design$total_units, 1220)
+  "sample_size.fixed_design imperfect test", {
+    act <- sample_size(fd_imp, prevalence_null = 0.01, prevalence_alt = 0.02)
+    expect_equal(act$sample_design$cluster_number, 29)
+    expect_equal(act$sample_design$total_pools, 87)
+    expect_equal(act$sample_design$total_units, 1305)
     expect_equal(
       act$text, 
-      "A survey design using an imperfect diagnostic test on pooled samples with the above parameters requires a total of 61 clusters, 122 total pools, and 1220 total units."
+      "A survey design using an imperfect diagnostic test on pooled samples with the above parameters requires a total of 29 clusters, 87 total pools, and 1305 total units."
     )
   }
 )
 
 test_that(
   "sample_size_pool() links", {
-    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, link = "identity")
+    act <- sample_size(fd, prevalence_null = 0.01, prevalence_alt = 0.02, link = "identity")
     exp <- list(clusters = 43, pools = 86, units = 860)
     expect_equal(act$sample_design$cluster_number, 43)
     expect_equal(act$sample_design$total_pools, 86)
     expect_equal(act$sample_design$total_units, 860)
     
-    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, link = "log")
+    act <- sample_size(fd, prevalence_null = 0.01, prevalence_alt = 0.02, link = "log")
     exp <- list(clusters = 55, pools = 110, units = 1100) # same as link = "logit"
     expect_equal(act$sample_design$cluster_number, 55)
     expect_equal(act$sample_design$total_pools, 110)
     expect_equal(act$sample_design$total_units, 1100)
     
-    act <- sample_size_pool(pool_size = 10, pool_number = 2, prevalence_null = 0.01, prevalence_alt = 0.02, link = "cloglog")
+    act <- sample_size(fd, prevalence_null = 0.01, prevalence_alt = 0.02, link = "cloglog")
     # same as link = "logit"
     expect_equal(act$sample_design$cluster_number, 55)
     expect_equal(act$sample_design$total_pools, 110)
