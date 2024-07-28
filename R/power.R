@@ -1,16 +1,12 @@
 #' Power and sample size calculations for estimating population prevalence from
 #' pooled samples
 #'
-#' `power_pool()` calculates the statistical power of a pooled survey design to
+#' `pool_power()` calculates the statistical power of a pooled survey design to
 #' determine whether population prevalence is different from a threshold.
-#' `sample_size_pool()` calculate the sample size required for a pooled survey
+#' `sample_size()` calculate the sample size required for a pooled survey
 #' to achieve a specified power.
 #'
 #' @param x sample_design object.
-#' @param pool_size numeric The number of units per pool. Must be a numeric
-#'   value or vector of values greater than 0.
-#' @param pool_number numeric The number of pools per cluster. Must be a integer
-#'   value or a vector of integer values greater than or equal to 1.
 #' @param cluster_number numeric The total number of clusters in a cluster
 #'   survey design (should be greater than 1) or 1 surveys where all collection
 #'   happens at a single site or collected via simple random sampling from the
@@ -66,27 +62,31 @@
 #' @param ... Additional parameters.
 #'
 #' @return The statistical power of the proposed design with regards to
-#'   comparing prevalence to a threshold (`power_pool()`) or a list with the
+#'   comparing prevalence to a threshold (`pool_power()`) or a list with the
 #'   sample size (number of clusters, pools, and units) required to achieve
-#'   desired power (`sample_size_pool()`)
+#'   desired power (`sample_size()`)
 #' @export
 #'
 #' @examples
+#' # Fixed design examples ----
 #' fd <- fixed_design(pool_size = 10, pool_number = 2)
+#'
+#' ## Unclustered ----
 #' pool_power(fd, cluster_number = 50,
 #'            prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
-#' sample_size_pool(pool_size = 10, pool_number = 2,
-#'                  prevalence_null = 0.01, prevalence_alt = 0.02)
-#'
+#' sample_size(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
+#' 
+#' ## Clustered ----
 #' pool_power(fd, cluster_number = 50,
 #'            prevalence_null = 0.01, prevalence_alt = 0.02,
 #'            correlation = 0.01)
 #' 
-#' sample_size_pool(pool_size = 10, pool_number = 2,
-#'                  prevalence_null = 0.01, prevalence_alt = 0.02,
-#'                  correlation = 0.01)
+#' sample_size(fd,
+#'             prevalence_null = 0.01, prevalence_alt = 0.02,
+#'             correlation = 0.01)
 #' 
+#' # Variable design examples ----
 #' power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50,
 #'                   prevalence_null = 0.01, prevalence_alt = 0.02,
 #'                   correlation = 0.01)
@@ -205,7 +205,6 @@ pool_power.fixed_design <- function(x,
 
 #' @rdname pool_power
 #' @export
-
 power_pool_random <- function(catch_dist, pool_strat, cluster_number,
                               prevalence_null, prevalence_alt,
                               correlation = 0, sensitivity = 1, specificity = 1,
@@ -325,23 +324,23 @@ sample_size.fixed_design <- function(x,
                                      ...) {
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
-  
-  if(!(alternative %in% c('less', 'greater'))){
-    stop('currently only supports one-sided tests. Valid options for alternative are less and greater')
+
+  if (!(alternative %in% c("less", "greater"))) {
+    stop("currently only supports one-sided tests. Valid options for alternative are less and greater")
   }
-  
-  if(alternative == 'less' & theta0 < thetaa){
-    stop('If alternative == "less", then prevalence.altnerative must be less than or equal to prevalence_null' )
+
+  if (alternative == "less" && theta0 < thetaa) {
+    stop("If alternative == 'less', then prevalence.altnerative must be less than or equal to prevalence_null")
   }
-  
-  if(alternative == 'greater' & theta0 > thetaa){
-    stop('If alternative == "greater", then prevalence.altnerative must be greater than or equal to prevalence_null' )
+
+  if (alternative == "greater" && theta0 > thetaa) {
+    stop("If alternative == 'greater', then prevalence.altnerative must be greater than or equal to prevalence_null")
   }
-  
-  # Get link functions ---- 
+
+  # Get link functions ----
   g <- g_switch(link)
   gdivinv <- gdivinv_switch(link)
-  
+ 
   fia <- gdivinv(thetaa)^2 /
     solve(fi_pool_cluster(pool_size = x$pool_size,
                           pool_number = x$pool_number,
