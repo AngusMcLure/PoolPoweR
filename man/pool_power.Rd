@@ -3,7 +3,7 @@
 \name{pool_power}
 \alias{pool_power}
 \alias{power_pool_random}
-\alias{sample_size_pool}
+\alias{sample_size}
 \alias{sample_size_pool_random}
 \title{Power and sample size calculations for estimating population prevalence from
 pooled samples}
@@ -38,19 +38,17 @@ power_pool_random(
   rel_tol = 1e-06
 )
 
-sample_size_pool(
-  pool_size,
-  pool_number,
+sample_size(
+  x,
   prevalence_null,
   prevalence_alt,
-  correlation = 0,
-  sensitivity = 1,
-  specificity = 1,
-  power = 0.8,
-  sig_level = 0.05,
-  alternative = "greater",
-  form = "logitnorm",
-  link = "logit"
+  correlation,
+  power,
+  sig_level,
+  alternative,
+  form,
+  link,
+  ...
 )
 
 sample_size_pool_random(
@@ -139,42 +137,40 @@ than `max_iter` otherwise algorithm will terminate early (with a warning)}
 calculating expected FI over random catch sizes. Must be positive and
 should be much smaller than 1.}
 
-\item{pool_size}{numeric The number of units per pool. Must be a numeric
-value or vector of values greater than 0.}
-
-\item{pool_number}{numeric The number of pools per cluster. Must be a integer
-value or a vector of integer values greater than or equal to 1.}
-
 \item{power}{numeric The desired statistical power of the survey.}
 }
 \value{
 The statistical power of the proposed design with regards to
-  comparing prevalence to a threshold (`power_pool()`) or a list with the
+  comparing prevalence to a threshold (`pool_power()`) or a list with the
   sample size (number of clusters, pools, and units) required to achieve
-  desired power (`sample_size_pool()`)
+  desired power (`sample_size()`)
 }
 \description{
-`power_pool()` calculates the statistical power of a pooled survey design to
+`pool_power()` calculates the statistical power of a pooled survey design to
 determine whether population prevalence is different from a threshold.
-`sample_size_pool()` calculate the sample size required for a pooled survey
+`sample_size()` calculate the sample size required for a pooled survey
 to achieve a specified power.
 }
 \examples{
+# Fixed design examples ----
 fd <- fixed_design(pool_size = 10, pool_number = 2)
+
+## Unclustered ----
 pool_power(fd, cluster_number = 50,
            prevalence_null = 0.01, prevalence_alt = 0.02)
 
-sample_size_pool(pool_size = 10, pool_number = 2,
-                 prevalence_null = 0.01, prevalence_alt = 0.02)
+sample_size(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
 
+## Clustered ----
 pool_power(fd, cluster_number = 50,
            prevalence_null = 0.01, prevalence_alt = 0.02,
            correlation = 0.01)
 
-sample_size_pool(pool_size = 10, pool_number = 2,
-                 prevalence_null = 0.01, prevalence_alt = 0.02,
-                 correlation = 0.01)
+sample_size(fd,
+            prevalence_null = 0.01, prevalence_alt = 0.02,
+            correlation = 0.01)
 
+# Variable design examples ----
 power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50,
                   prevalence_null = 0.01, prevalence_alt = 0.02,
                   correlation = 0.01)
