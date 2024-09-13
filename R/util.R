@@ -90,7 +90,11 @@ ev <- function(fn, distr,
     # Stop if increment changes ALL elements of FI by less than fraction rel_tol
     # OR cumm_mass reaches 1 OR if distribution of catch size has finite support
     # (i.e. if there is a maximum possible catch size)
+
     rel_incr <- abs(E_incr[[iter]]/E)
+
+    #print(x == max_x)
+    #print(1 - cumm_mass < .Machine$double.eps*10)
     if(all(rel_incr <= rel_tol) | x == max_x | 1 - cumm_mass < .Machine$double.eps*10){
       terminate <- TRUE
     }

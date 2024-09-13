@@ -2,7 +2,7 @@
 % Please edit documentation in R/optimise_prevalence.R
 \name{optimise_s_prevalence}
 \alias{optimise_s_prevalence}
-\alias{optimise_random_prevalence}
+\alias{optimise_prevalence.variable_design}
 \title{Optimising the pool size and number for estimating prevalence.}
 \usage{
 optimise_s_prevalence(
@@ -19,18 +19,14 @@ optimise_s_prevalence(
   interval = 0
 )
 
-optimise_random_prevalence(
-  catch_mean,
-  catch_variance,
-  pool_strat_family,
+\method{optimise_prevalence}{variable_design}(
+  x,
   prevalence,
   cost_unit,
   cost_pool,
   cost_period,
   cost_cluster = NA,
   correlation = NA,
-  sensitivity = 1,
-  specificity = 1,
   max_period = 10,
   form = "logitnorm",
   verbose = FALSE
@@ -83,6 +79,17 @@ prevalence and correlation of units within cluster. Select one of "beta",
 identifies range of designs with cost less than the optimal cost * (1 +
 interval).}
 
+\item{cost_period}{numeric The cost per collection period (per collection per
+cluster if `correlation` is not `NA`). Most be a numeric value greater than
+or equal to 0.}
+
+\item{max_period}{numeric The maximum number of collection periods (per
+cluster if `correlation` is not `NA`)}
+
+\item{verbose}{logical Should function indicate progress by printing each
+parameter set calculated to screen? If FALSE (default) only prints optimal
+parameters identified in each iteration}
+
 \item{catch_mean, catch_variance}{numeric The mean and variance of the number
 of units collected per collection period. Both must be greater than 0 and
 `catch_variance` must be greater than or equal to `catch_mean`. Number of
@@ -94,17 +101,6 @@ for how a number of units will be divided into pools, e.g.
 `pool_max_size()` and `pool_target_number()`. The function must take
 positive integer valued parameters, and return a function that defines a
 pooling strategy}
-
-\item{cost_period}{numeric The cost per collection period (per collection per
-cluster if `correlation` is not `NA`). Most be a numeric value greater than
-or equal to 0.}
-
-\item{max_period}{numeric The maximum number of collection periods (per
-cluster if `correlation` is not `NA`)}
-
-\item{verbose}{logical Should function indicate progress by printing each
-parameter set calculated to screen? If FALSE (default) only prints optimal
-parameters identified in each iteration}
 }
 \value{
 `optimise_s_prevalence` returns a list with the optimal pool size

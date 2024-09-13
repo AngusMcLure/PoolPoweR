@@ -35,7 +35,7 @@ print.pool_strat <- function(x,...){
   if(is.null(attr(x, 'description'))){
     print.function(x)
   }else{
-    cat(paste0('A pooling strategy that ', attr(x, 'description')))
+    cat('A pooling strategy that ', attr(x, 'description'), '\n')
   }
   invisible(x)
 }
@@ -50,7 +50,7 @@ pool_strat_family <- function(strat_family,name){
 
 #' @export
 print.pool_strat_family <- function(x,...){
-  cat(attr(x, 'name'))
+  cat(attr(x, 'name'), '\n')
   invisible(x)
 }
 

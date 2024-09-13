@@ -386,14 +386,17 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
 
 #' @rdname optimise_s_prevalence
 #' @export
-optimise_random_prevalence <- function(catch_mean, catch_variance,
-                                       pool_strat_family,
-                                       prevalence,
-                                       cost_unit, cost_pool, cost_period, cost_cluster = NA,
-                                       correlation = NA,
-                                       sensitivity = 1, specificity = 1,
-                                       max_period = 10, form = "logitnorm",
-                                       verbose = FALSE) {
+optimise_prevalence.variable_design <- function(x,
+                                                prevalence,
+                                                cost_unit, cost_pool, cost_period, cost_cluster = NA,
+                                                correlation = NA,
+                                                max_period = 10, form = "logitnorm",
+                                                verbose = FALSE) {
+  
+  pool_strat_family <- x$pool_strat_family
+  sensitivity <- x$sensitivity
+  specificity <- x$specificity
+  catch <- x$catch_dist
   
   strat_par_names <- names(formals(pool_strat_family))
   
@@ -401,7 +404,6 @@ optimise_random_prevalence <- function(catch_mean, catch_variance,
     
     pars <- as.list(rep(1, length(strat_par_names)))
     names(pars) <- strat_par_names
-    catch <- nb_catch(catch_mean, catch_variance)
     f <- function(prm){
       cost_fi_random(catch,
                      do.call(pool_strat_family, prm),
@@ -409,13 +411,13 @@ optimise_random_prevalence <- function(catch_mean, catch_variance,
                      cost_unit, cost_pool, cost_period)
     }
     
-    optpars <- optim_local_int(pars,f,verbose = verbose, max_iter = 100)
+    optpars <- optim_local_int(pars,f,verbose = verbose, max_iter = 100,width = 5)
     
     
     opt <- list(periods = NA,
                 cost = optpars$val,
-                catch = list(mean = catch_mean,
-                             variance = catch_variance,
+                catch = list(mean = mean(catch),
+                             variance = distributions3::variance(catch),
                              distribution = catch),
                 pool_strat = do.call(pool_strat_family, optpars$par),
                 pool_strat_pars = optpars$par)
