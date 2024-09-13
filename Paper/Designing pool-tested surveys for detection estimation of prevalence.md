@@ -608,24 +608,84 @@ Other complications:
 * One and two sided tests
 * Random catch sizes (see next section)
 
-Consider the case where there is a threshold value of prevalence, $\theta_0$, and we wish to use a cluster pool survey to demonstrate that the prevalence is below this threshold. Using asymptotic normality of the MLE we can calculate minimum sample sizes required for target power, $p$, confidence level, $c$, and a design prevalence, $\theta_a$. We assume that the pooling design will consist of some number, $J$, of replicates of a pooling design. In a non-cluster survey this we could summarise this with pooling design $J\underline{N}, \underline{s}$. For a cluster survey this might require $J$ locations each with pooling design $\underline{N},\underline{s}$. In either case the total number of units sampled is $n = J \underline{N} \cdot \underline{s}$. In the case of simple random sampling the power is approximated as
+#### Comparing prevalence to threshold
+
+Consider the case where there is a threshold value of prevalence, $\theta_0$, and we wish to use a cluster pool survey to demonstrate that the prevalence is above or below this threshold. Using asymptotic normality of the MLE we can calculate minimum sample sizes required for target power, $p$, confidence level, $c$, and a design prevalence, $\theta_a$. We assume that the pooling design will consist of some number, $J$, of replicates of a pooling design. In a non-cluster survey this we could summarise this with pooling design $J\underline{N}, \underline{s}$. For a cluster survey this might require $J$ locations each with pooling design $\underline{N},\underline{s}$. In either case the total number of units sampled is $n = J \underline{N} \cdot \underline{s}$​​. The standard error at the design prevalence, $\sigma_a$, and standard error at the threshold prevalence, $\sigma_0$, are
 $$
-z(p) \approx \left[\left(\theta_0-\theta_a\right) \sqrt{J} - \frac{z(c)} {\sqrt{ I(\theta_0|\underline{N},\underline{s})}}\right] \sqrt{I(\theta_a|\underline{N},\underline{s})}
+\sigma_x = \frac{s_x}{\sqrt{J}} = 
+\begin{cases}
+\left(J \ I(\theta_x | \underline{N}, \underline{s} \ \right)^{-\frac{1}{2}} & \text{for simple random surveys,}\\
+\left(J^{-1} \ {I(\theta_x,\rho|\underline{N},\underline{s})^{-1}}_{1,1}\right)^{\frac{1}{2}} & \text{for cluster surveys.}
+\end{cases}
+$$
+The power to reject one-sided and two-sided null hypotheses can be approximated as
+$$
+p \approx
+\begin{cases}
+z^{-1}\left(\frac{\left(\theta_0-\theta_a\right) - z(c) \sigma_0}{\sigma_a} \right) & H_0: \theta_a > \theta_0 \\
+z^{-1}\left(\frac{\left(\theta_a-\theta_0\right) - z(c) \sigma_0}{\sigma_a} \right) & H_0: \theta_a < \theta_0 \\
+z^{-1}\left(\frac{\left(\theta_a-\theta_0\right) - z(\frac{c+1}{2}) \sigma_0}{\sigma_a} \right) + z^{-1}\left(\frac{\left(\theta_0-\theta_a\right) - z(\frac{c+1}{2}) \sigma_0}{\sigma_a} \right) & H_0: \theta_a = \theta_0 \\
+\end{cases}
 $$
 
 
-and for power to exceed $p$, $J$ must be at least
+where $z$ is the quantile function of the standard normal distribution. For one-sided hypothesis tests, if the power is to exceed $p$, $J$ must be at least
 $$
-J \geq \left[\frac{\frac{z(c)}{\sqrt{I(\theta_0|\underline{N},\underline{s})}} + \frac{z(p)}{\sqrt{I(\theta_a|\underline{N},\underline{s})}}}{\theta_0 - \theta_a}\right]^2
+J \geq \left[\frac{z(c) s_0 + z(p) s_a}{\theta_0 - \theta_a}\right]^2.
 $$
-where $z$ is the quantile function of the standard normal distribution. For the cluster survey case the requirement is very similar except we replace the inverse of the Fisher information with the upper left entry of the inverse of the Fisher Information matrix:
+#### Comparing prevalence in two samples
+
+Now consider the case where we conduct pooled cluster surveys in two populations; for instance, surveys in two separate regions, or surveys at two time points before and after an intervention in a single region. Here we assume that the samples are statistically independent. There are now two design prevalences, $\theta_a$ and $\theta_b$, and two pooling designs consisting of $J_a$ and $J_b$ replicates of represented by $\underline{N}_a,\underline{s}_a$ and $\underline{N}_b,\underline{s}_b$. In the cluster sampling case there may also be two correlations $\rho_a$ and $\rho_b$. In both the simple random and cluster sampling cases, the total number of units across both samples is $n = n_a + n_b = J_a \underline{N}_a \cdot \underline{s}_a + J_b \underline{N}_b \cdot \underline{s}_b$. Using the independence of the samples and the asymptotic normality of each MLE of prevalence, the difference in the two MLEs is approximately normal with standard error, $\sigma_\delta$
 $$
-z(p) \approx \frac{\left(\theta_0-\theta_a\right)\sqrt{J} - z(c) \sqrt{I(\theta_a,\rho|\underline{N},\underline{s})^{-1}_{1,1}}}{\sqrt{I(\theta_a,\rho|\underline{N},\underline{s})^{-1}_{1,1})}}
+\sigma_\delta  = \sqrt{\sigma_a^2 + \sigma_b^2}  = \sqrt{\frac{s_a^2}{n_a} + \frac{s_b^2}{n_b}},
+$$
+where $s_x$ and $\sigma_x$​ are defined similarly to the previous section, with the generalisation to different pooling designs:
+$$
+\sigma_x = \frac{s_x}{\sqrt{J_x}} = 
+\begin{cases}
+\left(J_x \ I(\theta_x | \underline{N}_x, \underline{s}_x \ \right)^{-\frac{1}{2}} & \text{for simple random surveys,}\\
+\left(J_x^{-1} \ {I(\theta_x,\rho_x|\underline{N}_x,\underline{s}_x)^{-1}}_{1,1}\right)^{\frac{1}{2}} & \text{for cluster surveys.}
+\end{cases}
+$$
+Under the null hypothesis $\theta_a = \theta_b = \theta_c$, the standard error of the difference is $s_c \sqrt{(\frac{1}{J_a} + \frac{1}{J_b})}$. We reject the null hypothesis with confidence $c$, if $\left| \widehat{\theta_a} - \widehat{\theta_b} \right| > z(\frac{1+c}{2}) \widehat{s_c} \sqrt{(\frac{1}{J_a} + \frac{1}{J_b})}$. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+and the standard error of the estimate of prevalence yielded from combining the two samples is 
+$$
+\sigma_x = \frac{s_x}{\sqrt{J}} = 
+\begin{cases}
+\left(J \ I(\theta_x | \underline{N}, \underline{s} \ \right)^{-\frac{1}{2}} & \text{for simple random surveys,}\\
+\left(J^{-1} \ {I(\theta_x,\rho|\underline{N},\underline{s})^{-1}}_{1,1}\right)^{\frac{1}{2}} & \text{for cluster surveys.}
+\end{cases}
+$$
+The power to reject one-sided and two-sided null hypotheses can be approximated as
+$$
+p \approx
+\begin{cases}
+z^{-1}\left(\frac{\left(\theta_b-\theta_a\right)}{\sqrt{\sigma_a^2 + \sigma_b^2}} - z(c) \right) & H_0: \theta_a > \theta_b \\
+z^{-1}\left(\frac{\left(\theta_a-\theta_b\right)}{\sqrt{\sigma_a^2 + \sigma_b^2}} - z(c) \right) & H_0: \theta_a < \theta_b \\
+z^{-1}\left(\frac{\left(\theta_a-\theta_b\right)}{\sqrt{\sigma_a^2 + \sigma_b^2}} - z(\frac{c+1}{2})\right) + z^{-1}\left(\frac{\left(\theta_b-\theta_a\right)}{\sqrt{\sigma_a^2 + \sigma_b^2}} - z(\frac{c+1}{2}) \right) & H_0: \theta_a = \theta_b \\
+\end{cases}
 $$
 
-$$
-J \geq \left[\frac{z(c)\sqrt{I(\theta_0,\rho|\underline{N},\underline{s})^{-1}_{1,1}} + z(p)\sqrt{I(\theta_a,\rho|\underline{N},\underline{s})^{-1}_{1,1}}}{\theta_0 - \theta_a} \right]^2.
-$$
+The assumption of independent samples could be violated if, for instance, the two samples were collected from the same set of clusters and the cluster-level prevalences for the two populations of interested are correlated. This situation arises naturally in molecular xenomonitoring surveys, where mosquitos are collected in traps from a number of (randomly) selected sites (clusters) but traps catch more than species of mosquito. If these mosquitos are sorted and then pooled and tested for the presence of a pathogen separately, this yields a pooled cluster sample for each mosquito species. However, one may reasonably expect (and at least one study has demonstrated) that the prevalence of the marker in the different species can be correlated at the site level. Though beyond the scope of this paper, positive  correlations between species at the cluster level will likely reduce the statistical power of surveys to detect differences at the population level.
+
 ***Should I elaborate two-sided tests?***
 
 Alternatively we can use existing sample size calculation methods for binary tested data and then multiply by the design effect to appropriately adjust the total sample size. A common method of calculating power for when using simple random sampling and individual testing is the arcsine transformation methods (eg.[reference]). In this method power is approximated as:

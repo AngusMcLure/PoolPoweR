@@ -2,51 +2,35 @@
 % Please edit documentation in R/detection.R
 \name{detection_errors}
 \alias{detection_errors}
-\alias{detection_errors_cluster}
+\alias{detection_errors.fixed_design}
 \title{Power and sample size calculations for estimating population prevalence from
 pooled samples}
 \usage{
 detection_errors(
-  pool_size,
-  pool_number,
+  x,
+  cluster_number,
   prevalence,
-  sensitivity = 1,
-  specificity = 1
+  correlation = 0,
+  form = "logitnorm"
 )
 
-detection_errors_cluster(
-  pool_size,
-  pool_number,
+\method{detection_errors}{fixed_design}(
+  x,
   cluster_number,
   prevalence,
   correlation,
-  sensitivity = 1,
-  specificity = 1,
   form = "logitnorm"
 )
 }
 \arguments{
-\item{pool_size}{numeric The number of units per pool. Must be a numeric
-value or vector of values greater than 0.}
+\item{x}{a sample_design object}
 
-\item{pool_number}{numeric The number of pools per cluster. Must be a integer
-value or a vector of integer values greater than or equal to 1.}
+\item{cluster_number}{numeric The number of clusters. The same sample design,
+x, is assumed to be used at each cluster}
 
 \item{prevalence}{numeric The proportion of units that carry the marker of
 interest (i.e. true positive) that you want wish to assess your survey
 against}
-
-\item{sensitivity}{numeric The probability that the test correctly identifies
-a true positive. Must be a numeric value between 0 and 1, inclusive of
-both. A value of 1 indicates that the test can perfectly identify all true
-positives.}
-
-\item{specificity}{numeric The probability that the test correctly identifies
-a true negative. Must be a numeric value between 0 and 1, inclusive of
-both. A value of 1 indicates that the test can perfectly identify all true
-negatives.}
-
-\item{cluster_number}{numeric The number of clusters.}
 
 \item{correlation}{numeric The correlation between test results within a
 single cluster (units in different clusters are assumed to be
@@ -59,29 +43,31 @@ different clusters.}
 \item{form}{string The distribution used to model the cluster-level
 prevalence and correlation of units within cluster. Select one of "beta",
 "logitnorm" or "cloglognorm". See details.}
+
+\item{sensitivity}{numeric The probability that the test correctly identifies
+a true positive. Must be a numeric value between 0 and 1, inclusive of
+both. A value of 1 indicates that the test can perfectly identify all true
+positives.}
+
+\item{specificity}{numeric The probability that the test correctly identifies
+a true negative. Must be a numeric value between 0 and 1, inclusive of
+both. A value of 1 indicates that the test can perfectly identify all true
+negatives.}
 }
 \value{
 A list with the typeI (false detection probability) and typeII error
   (false non-detection or 1-power of detection)
 }
 \description{
-`detection_errors()` and `detection_errors_cluster()` calculate the typeI
-(false detection probability) and typeII error (false non-detection or
-1-power of detection) for pool-tested surveys with a known number and size of
-pools. `detection_errors_random()` and `detection_errors_cluster_random()`
-calculate errors for surveys where the number of units is random.
-`detection_error()` and `detection_errors_random()` calculates the errors for
-simple random surveys. `detection_errors_cluster()` and
-`detection_errors_cluster_random()` calculate errors cluster survey designs.
+`detection_errors()` calculates the typeI (false detection probability) and
+typeII error (false non-detection or 1-power of detection) for pool-tested
+surveys with a known number and size of pools.
 }
 \examples{
 
-detection_errors(pool_size = 10, pool_number = 30,
+
+detection_errors(fixed_design(10, 2), 20,
                  prevalence = 0.01,
                  sensitivity = 1, specificity = 0.999)
 
-detection_errors_cluster(pool_size = 10, pool_number = 6, cluster_number = 5,
-                         prevalence = 0.01, correlation = 0.1,
-                         sensitivity = 1, specificity = 0.999, form = "beta"
-                         )
 }

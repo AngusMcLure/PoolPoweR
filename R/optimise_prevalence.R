@@ -291,36 +291,85 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
     )
     return(out)
   }
+  
 
-  # Iterate to find optimal N ----
-  N <- 1
-  opt <- list(cost = Inf)
-  while (N < max_N) {
-    opt_new <- optimise_s_prevalence(
-      pool_number = N + 1, prevalence, cost_unit, cost_pool, cost_cluster,
-      correlation, x$sensitivity, x$specificity, max_s, form
-    )
-    if (opt_new$cost > opt$cost) {
-      break
-    } else {
-      N <- N + 1
-      opt <- opt_new
-    }
+  # # Iterate to find optimal N ----
+  # N <- 1
+  # opt <- list(cost = Inf)
+  # while (N < max_N) {
+  #   opt_new <- optimise_s_prevalence(
+  #     pool_number = N + 1, prevalence, cost_unit, cost_pool, cost_cluster,
+  #     correlation, x$sensitivity, x$specificity, max_s, form
+  #   )
+  #   if (opt_new$cost > opt$cost) {
+  #     break
+  #   } else {
+  #     N <- N + 1
+  #     opt <- opt_new
+  #   }
+  # }
+  
+  N <- min(5, max_N)
+  opt <- optimise_s_prevalence(
+        pool_number = N, prevalence, cost_unit, cost_pool, cost_cluster,
+        correlation, x$sensitivity, x$specificity, max_s, form
+      )
+  
+  
+  fN <- function(par){
+    .sN <- par$.sN
+    .N <- par$.N
+    .s <- .sN/.N
+    if(.s < 1 | .N < 2 | .s%%1) return(NA)
+    cost_fi_cluster(.s, .N,
+                    prevalence, correlation,
+                    x$sensitivity,x$specificity,
+                    cost_unit, cost_pool,cost_cluster,
+                    form = form)
   }
-
+  
+  fs <- function(par){
+    .sN <- par$.sN
+    .s <- par$.s
+    .N <- .sN/.s
+    if(.s < 1 | .N < 2 | .N%%1) return(NA)
+    cost_fi_cluster(.s, .N,
+                    prevalence, correlation,
+                    x$sensitivity,x$specificity,
+                    cost_unit, cost_pool,cost_cluster,
+                    form = form)
+  }
+  
+  #local integer search for total catch and N -- works well unless optimal N is large and s is small
+  optfN <- optim_local_int(c(.sN = opt$s * N, .N = N),fN,
+                            width = 3 * c(opt$s, 1),
+                            par_upper = c(max_s * max_N, max_N),
+                            verbose = FALSE)
+  opt_N <- optfN$par$.N
+  opt_s <- optfN$par$.sN/opt_N
+  
+  
+  #local integer search for total catch and s -- works well unless optimal s is large and N is small
+  optfs <- optim_local_int(c(.sN = opt_s*opt_N, .s = opt_s),fs,
+                            width = 3 * c(1, 1),
+                            par_upper = c(max_s * max_N, max_s),
+                            verbose = FALSE)
+  
+  opt_s <- optfs$par$.s
+  opt_N <- optfs$par$.sN/opt_s
+  
   # Warnings ----
-  opt$N <- N
-  if (opt$N == max_N) {
+  if (opt_N == max_N) {
     warning("Maximum cost effectivness is achieved at or above the maximum number of pools allowed. Consider increasing max_N")
   }
-  if (opt$s == max_s) {
+  if (opt_s == max_s) {
     warning("Maximum cost effectivness is achieved at or above the maximum size of pools allowed. Consider increasing max_s")
   }
 
   # Output optimal results ----
   fd <- fixed_design(
-    pool_size = opt$s,
-    pool_number = opt$N,
+    pool_size = opt_s,
+    pool_number = opt_N,
     sensitivity = x$sensitivity,
     specificity = x$specificity
   )
@@ -409,35 +458,39 @@ optim_local_int <- function(par, fn,
                             par_lower = rep(1, length(par)),
                             par_upper = rep(Inf, length(par)),
                             max_iter = 20, verbose = FALSE){
-  
+  #par must be a named vector of parameters
   opt_par <- lapply(par, round)
   searched_par <- as.data.frame(opt_par)
   opt_val <- fn(opt_par)
   
+  if(is.na(opt_val)){stop('fn must have valid value at initial values (par)')}
+  
   for(iter in 1:max_iter){
-    print(paste0('Iteration ', iter, '. optimal parameters = ', paste(opt_par, collapse = ', '), ', with function value = ', opt_val))
+    if(verbose){print(paste0('Iteration ', iter, '. optimal parameters = ', paste(opt_par, collapse = ', '), ', with function value = ', opt_val))}
     local_par_ranges <- purrr::pmap(list(op = opt_par, w = width, pl = par_lower, pu = par_upper), 
                                    \(op, w, pl, pu) max((op - w), pl):min((op + w), pu))
     local_par <- do.call(expand.grid,local_par_ranges)
     search <- dplyr::setdiff(local_par, searched_par)
     searched_par <- rbind(searched_par, search)
-    
+
+    if(nrow(search) == 0){break} #If nothing new to search
+      
     val <- c()
     for(i in 1:nrow(search)){
       if(verbose){print(paste0('Calculating for paramter set #',i,': ', paste(unlist(search[i,]), collapse = ", ") ))}
       val[i] <- fn(as.list(search[i,,drop = FALSE]))
     }
     
-    min_val <- min(val)
+    min_val <- min(val,na.rm = TRUE)
     if(opt_val <= min_val){
       break
     }else{
       opt_val <- min_val
-      opt_par <- unlist(search[which.min(val),,drop=FALSE])
+      opt_par <- search[which.min(val),,drop=FALSE]
     }
   }
   if(iter == max_iter){warning('Local integer search reached max_iter and may have terminated early. Consider increasing max_iter')}
-  return(list(val = opt_val, par = as.list(opt_par)))
+  return(list(val = opt_val, par = as.list(unlist(opt_par))))
 }
 
 cost_fi <- function(pool_size, prevalence, sensitivity, specificity, cost_unit, cost_pool) {

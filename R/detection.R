@@ -1,20 +1,13 @@
 #' Power and sample size calculations for estimating population prevalence from
 #' pooled samples
 #'
-#' `detection_errors()` and `detection_errors_cluster()` calculate the typeI
-#' (false detection probability) and typeII error (false non-detection or
-#' 1-power of detection) for pool-tested surveys with a known number and size of
-#' pools. `detection_errors_random()` and `detection_errors_cluster_random()`
-#' calculate errors for surveys where the number of units is random.
-#' `detection_error()` and `detection_errors_random()` calculates the errors for
-#' simple random surveys. `detection_errors_cluster()` and
-#' `detection_errors_cluster_random()` calculate errors cluster survey designs.
+#' `detection_errors()` calculates the typeI (false detection probability) and
+#' typeII error (false non-detection or 1-power of detection) for pool-tested
+#' surveys with a known number and size of pools.
 #'
-#' @param pool_size numeric The number of units per pool. Must be a numeric
-#'   value or vector of values greater than 0.
-#' @param pool_number numeric The number of pools per cluster. Must be a integer
-#'   value or a vector of integer values greater than or equal to 1.
-#' @param cluster_number numeric The number of clusters.
+#' @param x a sample_design object
+#' @param cluster_number numeric The number of clusters. The same sample design,
+#'   x, is assumed to be used at each cluster
 #' @param prevalence numeric The proportion of units that carry the marker of
 #'   interest (i.e. true positive) that you want wish to assess your survey
 #'   against
@@ -44,44 +37,44 @@
 #'
 #' @examples
 #'
-#' detection_errors(pool_size = 10, pool_number = 30,
+#'
+#' detection_errors(fixed_design(10, 2), 20,
 #'                  prevalence = 0.01,
 #'                  sensitivity = 1, specificity = 0.999)
-#'
-#' detection_errors_cluster(pool_size = 10, pool_number = 6, cluster_number = 5,
-#'                          prevalence = 0.01, correlation = 0.1,
-#'                          sensitivity = 1, specificity = 0.999, form = "beta"
-#'                          )
+#' 
 
 
-detection_errors <- function(pool_size, pool_number, prevalence,
-                             sensitivity = 1, specificity = 1){
-  
-  #typeI <- 1 - specificity^pool_number
-  typeI <- -expm1(log(specificity)*pool_number) # equivalent to the above commented code, but more numerically stable for high specificity and large pool_number*cluster_number
-  
-  #might need to make some adjustments for numeric stability for extreme values
-  typeII <- (1 - (1 - sensitivity - specificity) *
-               (1-prevalence)^pool_size - sensitivity)^(pool_number)
-  
-  list(typeI = typeI, typeII = typeII)
+detection_errors <- function(x, cluster_number, prevalence,
+                             correlation = 0, form = 'logitnorm') {
+  check_in_range2(prevalence)
+  check_in_range2(correlation)
+  # No input check for form as done in downstream functions/methods
+  UseMethod("detection_errors")
 }
 
 
 #' @rdname detection_errors
 #' @export
  
-detection_errors_cluster <- function(pool_size, pool_number, cluster_number,
-                                     prevalence, correlation,
-                                     sensitivity = 1, specificity = 1,
-                                     form = 'logitnorm'){
+detection_errors.fixed_design <- function(x, cluster_number,
+                                          prevalence, correlation = 0,
+                                          form = 'logitnorm'){
   
-  if(correlation == 0){
-    warning('For correlation = 0, a heirarchical/cluster survey design with',
-            'cluster_number locations and pool_number groups per location is',
-            'equivalent a simple random survey with pool_number*cluster_number groups')
-    return(detection_errors(pool_size, pool_number * cluster_number,
-                            prevalence, sensitivity, specificity))
+  pool_size <- x$pool_size
+  pool_number <- x$pool_number
+  sensitivity <- x$sensitivity
+  specificity <- x$specificity
+  
+  if(correlation == 0){ #Non-cluster surveys
+    pool_number <- pool_number * cluster_number
+    #typeI <- 1 - specificity^pool_number
+    typeI <- -expm1(log(specificity)*pool_number) # equivalent to the above commented code, but more numerically stable for high specificity and large pool_number*cluster_number
+    
+    #might need to make some adjustments for numeric stability for extreme values
+    typeII <- (1 - (1 - sensitivity - specificity) *
+                 (1-prevalence)^pool_size - sensitivity)^(pool_number)
+    
+    return(list(typeI = typeI, typeII = typeII))
   }
   
   if(form %in% c('logitnorm', 'cloglognorm')){
@@ -98,7 +91,7 @@ detection_errors_cluster <- function(pool_size, pool_number, cluster_number,
       #stats::dnorm(x, mean = mu, sd = sigma) * (1 - (1 - sensitivity - specificity) * (1-invlink(x))^pool_size - sensitivity)^pool_number
       #equivalent to the above, but more numerically stable
       exp(stats::dnorm(x, mean = mu, sd = sigma, log = TRUE) +
-            log_one_minus_phi(invlink(x), pool_size, sensitivity, specificity) * pool_number)
+            Vectorize(log_one_minus_phi,'p')(invlink(x), pool_size, sensitivity, specificity) * pool_number)
     }
     
     typeII <- stats::integrate(f, -Inf, Inf)$value ^ cluster_number

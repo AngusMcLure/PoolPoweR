@@ -40,7 +40,7 @@
 #' 
 #' print(result) # pretty print
 #' result$stat_test$power
-power_size_results <- function(sensitivity, specificity, prev_null, prev_alt, 
+power_size_results <- function(sensitivity, specificity, prev_null, prev_alt,
                                correlation, sig_level, power, alternative,
                                pool_size = NA, pool_number = NA, catch_dist = NA, 
                                pool_strat = NA, cluster_number, total_pools = NA, 
