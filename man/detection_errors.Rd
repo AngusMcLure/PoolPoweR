@@ -18,7 +18,7 @@ detection_errors(
   x,
   cluster_number,
   prevalence,
-  correlation,
+  correlation = 0,
   form = "logitnorm"
 )
 }

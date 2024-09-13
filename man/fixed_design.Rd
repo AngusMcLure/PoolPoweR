@@ -13,7 +13,13 @@ fixed_design(
   total_units = NULL
 )
 
-variable_design(catch_dist, pool_strat, sensitivity = 1, specificity = 1)
+variable_design(
+  catch_dist,
+  pool_strat = NULL,
+  pool_strat_family = NULL,
+  sensitivity = 1,
+  specificity = 1
+)
 }
 \arguments{
 \item{pool_size}{numeric/NULL The number of units per pool. Must be a numeric

@@ -34,34 +34,39 @@ pool_max_size <- function(max_size){
     }
   }
   pool_strat(strat = strat,
+             family = pool_max_size,
              call = match.call(),
              description = paste('places units in pools of size', max_size, 'and any remainder in a single smaller pool.'))
 }
 
 #' @rdname pooling_strategies
 #' @export
-pool_target_number <- function(target_number){
-  if(target_number%%1 !=0) stop('target_number must be an integer')
-  strat <- function(catch){
-    if(catch<target_number){
-      return(list(pool_size = 1, pool_number = catch))
-    }else if(catch%%target_number == 0){
-      return(list(pool_size = catch/target_number, pool_number = target_number))
-    }else{
-      base_size <- catch%/%target_number
-      base_number <- target_number - (catch %% target_number)
-      return(list(pool_size = c(base_size, base_size + 1), pool_number = c(base_number, target_number-base_number)))
-    }
-  }
-  pool_strat(strat,
-             match.call(),
-             paste(if(target_number == 1){
-               'places all units in 1 pool,'}
-               else{
-                 paste('aims to distribute units into', target_number, 'equally sized pools,')
-                 },'with no maximum pool size'))
-}
-
+pool_target_number <- pool_strat_family(
+  strat_family =
+    function(target_number){
+      if(target_number%%1 !=0) stop('target_number must be an integer')
+      strat <- function(catch){
+        if(catch<target_number){
+          return(list(pool_size = 1, pool_number = catch))
+        }else if(catch%%target_number == 0){
+          return(list(pool_size = catch/target_number, pool_number = target_number))
+        }else{
+          base_size <- catch%/%target_number
+          base_number <- target_number - (catch %% target_number)
+          return(list(pool_size = c(base_size, base_size + 1), pool_number = c(base_number, target_number-base_number)))
+        }
+      }
+      pool_strat(strat,
+                 pool_target_number,
+                 match.call(),
+                 paste(if(target_number == 1){
+                   'places all units in 1 pool,'}
+                   else{
+                     paste('aims to distribute units into', target_number, 'equally sized pools,')
+                   },'with no maximum pool size'))
+    },
+  name = 'pool_target_number'
+)
 
 
   

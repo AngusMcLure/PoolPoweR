@@ -111,18 +111,38 @@ fixed_design <- function(pool_size = NULL,
 #' @rdname fixed_design
 #' @export
 variable_design <- function(catch_dist, 
-                            pool_strat,
+                            pool_strat = NULL,
+                            pool_strat_family = NULL,
                             sensitivity = 1,
                             specificity = 1) {
 
   # sens and spec cannot be NULL
   check_in_range2(sensitivity)
   check_in_range2(specificity)
+  
+  #must provide either pool_strat or pool_strat_family
+  if(is.null(pool_strat) & is.null(pool_strat_family)){
+    stop('Must provide either a valid `pool_strat` or `pool_strat_family`')
+  }
+  
+  #
+  if(!is.null(pool_strat) & !inherits(pool_strat, 'pool_strat')){
+    stop('`pool_strat` must be a object of class `pool_strat`')
+  }
+  
+  #Fill pool_strat_family based on pool_strat if former is not provided
+  if(!is.null(pool_strat) & is.null(pool_strat_family)){
+    pool_strat_family <- attr(pool_strat, 'family')
+  }
+  
+  #Note there is currently no check that the pool_strat_family matches
+  #pool_strat if both are supplied
 
   structure(
     list(
       catch_dist = catch_dist,
       pool_strat = pool_strat,
+      pool_strat_family = pool_strat_family,
       sensitivity = sensitivity,
       specificity = specificity
     ),

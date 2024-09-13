@@ -2,20 +2,24 @@
 % Please edit documentation in R/pool_strat_methods.R
 \name{pool_strat}
 \alias{pool_strat}
-\title{Constructor for pool_strat objects}
+\title{Constructor for pool_strat and pool_strat_family objects}
 \usage{
-pool_strat(strat, call, description)
+pool_strat(strat, family, call, description)
 }
 \arguments{
 \item{strat}{function that takes an integer number of units and returns the
 number and size of pools to split the units across}
+
+\item{family}{family that the pool strategy function comes from}
 
 \item{call}{call used to generate the pool_strat function. Used for format
 and as.character method (pretty printing)}
 
 \item{description}{text description of pool strategy to be used in print
 function}
+
+\item{name}{name of pool strategy family to be used in print function}
 }
 \description{
-Constructor for pool_strat objects
+Constructor for pool_strat and pool_strat_family objects
 }
