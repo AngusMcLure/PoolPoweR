@@ -65,8 +65,8 @@ design_effect.variable_design <- function(x,
                                           prevalence,
                                           correlation,
                                           form = "logitnorm") {
-  
-  mean(x$catch_dist) * fi_pool(pool_size = 1, prevalence, x$sensitivity, x$specificity) *
+  catch_mean <- distrEx::E(x$catch_dist)
+  catch_mean * fi_pool(pool_size = 1, prevalence, x$sensitivity, x$specificity) *
     solve(fi_pool_cluster_random(
       x$catch_dist, x$pool_strat, prevalence,
       correlation, x$sensitivity, x$specificity, form)

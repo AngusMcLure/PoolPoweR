@@ -54,14 +54,19 @@ ev <- function(fn, distr,
   #for more general distributions, e.g. continuous random variables or functions
   #with support on negative and positive numbers. 
   
-  supp <- distributions3::support(distr)
+  supp <- distr::support(distr)
   
-  if(supp[['min']] < 0) {stop('ev does dot support distributions which can take values on negative numbers')}
-  if(distributions3::is_continuous(distr)){stop('ev does dot support continuous distributions')}
+  if(min(supp) < 0) {stop('ev does dot support distributions which can take values on negative numbers')}
+  
+  #It would be good to also have a check for whether the distribution is
+  #continuous. I'm not sure how to do this now that we have moved to distr
+  #package
+  
+  #if(distributions3::is_continuous(distr)){stop('ev does dot support
+  #continuous distributions')}
   
   #Initialise sum over distribution
-  x <- max(0,supp[['min']] - 1)
-  max_x <- supp[['max']]
+  x <- max(0,min(supp) - 1)
   terminate <- FALSE
   E <- 0
   iter <- 0
@@ -72,8 +77,8 @@ ev <- function(fn, distr,
   #Main loop for sum
   while(!terminate){
     x <- x + 1
-    mass <- distributions3::pdf(distr,x)
-    cumm_mass <- distributions3::cdf(distr,x)
+    mass <- distr::d(distr)(x)
+    cumm_mass <- distr::p(distr)(x)
     #this avoids unnecessary calls to fn and prevents the early termination of
     #the algorithm for distributions that may have 0 mass for some n but
     #non-zero mass for some m>n (e.g. if distribution only has mass on multiples
@@ -93,9 +98,7 @@ ev <- function(fn, distr,
 
     rel_incr <- abs(E_incr[[iter]]/E)
 
-    #print(x == max_x)
-    #print(1 - cumm_mass < .Machine$double.eps*10)
-    if(all(rel_incr <= rel_tol) | x == max_x | 1 - cumm_mass < .Machine$double.eps*10){
+    if(all(rel_incr <= rel_tol) | 1 - cumm_mass < .Machine$double.eps*10){
       terminate <- TRUE
     }
     if(iter == max_iter){
@@ -107,5 +110,18 @@ ev <- function(fn, distr,
     }
   }
   return(E)
+}
+
+sum_n_rv <- function(rv, n){
+  if(!is.numeric(n) || n%%1 || n < 1){
+    stop('n must be a positive integer')
+  }
+  srv <- rv
+  if(n > 1){
+    for(m in 1:(n-1)){
+      srv <- srv + rv
+    }
+  }
+  srv
 }
 

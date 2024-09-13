@@ -20,17 +20,14 @@
 
 nb_catch <- function(mean,variance){
   if(mean>variance){stop('variance must be greater than or equal to mean')}
-  distributions3::NegativeBinomial(size = mean^2/(variance - mean), p = mean/variance)
+  distr::Nbinom(size = mean^2/(variance - mean), prob = mean/variance)
 }
 
 #' @rdname catch_distributions
 #' @export
 pois_catch <- function(mean){
-  distributions3::Poisson(lambda = mean)
+  distr::Pois(lambda = mean)
 }
-
-## Functions for implementing common pooling strategies
-
 
 
 # ## No longer actually used: but this help you multiply out the product over k of

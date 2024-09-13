@@ -541,10 +541,6 @@ fi_pool_random <- function(catch_dist,
   #infinite) sum over possible integer catch sizes. Summation continues until FI
   #appears to have converged (using a relative tolerance heuristic)
   
-  if(distributions3::support(catch_dist)['min'] == -Inf){
-    stop('Catch distribution must have support on the positive integers. Provided catch distribution is defined over negative numbers also')
-  }
-  
   total_fi <- function(catch){
     pooling <- pool_strat(catch) #determine pool sizes and numbers based on catch size
     if(sum(pooling$pool_size * pooling$pool_number)>catch){
@@ -570,10 +566,6 @@ fi_pool_cluster_random <- function(catch_dist,
                                    real_scale = FALSE,
                                    max_iter = 1000,
                                    rel_tol = 1e-6){
-  
-  if(distributions3::support(catch_dist)['min'] == -Inf){
-    stop('Catch distribution must have support on the positive integers. Provided catch distribution is defined over negative numbers also')
-  }
   
   total_fi <- function(catch){
     pooling <- pool_strat(catch) #determine pool sizes and numbers based on catch size

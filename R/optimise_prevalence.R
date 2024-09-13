@@ -386,12 +386,17 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
 
 #' @rdname optimise_s_prevalence
 #' @export
-optimise_prevalence.variable_design <- function(x,
-                                                prevalence,
-                                                cost_unit, cost_pool, cost_period, cost_cluster = NA,
+optimise_prevalence.variable_design <- function(x,prevalence,
+                                                cost_unit, cost_pool, cost_cluster,
+                                                cost_period = NULL,
                                                 correlation = NA,
                                                 max_period = 10, form = "logitnorm",
                                                 verbose = FALSE) {
+  
+  # This function will do local integer searches over period (how many times to
+  # repeate the catch at each site) and any pooling strategy family arguments.
+  # Currently all the pooling strategy families only have integer arguments, so
+  # this is fine, but this might need to be generalised in the future
   
   pool_strat_family <- x$pool_strat_family
   sensitivity <- x$sensitivity
@@ -402,13 +407,17 @@ optimise_prevalence.variable_design <- function(x,
   
   if(is.na(correlation)){ #If correlation is NA, assumes no correlation. However, sampling everything from the one site is optimal (i.e. periods = Inf). Consequently, we assume period = 1 
     
+    if(!is.null(cost_period)){
+      cost_cluster <- cost_cluster + cost_period
+    }
+    
     pars <- as.list(rep(1, length(strat_par_names)))
     names(pars) <- strat_par_names
     f <- function(prm){
       cost_fi_random(catch,
                      do.call(pool_strat_family, prm),
                      prevalence, sensitivity,specificity,
-                     cost_unit, cost_pool, cost_period)
+                     cost_unit, cost_pool, cost_cluster)
     }
     
     optpars <- optim_local_int(pars,f,verbose = verbose, max_iter = 100,width = 5)
@@ -416,8 +425,8 @@ optimise_prevalence.variable_design <- function(x,
     
     opt <- list(periods = NA,
                 cost = optpars$val,
-                catch = list(mean = mean(catch),
-                             variance = distributions3::variance(catch),
+                catch = list(mean = distrEx::E(catch),
+                             variance = distrEx::var(catch),
                              distribution = catch),
                 pool_strat = do.call(pool_strat_family, optpars$par),
                 pool_strat_pars = optpars$par)
@@ -425,32 +434,34 @@ optimise_prevalence.variable_design <- function(x,
     
   }else{
     
+    if(is.null(cost_period)){
+      stop('cost_period must be specified if correlation is not NA')
+    }
+      
     pars <- as.list(rep(1, 1 + length(strat_par_names)))
     names(pars) <- c(".periods", strat_par_names)
     
     f <- function(prm){
-      cost_fi_cluster_random(nb_catch(catch_mean * prm$.periods, catch_variance * prm$.periods),
+      cost_fi_cluster_random(sum_n_rv(catch,prm$.periods),
                              do.call(pool_strat_family, prm[strat_par_names]),
                              prevalence, correlation,
                              sensitivity,specificity,
-                             cost_unit, cost_pool,cost_cluster + prm$.periods * cost_period,
+                             cost_unit, cost_pool, cost_cluster + prm$.periods * cost_period,
                              form = form)
     }
     
-    optpars <- optim_local_int(pars,f, verbose = verbose)
+    optpars <- optim_local_int(pars,f, verbose = verbose, width = 1)
     
-    
+    optcatch <- sum_n_rv(catch,optpars$par$.periods)
     opt <- list(periods = optpars$par$.periods,
                 cost = optpars$val,
-                catch = list(mean = optpars$par$.periods * catch_mean,
-                             variance = optpars$par$.periods * catch_variance,
-                             distribution = nb_catch(optpars$par$.periods * catch_mean,
-                                                     optpars$par$.periods * catch_variance)),
+                catch = list(mean = distrEx::E(optcatch),
+                             variance = distrEx::var(optcatch),
+                             distribution = optcatch),
                 pool_strat = do.call(pool_strat_family, optpars$par[-1]),
                 pool_strat_pars = optpars$par[-1])
     
   }
-
   opt
 }
 
@@ -510,12 +521,12 @@ cost_fi_cluster <- function(pool_size, pool_number,
 
   fi <- fi_pool_cluster(s, N, prevalence, correlation, sensitivity, specificity, form)
   cost <- sum(cost_unit * s * N) + sum(cost_pool * N) + cost_cluster
-  # print(c(cost = cost, information = fi))
   cost * solve(fi)[1, 1]
 }
 
 cost_fi_random <- function(catch_dist, pool_strat, prevalence,
-                           sensitivity, specificity, cost_unit, cost_pool, cost_fixed){
+                           sensitivity, specificity,
+                           cost_unit, cost_pool, cost_fixed){
   
   fn <- function(catch){
     pooling <- pool_strat(catch)

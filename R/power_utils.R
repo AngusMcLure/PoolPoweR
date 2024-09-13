@@ -83,8 +83,8 @@ power_size_results <- function(sensitivity, specificity, prev_null, prev_alt,
     )
   } else { # power_pool_random
    temp_design <- list(
-      catch_mean = mean(catch_dist),
-      catch_variance = distributions3::variance(catch_dist),
+      catch_mean = distrEx::E(catch_dist),
+      catch_variance = distrEx::var(catch_dist),
       pool_strat = pool_strat
     )
   }
