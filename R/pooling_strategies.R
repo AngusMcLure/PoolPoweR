@@ -23,21 +23,29 @@
 #' pool_target_number(4)
 
 
-pool_max_size <- function(max_size){
-  strat <- function(catch){
-    if(catch<max_size){
-      return(list(pool_size = catch, pool_number = 1))
-    }else if(catch%%max_size == 0){
-      return(list(pool_size = max_size, pool_number = catch/max_size))
-    }else{
-      return(list(pool_size = c(catch%%max_size, max_size), pool_number = c(1, catch%/%max_size)))
+pool_max_size <- pool_strat_family(
+  strat_family = function(max_size){
+    strat <- function(catch){
+      if(catch<max_size){
+        return(list(pool_size = catch, pool_number = 1))
+      }else if(catch%%max_size == 0){
+        return(list(pool_size = max_size, pool_number = catch/max_size))
+      }else{
+        return(list(pool_size = c(catch%%max_size, max_size), pool_number = c(1, catch%/%max_size)))
+      }
     }
-  }
-  pool_strat(strat = strat,
-             family = pool_max_size,
-             call = match.call(),
-             description = paste('places units in pools of size', max_size, 'and any remainder in a single smaller pool.'))
-}
+    pool_strat(strat = strat,
+               family = pool_max_size,
+               call = match.call(),
+               description = if(max_size == 1){
+                 'places units in pools of size 1, i.e. individual testing'
+               }else{
+                   paste('places units in pools of size',
+                         max_size, 'and any remainder in a single smaller pool.')}
+    )
+  },
+  name = 'pool_max_size'
+)
 
 #' @rdname pooling_strategies
 #' @export
@@ -56,10 +64,10 @@ pool_target_number <- pool_strat_family(
           return(list(pool_size = c(base_size, base_size + 1), pool_number = c(base_number, target_number-base_number)))
         }
       }
-      pool_strat(strat,
-                 pool_target_number,
-                 match.call(),
-                 paste(if(target_number == 1){
+      pool_strat(strat = strat,
+                 family = pool_target_number,
+                 call = match.call(),
+                 description = paste(if(target_number == 1){
                    'places all units in 1 pool,'}
                    else{
                      paste('aims to distribute units into', target_number, 'equally sized pools,')
