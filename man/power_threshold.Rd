@@ -3,8 +3,8 @@
 \name{power_threshold}
 \alias{power_threshold}
 \alias{sample_size_threshold}
-\title{Power and sample size calculations for estimating population prevalence from
-pooled samples}
+\title{Power and sample size calculations for detecting presence and estimating
+population prevalence from pooled samples}
 \usage{
 power_threshold(
   x,
@@ -40,10 +40,12 @@ survey design (should be greater than 1) or 1 surveys where all collection
 happens at a single site or collected via simple random sampling from the
 target population.}
 
-\item{prevalence_null, prevalence_alt}{numeric The proportion of units that
-carry the marker of interest (i.e. true positive). `prevalence_null` is the
-threshold to compare to and `prevalence_alt` is the design prevalence. Must
-be be a numeric value between 0 and 1, inclusive of both.}
+\item{prevalence_null, prevalence_alt, prevalence}{numeric The proportion of
+units that carry the marker of interest (i.e. true positive). For
+`_threshold` functions `prevalence_null` is the threshold to compare to and
+`prevalence_alt` is the design prevalence. For `_detect` functions,
+`prevalence` is the design prevalence. Must be be a numeric value between 0
+and 1, inclusive of both.}
 
 \item{correlation}{numeric The correlation between test results within a
 single cluster (units in different clusters are assumed to be
@@ -56,11 +58,11 @@ different clusters.}
 \item{sig_level}{numeric Significance level for statistical test. Defaults to
 0.05. Must be strictly between 0 and 1.}
 
-\item{alternative}{string The kind of comparison to make. If "greater"
-(default) or "less" computes power of tests for one-sided comparisons that
+\item{alternative}{string The kind of comparison to make. If "greater" or
+"less" (default), computes power of tests for one-sided comparisons that
 population prevalence (`prevalence_alt`) is greater than or less than the
 reference on threshold prevalence (`prevalence_null`) respectively. If
-"two.sided" computes power for a two-sided comparison (`power_pool()`
+"two.sided" computes power for a two-sided comparison (`power_threshold()`
 only).}
 
 \item{form}{string The distribution used to model the cluster-level
@@ -75,25 +77,6 @@ the purposes of calculating confidence intervals. Options are 'identity'
 
 \item{power}{numeric The desired statistical power of the survey.}
 
-\item{catch_dist}{An object of class `distribution` (e.g. produced by
-`nb_catch()`) defining the distribution of the possible catch.}
-
-\item{pool_strat}{function Defines a rule for how a number of units will be
-divided into pools. Must take a single numeric argument and return a named
-list of pool sizes and pool numbers. `pool_max_size()` and
-`pool_target_number()` provide convenience functions for defining common
-pooling strategies.}
-
-\item{sensitivity}{numeric The probability that the test correctly identifies
-a true positive. Must be a numeric value between 0 and 1, inclusive of
-both. A value of 1 indicates that the test can perfectly identify all true
-positives.}
-
-\item{specificity}{numeric The probability that the test correctly identifies
-a true negative. Must be a numeric value between 0 and 1, inclusive of
-both. A value of 1 indicates that the test can perfectly identify all true
-negatives.}
-
 \item{max_iter}{numeric Maximum number of iterations (possible catch sizes)
 to consider when calculating expected FI over random catch sizes. Generally
 needs to be large enough so that the nearly all catch sizes will be less
@@ -105,15 +88,22 @@ should be much smaller than 1.}
 }
 \value{
 The statistical power of the proposed design with regards to
-  comparing prevalence to a threshold (`power_threshold()`) or a list
-  with the sample size (number of clusters, pools, and units) required to
-  achieve desired power (`sample_size_threshold()`)
+  comparing prevalence to a threshold (`power_threshold()`) or a list with
+  the sample size (number of clusters, pools, and units) required to achieve
+  desired power (`sample_size_threshold()`)
 }
 \description{
 `power_threshold()` calculates the statistical power of a pooled survey
 design to determine whether population prevalence is different from a
-threshold. `sample_size_threshold()` calculate the sample size required for a
-pooled survey to achieve a specified power.
+threshold.
+}
+\details{
+`power_detect()` calculations the statistical power of a pooled survey design
+to detect a marker in a population, given it is present at a specified
+prevalence.
+
+`sample_size_` family of functions calculate the sample size required for a
+pooled survey to achieve the specified power for the given objective.
 }
 \examples{
 # Fixed design examples ----
@@ -121,27 +111,27 @@ fd <- fixed_design(pool_size = 10, pool_number = 2)
 
 ## Unclustered ----
 power_threshold(fd, cluster_number = 50,
-           prevalence_null = 0.01, prevalence_alt = 0.02)
+           prevalence_null = 0.02, prevalence_alt = 0.1)
 
-sample_size_threshold(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
+sample_size_threshold(fd, prevalence_null = 0.02, prevalence_alt = 0.1)
 
 ## Clustered ----
 power_threshold(fd, cluster_number = 50,
-                prevalence_null = 0.01, prevalence_alt = 0.02,
-                correlation = 0.01)
+                prevalence_null = 0.02, prevalence_alt = 0.01,
+                correlation = 0.1)
 
 sample_size_threshold(fd,
-                      prevalence_null = 0.01, prevalence_alt = 0.02,
-                      correlation = 0.01)
+                      prevalence_null = 0.02, prevalence_alt = 0.01,
+                      correlation = 0.1)
 
 # Variable design examples ----
 
 vd <- variable_design(nb_catch(20,25), pool_target_number(2))
 power_threshold(vd, cluster_number = 50,
-                prevalence_null = 0.01, prevalence_alt = 0.02,
-                correlation = 0.01)
+                prevalence_null = 0.02, prevalence_alt = 0.01,
+                correlation = 0.1)
 
 sample_size_threshold(vd,
-                      prevalence_null = 0.01, prevalence_alt = 0.02,
-                      correlation = 0.01)
+                      prevalence_null = 0.02, prevalence_alt = 0.01,
+                      correlation = 0.1)
 }
