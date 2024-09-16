@@ -3,6 +3,7 @@
 \name{power_threshold}
 \alias{power_threshold}
 \alias{sample_size_threshold}
+\alias{sample_size_detect}
 \title{Power and sample size calculations for detecting presence and estimating
 population prevalence from pooled samples}
 \usage{
@@ -31,6 +32,8 @@ sample_size_threshold(
   link,
   ...
 )
+
+sample_size_detect(x, prevalence, correlation, power, form, ...)
 }
 \arguments{
 \item{x}{sample_design object.}

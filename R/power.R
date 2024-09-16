@@ -90,7 +90,7 @@
 #'                       prevalence_null = 0.02, prevalence_alt = 0.01,
 #'                       correlation = 0.1)
 
-###
+# _threshold ----
 
 power_threshold <- function(x, 
                             cluster_number,
@@ -117,7 +117,7 @@ power_threshold.fixed_design <- function(x,
                                          form = 'logitnorm', 
                                          link = 'logit',
                                          ...) {
-  # Input checks ----
+  # Input checks
   if (correlation > 0 & cluster_number <= 1) {
     stop('The number of clusters (cluster_number) must be (substantially) greater than 1 if there is non-zero correlation between units in a cluster')
   }
@@ -133,7 +133,7 @@ power_threshold.fixed_design <- function(x,
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
   
-  # Get link functions ---- 
+  # Get link functions
   g <- g_switch(link)
   gdivinv <- gdivinv_switch(link)
   
@@ -164,7 +164,7 @@ power_threshold.fixed_design <- function(x,
                   stop('invalid alternative. options are less, greater, and two.sided')
   )
   
-  # Prepare output ----
+  # Prepare output
   total_pools <- cluster_number * x$pool_number
   total_units <- # leaving verbose as cluster_number to be added to fixed_design
     cluster_number * 
@@ -242,7 +242,7 @@ power_threshold.variable_design <- function(x,
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
   
-  # Get link functions ---- 
+  # Get link functions
   g <- g_switch(link)
   gdivinv <- gdivinv_switch(link)
   
@@ -327,7 +327,7 @@ sample_size_threshold.fixed_design <- function(x,
                                                correlation = 0,
                                                power = 0.8,
                                                sig_level = 0.05,
-                                               alternative = "greater",
+                                               alternative = "less",
                                                form = "logitnorm",
                                                link = "logit",
                                                ...) {
@@ -346,7 +346,7 @@ sample_size_threshold.fixed_design <- function(x,
     stop("If alternative == 'greater', then prevalence.altnerative must be greater than or equal to prevalence_null")
   }
   
-  # Get link functions ----
+  # Get link functions
   g <- g_switch(link)
   gdivinv <- gdivinv_switch(link)
   
@@ -415,11 +415,16 @@ sample_size_threshold.variable_design <- function(x,
                                                   correlation = 0,
                                                   power = 0.8,
                                                   sig_level = 0.05,
-                                                  alternative = 'greater',
+                                                  alternative = 'less',
                                                   form = 'logitnorm',
                                                   link = 'logit',
                                                   max_iter = 10000,
-                                                  rel_tol = 1e-6){
+                                                  rel_tol = 1e-6,
+                                                  ...){
+  
+  if(!inherits(x$pool_strat, 'pool_strat')){
+    stop('pool design must include a valid pooling strategy of class `pool_strat`',
+         ' (not just a pooling strategy family)')}
   
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
@@ -436,7 +441,7 @@ sample_size_threshold.variable_design <- function(x,
     stop('If alternative == "greater", then prevalence.altnerative must be greater than or equal to prevalence_null' )
   }
   
-  # Get link functions ---- 
+  # Get link functions
   g <- g_switch(link)
   gdivinv <- gdivinv_switch(link)
   
@@ -498,5 +503,135 @@ sample_size_threshold.variable_design <- function(x,
     # parsing
     text = text
   )
+}
+
+
+# _detect ----
+
+#' @rdname power_threshold
+#' @export
+sample_size_detect <- function(x, 
+                               prevalence,
+                               correlation,
+                               power, 
+                               form,
+                               ...) {
+  UseMethod("sample_size_detect")
+}
+
+#' @method sample_size_detect fixed_design
+#' @export
+
+sample_size_detect.fixed_design <- function(x,
+                                            prevalence,
+                                            correlation = 0,
+                                            power = 0.8,
+                                            form = "logitnorm",
+                                            ...) {
   
+  # Get detection probability for a single cluster
+  errors <- detection_errors(x,1,prevalence,correlation,form)
+  
+  total_clusters_raw <- log1p(-power)/log(errors$typeII)
+  
+  #Could be modularised? Everything below here is almost identical (except for
+  #how prevalence, alternative, and sig_level are returned) to
+  #sample_size_threshold.fixed_design
+  
+  total_clusters <- ceiling(total_clusters_raw)
+  total_pools <- total_clusters * x$pool_number
+  # sample_design$total_units is per-cluster
+  total_units <- total_pools * x$pool_size
+  text <- paste0(
+    "A survey design using ", is_perfect_test_temp(x$sensitivity, x$specificity), 
+    " diagnostic test on pooled samples with the above parameters requires a total of ",
+    total_clusters, " clusters, ", 
+    total_pools, " total pools, and ", 
+    total_units, " total units."
+  )
+  
+  power_size_results(  
+    sensitivity = x$sensitivity,
+    specificity = x$specificity,
+    # prevalence
+    prev_null = prevalence,
+    prev_alt = NA,
+    correlation = correlation,
+    # statistical test
+    sig_level = NA,
+    power = power,
+    alternative = NA,
+    # sample design
+    pool_size = x$pool_size,
+    pool_number = x$pool_number,
+    cluster_number = total_clusters,
+    total_pools = total_pools,
+    total_units = total_units,
+    # parsing
+    text = text
+  )
+}
+
+
+#' @method sample_size_detect variable_design 
+#' @export
+
+sample_size_detect.variable_design <- function(x,
+                                               prevalence,
+                                               correlation = 0,
+                                               power = 0.8,
+                                               alternative = 'less',
+                                               form = 'logitnorm',
+                                               max_iter = 10000,
+                                               rel_tol = 1e-6,
+                                               ...){
+  
+  if(!inherits(x$pool_strat, 'pool_strat')){
+    stop('pool design must include a valid pooling strategy of class `pool_strat`',
+         ' (not just a pooling strategy family)')}
+  
+  # Get detection probability for a single cluster
+  errors <- detection_errors(x,1,prevalence,correlation,form)
+  
+  total_clusters_raw <- log1p(-power)/log(errors$typeII)
+  
+  #Could be modularised? Everything below here is almost identical (except for
+  #how prevalence, alternative, and sig_level are returned) to
+  #sample_size_threshold.variable_design
+  
+  
+  total_clusters <- ceiling(total_cluster_raw)
+  exp_total_units <- round(distrEx::E(x$catch_dist) * total_clusters,1)
+  exp_total_pools <- round(ev(\(catch) sum(x$pool_strat(catch)$pool_number),
+                              x$catch_dist, max_iter, rel_tol) * total_clusters, 1)
+  
+  # Prepare output
+  text = paste0(
+    "A survey design using ", is_perfect_test_temp(x$sensitivity, x$specificity), 
+    " diagnostic test on pooled samples with the above parameters requires a total of ",
+    total_clusters, " clusters, ", 
+    exp_total_pools, " expected total pools, and ", 
+    exp_total_units, " expected total units."
+  )
+  
+  power_size_results(  
+    sensitivity = x$sensitivity,
+    specificity = x$specificity,
+    # prevalence
+    prev_null = prevalence,
+    prev_alt = NA,
+    correlation = correlation,
+    # statistical test
+    sig_level = NA,
+    power = power,
+    alternative = NA,
+    # sample design
+    catch_dist = x$catch_dist,
+    pool_strat = as.character(x$pool_strat),
+    cluster_number = total_clusters,
+    exp_total_pools = exp_total_pools,
+    exp_total_units = exp_total_units,
+    # parsing
+    text = text
+  )
 }
