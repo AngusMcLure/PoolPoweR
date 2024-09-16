@@ -1,7 +1,7 @@
 #' Power and sample size calculations for estimating population prevalence from
 #' pooled samples
 #'
-#' `pool_power_threshold()` calculates the statistical power of a pooled survey
+#' `power_threshold()` calculates the statistical power of a pooled survey
 #' design to determine whether population prevalence is different from a
 #' threshold. `sample_size_threshold()` calculate the sample size required for a
 #' pooled survey to achieve a specified power.
@@ -62,7 +62,7 @@
 #' @param ... Additional parameters.
 #'
 #' @return The statistical power of the proposed design with regards to
-#'   comparing prevalence to a threshold (`pool_power_threshold()`) or a list
+#'   comparing prevalence to a threshold (`power_threshold()`) or a list
 #'   with the sample size (number of clusters, pools, and units) required to
 #'   achieve desired power (`sample_size_threshold()`)
 #' @export
@@ -72,53 +72,55 @@
 #' fd <- fixed_design(pool_size = 10, pool_number = 2)
 #'
 #' ## Unclustered ----
-#' pool_power_threshold(fd, cluster_number = 50,
+#' power_threshold(fd, cluster_number = 50,
 #'            prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
 #' sample_size_threshold(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
 #' ## Clustered ----
-#' pool_power_threshold(fd, cluster_number = 50,
-#'            prevalence_null = 0.01, prevalence_alt = 0.02,
-#'            correlation = 0.01)
+#' power_threshold(fd, cluster_number = 50,
+#'                 prevalence_null = 0.01, prevalence_alt = 0.02,
+#'                 correlation = 0.01)
 #'
 #' sample_size_threshold(fd,
-#'             prevalence_null = 0.01, prevalence_alt = 0.02,
-#'             correlation = 0.01)
+#'                       prevalence_null = 0.01, prevalence_alt = 0.02,
+#'                       correlation = 0.01)
 #'
 #' # Variable design examples ----
-#' power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50,
-#'                   prevalence_null = 0.01, prevalence_alt = 0.02,
-#'                   correlation = 0.01)
+#' 
+#' vd <- variable_design(nb_catch(20,25), pool_target_number(2))
+#' power_threshold(vd, cluster_number = 50,
+#'                 prevalence_null = 0.01, prevalence_alt = 0.02,
+#'                 correlation = 0.01)
 #'
-#' sample_size_threshold_pool_random(nb_catch(20,25), pool_target_number(2),
-#'                         prevalence_null = 0.01, prevalence_alt = 0.02,
-#'                          correlation = 0.01)
-pool_power_threshold <- function(x, 
-                                 cluster_number,
-                                 prevalence_null, 
-                                 prevalence_alt,
-                                 correlation,
-                                 sig_level,
-                                 alternative,
-                                 form,
-                                 link,
-                                 ...) {
-  UseMethod("pool_power_threshold")
+#' sample_size_threshold(vd,
+#'                       prevalence_null = 0.01, prevalence_alt = 0.02,
+#'                       correlation = 0.01)
+power_threshold <- function(x, 
+                            cluster_number,
+                            prevalence_null, 
+                            prevalence_alt,
+                            correlation,
+                            sig_level,
+                            alternative,
+                            form,
+                            link,
+                            ...) {
+  UseMethod("power_threshold")
 }
 
-#' @method pool_power_threshold fixed_design
+#' @method power_threshold fixed_design
 #' @export
-pool_power_threshold.fixed_design <- function(x,
-                                              cluster_number,
-                                              prevalence_null, 
-                                              prevalence_alt,
-                                              correlation = 0, 
-                                              sig_level = 0.05, 
-                                              alternative = 'greater',
-                                              form = 'logitnorm', 
-                                              link = 'logit',
-                                              ...) {
+power_threshold.fixed_design <- function(x,
+                                         cluster_number,
+                                         prevalence_null, 
+                                         prevalence_alt,
+                                         correlation = 0, 
+                                         sig_level = 0.05, 
+                                         alternative = 'greater',
+                                         form = 'logitnorm', 
+                                         link = 'logit',
+                                         ...) {
   # Input checks ----
   if (correlation > 0 & cluster_number <= 1) {
     stop('The number of clusters (cluster_number) must be (substantially) greater than 1 if there is non-zero correlation between units in a cluster')
@@ -203,21 +205,22 @@ pool_power_threshold.fixed_design <- function(x,
   
 }
 
-#' @method pool_power_threshold variable_design
+#' @method power_threshold variable_design
 #' @export
-pool_power_threshold.variable_design <- function(x,
-                                                 cluster_number,
-                                                 prevalence_null,
-                                                 prevalence_alt,
-                                                 correlation = 0,
-                                                 sensitivity = 1,
-                                                 specificity = 1,
-                                                 sig_level = 0.05,
-                                                 alternative = 'greater',
-                                                 form = 'logitnorm',
-                                                 link = 'logit',
-                                                 max_iter = 10000,
-                                                 rel_tol = 1e-6){
+power_threshold.variable_design <- function(x,
+                                            cluster_number,
+                                            prevalence_null,
+                                            prevalence_alt,
+                                            correlation = 0,
+                                            sensitivity = 1,
+                                            specificity = 1,
+                                            sig_level = 0.05,
+                                            alternative = 'greater',
+                                            form = 'logitnorm',
+                                            link = 'logit',
+                                            max_iter = 10000,
+                                            rel_tol = 1e-6,
+                                            ...){
   
   catch_dist <- x$catch_dist
   pool_strat <- x$pool_strat
@@ -309,7 +312,7 @@ pool_power_threshold.variable_design <- function(x,
   )
 }
 
-#' @rdname pool_power_threshold
+#' @rdname power_threshold
 #' @export
 sample_size_threshold <- function(x, 
                                   prevalence_null, 
