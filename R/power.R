@@ -1,10 +1,10 @@
 #' Power and sample size calculations for estimating population prevalence from
 #' pooled samples
 #'
-#' `pool_power()` calculates the statistical power of a pooled survey design to
-#' determine whether population prevalence is different from a threshold.
-#' `sample_size()` calculate the sample size required for a pooled survey
-#' to achieve a specified power.
+#' `pool_power_threshold()` calculates the statistical power of a pooled survey
+#' design to determine whether population prevalence is different from a
+#' threshold. `sample_size_threshold()` calculate the sample size required for a
+#' pooled survey to achieve a specified power.
 #'
 #' @param x sample_design object.
 #' @param cluster_number numeric The total number of clusters in a cluster
@@ -62,9 +62,9 @@
 #' @param ... Additional parameters.
 #'
 #' @return The statistical power of the proposed design with regards to
-#'   comparing prevalence to a threshold (`pool_power()`) or a list with the
-#'   sample size (number of clusters, pools, and units) required to achieve
-#'   desired power (`sample_size()`)
+#'   comparing prevalence to a threshold (`pool_power_threshold()`) or a list
+#'   with the sample size (number of clusters, pools, and units) required to
+#'   achieve desired power (`sample_size_threshold()`)
 #' @export
 #'
 #' @examples
@@ -72,53 +72,53 @@
 #' fd <- fixed_design(pool_size = 10, pool_number = 2)
 #'
 #' ## Unclustered ----
-#' pool_power(fd, cluster_number = 50,
+#' pool_power_threshold(fd, cluster_number = 50,
 #'            prevalence_null = 0.01, prevalence_alt = 0.02)
 #'
-#' sample_size(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
-#' 
+#' sample_size_threshold(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
+#'
 #' ## Clustered ----
-#' pool_power(fd, cluster_number = 50,
+#' pool_power_threshold(fd, cluster_number = 50,
 #'            prevalence_null = 0.01, prevalence_alt = 0.02,
 #'            correlation = 0.01)
-#' 
-#' sample_size(fd,
+#'
+#' sample_size_threshold(fd,
 #'             prevalence_null = 0.01, prevalence_alt = 0.02,
 #'             correlation = 0.01)
-#' 
+#'
 #' # Variable design examples ----
 #' power_pool_random(nb_catch(20,25), pool_target_number(2), cluster_number = 50,
 #'                   prevalence_null = 0.01, prevalence_alt = 0.02,
 #'                   correlation = 0.01)
-#' 
-#' sample_size_pool_random(nb_catch(20,25), pool_target_number(2),
+#'
+#' sample_size_threshold_pool_random(nb_catch(20,25), pool_target_number(2),
 #'                         prevalence_null = 0.01, prevalence_alt = 0.02,
 #'                          correlation = 0.01)
-pool_power <- function(x, 
-                       cluster_number,
-                       prevalence_null, 
-                       prevalence_alt,
-                       correlation,
-                       sig_level,
-                       alternative,
-                       form,
-                       link,
-                       ...) {
-  UseMethod("pool_power")
+pool_power_threshold <- function(x, 
+                                 cluster_number,
+                                 prevalence_null, 
+                                 prevalence_alt,
+                                 correlation,
+                                 sig_level,
+                                 alternative,
+                                 form,
+                                 link,
+                                 ...) {
+  UseMethod("pool_power_threshold")
 }
 
-#' @method pool_power fixed_design
+#' @method pool_power_threshold fixed_design
 #' @export
-pool_power.fixed_design <- function(x,
-                                    cluster_number,
-                                    prevalence_null, 
-                                    prevalence_alt,
-                                    correlation = 0, 
-                                    sig_level = 0.05, 
-                                    alternative = 'greater',
-                                    form = 'logitnorm', 
-                                    link = 'logit',
-                                    ...) {
+pool_power_threshold.fixed_design <- function(x,
+                                              cluster_number,
+                                              prevalence_null, 
+                                              prevalence_alt,
+                                              correlation = 0, 
+                                              sig_level = 0.05, 
+                                              alternative = 'greater',
+                                              form = 'logitnorm', 
+                                              link = 'logit',
+                                              ...) {
   # Input checks ----
   if (correlation > 0 & cluster_number <= 1) {
     stop('The number of clusters (cluster_number) must be (substantially) greater than 1 if there is non-zero correlation between units in a cluster')
@@ -134,7 +134,7 @@ pool_power.fixed_design <- function(x,
   
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
-
+  
   # Get link functions ---- 
   g <- g_switch(link)
   gdivinv <- gdivinv_switch(link)
@@ -148,7 +148,7 @@ pool_power.fixed_design <- function(x,
                           sensitivity = x$sensitivity,
                           specificity = x$specificity,
                           form = form))[1,1]
-
+  
   fi0 <- cluster_number * gdivinv(theta0)^2/
     solve(fi_pool_cluster(pool_size = x$pool_size,
                           pool_number = x$pool_number,
@@ -203,7 +203,7 @@ pool_power.fixed_design <- function(x,
   
 }
 
-#' @rdname pool_power
+#' @rdname pool_power_threshold
 #' @export
 power_pool_random <- function(catch_dist, pool_strat, cluster_number,
                               prevalence_null, prevalence_alt,
@@ -258,7 +258,7 @@ power_pool_random <- function(catch_dist, pool_strat, cluster_number,
                                  form = form,
                                  max_iter = max_iter,
                                  rel_tol = rel_tol-6))[1,1]
-
+  
   power <- switch(alternative,
                   less    = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
                   greater = stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
@@ -295,52 +295,52 @@ power_pool_random <- function(catch_dist, pool_strat, cluster_number,
   )
 }
 
-#' @rdname pool_power
+#' @rdname pool_power_threshold
 #' @export
-sample_size <- function(x, 
-                        prevalence_null, 
-                        prevalence_alt,
-                        correlation,
-                        power, 
-                        sig_level,
-                        alternative,
-                        form,
-                        link,
-                        ...) {
-  UseMethod("sample_size")
+sample_size_threshold <- function(x, 
+                                  prevalence_null, 
+                                  prevalence_alt,
+                                  correlation,
+                                  power, 
+                                  sig_level,
+                                  alternative,
+                                  form,
+                                  link,
+                                  ...) {
+  UseMethod("sample_size_threshold")
 }
 
-#' @method sample_size fixed_design 
+#' @method sample_size_threshold fixed_design 
 #' @export
-sample_size.fixed_design <- function(x,
-                                     prevalence_null,
-                                     prevalence_alt,
-                                     correlation = 0,
-                                     power = 0.8,
-                                     sig_level = 0.05,
-                                     alternative = "greater",
-                                     form = "logitnorm",
-                                     link = "logit",
-                                     ...) {
+sample_size_threshold.fixed_design <- function(x,
+                                               prevalence_null,
+                                               prevalence_alt,
+                                               correlation = 0,
+                                               power = 0.8,
+                                               sig_level = 0.05,
+                                               alternative = "greater",
+                                               form = "logitnorm",
+                                               link = "logit",
+                                               ...) {
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
-
+  
   if (!(alternative %in% c("less", "greater"))) {
     stop("currently only supports one-sided tests. Valid options for alternative are less and greater")
   }
-
+  
   if (alternative == "less" && theta0 < thetaa) {
     stop("If alternative == 'less', then prevalence.altnerative must be less than or equal to prevalence_null")
   }
-
+  
   if (alternative == "greater" && theta0 > thetaa) {
     stop("If alternative == 'greater', then prevalence.altnerative must be greater than or equal to prevalence_null")
   }
-
+  
   # Get link functions ----
   g <- g_switch(link)
   gdivinv <- gdivinv_switch(link)
- 
+  
   fia <- gdivinv(thetaa)^2 /
     solve(fi_pool_cluster(pool_size = x$pool_size,
                           pool_number = x$pool_number,
@@ -398,17 +398,17 @@ sample_size.fixed_design <- function(x,
 
 
 
-#' @rdname pool_power
+#' @rdname pool_power_threshold
 #' @export
 #' 
 
-sample_size_pool_random <- function(catch_dist, pool_strat,
-                                    prevalence_null, prevalence_alt,
-                                    correlation = 0, sensitivity = 1, specificity = 1,
-                                    power = 0.8, sig_level = 0.05,
-                                    alternative = 'greater',
-                                    form = 'logitnorm', link = 'logit',
-                                    max_iter = 10000, rel_tol = 1e-6){
+sample_size_threshold_pool_random <- function(catch_dist, pool_strat,
+                                              prevalence_null, prevalence_alt,
+                                              correlation = 0, sensitivity = 1, specificity = 1,
+                                              power = 0.8, sig_level = 0.05,
+                                              alternative = 'greater',
+                                              form = 'logitnorm', link = 'logit',
+                                              max_iter = 10000, rel_tol = 1e-6){
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
   
