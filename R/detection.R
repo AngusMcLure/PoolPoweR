@@ -68,11 +68,11 @@ detection_errors.fixed_design <- function(x, cluster_number,
   if(correlation == 0){ #Non-cluster surveys
     pool_number <- pool_number * cluster_number
     #typeI <- 1 - specificity^pool_number
-    typeI <- -expm1(log(specificity)*pool_number) # equivalent to the above commented code, but more numerically stable for high specificity and large pool_number*cluster_number
+    #typeII <- (1 - (1 - sensitivity - specificity) * (1-prevalence)^pool_size - sensitivity)^(pool_number)
     
-    #might need to make some adjustments for numeric stability for extreme values
-    typeII <- (1 - (1 - sensitivity - specificity) *
-                 (1-prevalence)^pool_size - sensitivity)^(pool_number)
+    #equivalent to the above commented code, but more numerically stable for extreme values
+    typeI <- -expm1(log(specificity)*pool_number) 
+    typeII <- exp(log_one_minus_phi(prevalence, pool_size,sensitivity, specificity) * pool_number)
     
     return(list(typeI = typeI, typeII = typeII))
   }
