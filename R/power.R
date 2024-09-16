@@ -203,14 +203,28 @@ pool_power_threshold.fixed_design <- function(x,
   
 }
 
-#' @rdname pool_power_threshold
+#' @method pool_power_threshold variable_design
 #' @export
-power_pool_random <- function(catch_dist, pool_strat, cluster_number,
-                              prevalence_null, prevalence_alt,
-                              correlation = 0, sensitivity = 1, specificity = 1,
-                              sig_level = 0.05, alternative = 'greater',
-                              form = 'logitnorm', link = 'logit',
-                              max_iter = 10000, rel_tol = 1e-6){
+pool_power_threshold.variable_design <- function(x,
+                                                 cluster_number,
+                                                 prevalence_null,
+                                                 prevalence_alt,
+                                                 correlation = 0,
+                                                 sensitivity = 1,
+                                                 specificity = 1,
+                                                 sig_level = 0.05,
+                                                 alternative = 'greater',
+                                                 form = 'logitnorm',
+                                                 link = 'logit',
+                                                 max_iter = 10000,
+                                                 rel_tol = 1e-6){
+  
+  catch_dist <- x$catch_dist
+  pool_strat <- x$pool_strat
+  
+  if(!inherits(pool_strat, 'pool_strat')){
+    stop('pool design must include a valid pooling strategy of class `pool_strat`',
+    ' (not just a pooling strategy family)')}
   
   exp_pools <- ev(\(catch) sum(pool_strat(catch)$pool_number),
                   catch_dist, max_iter, rel_tol) * cluster_number
@@ -397,18 +411,26 @@ sample_size_threshold.fixed_design <- function(x,
 
 
 
-
-#' @rdname pool_power_threshold
+#' @method sample_size_threshold variable_design 
 #' @export
-#' 
 
-sample_size_threshold_pool_random <- function(catch_dist, pool_strat,
-                                              prevalence_null, prevalence_alt,
-                                              correlation = 0, sensitivity = 1, specificity = 1,
-                                              power = 0.8, sig_level = 0.05,
-                                              alternative = 'greater',
-                                              form = 'logitnorm', link = 'logit',
-                                              max_iter = 10000, rel_tol = 1e-6){
+sample_size_threshold.variable_design <- function(x,
+                                                  prevalence_null,
+                                                  prevalence_alt,
+                                                  correlation = 0,
+                                                  sensitivity = 1,
+                                                  specificity = 1,
+                                                  power = 0.8,
+                                                  sig_level = 0.05,
+                                                  alternative = 'greater',
+                                                  form = 'logitnorm',
+                                                  link = 'logit',
+                                                  max_iter = 10000,
+                                                  rel_tol = 1e-6){
+  
+  catch_dist <- x$catch_dist
+  pool_strat <- x$pool_strat
+  
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
   
@@ -453,7 +475,7 @@ sample_size_threshold_pool_random <- function(catch_dist, pool_strat,
   total_cluster_raw <- ((stats::qnorm(power)/sqrt(fia) + stats::qnorm(1 - sig_level)/sqrt(fi0))/(g(theta0) - g(thetaa)))^2
   
   total_clusters <- ceiling(total_cluster_raw)
-  exp_total_units <- round(mean(catch_dist) * total_clusters,1)
+  exp_total_units <- round(distrEx::E(catch_dist) * total_clusters,1)
   exp_total_pools <- round(ev(\(catch) sum(pool_strat(catch)$pool_number),
                               catch_dist, max_iter, rel_tol) * total_clusters, 1)
   

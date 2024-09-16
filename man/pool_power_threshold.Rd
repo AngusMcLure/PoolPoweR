@@ -2,9 +2,7 @@
 % Please edit documentation in R/power.R
 \name{pool_power_threshold}
 \alias{pool_power_threshold}
-\alias{power_pool_random}
 \alias{sample_size_threshold}
-\alias{sample_size_threshold_pool_random}
 \title{Power and sample size calculations for estimating population prevalence from
 pooled samples}
 \usage{
@@ -21,23 +19,6 @@ pool_power_threshold(
   ...
 )
 
-power_pool_random(
-  catch_dist,
-  pool_strat,
-  cluster_number,
-  prevalence_null,
-  prevalence_alt,
-  correlation = 0,
-  sensitivity = 1,
-  specificity = 1,
-  sig_level = 0.05,
-  alternative = "greater",
-  form = "logitnorm",
-  link = "logit",
-  max_iter = 10000,
-  rel_tol = 1e-06
-)
-
 sample_size_threshold(
   x,
   prevalence_null,
@@ -49,23 +30,6 @@ sample_size_threshold(
   form,
   link,
   ...
-)
-
-sample_size_threshold_pool_random(
-  catch_dist,
-  pool_strat,
-  prevalence_null,
-  prevalence_alt,
-  correlation = 0,
-  sensitivity = 1,
-  specificity = 1,
-  power = 0.8,
-  sig_level = 0.05,
-  alternative = "greater",
-  form = "logitnorm",
-  link = "logit",
-  max_iter = 10000,
-  rel_tol = 1e-06
 )
 }
 \arguments{
@@ -109,6 +73,8 @@ the purposes of calculating confidence intervals. Options are 'identity'
 
 \item{...}{Additional parameters.}
 
+\item{power}{numeric The desired statistical power of the survey.}
+
 \item{catch_dist}{An object of class `distribution` (e.g. produced by
 `nb_catch()`) defining the distribution of the possible catch.}
 
@@ -136,8 +102,6 @@ than `max_iter` otherwise algorithm will terminate early (with a warning)}
 \item{rel_tol}{numeric Relative tolerance for determining convergence when
 calculating expected FI over random catch sizes. Must be positive and
 should be much smaller than 1.}
-
-\item{power}{numeric The desired statistical power of the survey.}
 }
 \value{
 The statistical power of the proposed design with regards to
