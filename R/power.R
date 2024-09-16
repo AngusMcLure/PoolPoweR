@@ -73,29 +73,29 @@
 #'
 #' ## Unclustered ----
 #' power_threshold(fd, cluster_number = 50,
-#'            prevalence_null = 0.01, prevalence_alt = 0.02)
+#'            prevalence_null = 0.02, prevalence_alt = 0.1)
 #'
-#' sample_size_threshold(fd, prevalence_null = 0.01, prevalence_alt = 0.02)
+#' sample_size_threshold(fd, prevalence_null = 0.02, prevalence_alt = 0.1)
 #'
 #' ## Clustered ----
 #' power_threshold(fd, cluster_number = 50,
-#'                 prevalence_null = 0.01, prevalence_alt = 0.02,
-#'                 correlation = 0.01)
+#'                 prevalence_null = 0.02, prevalence_alt = 0.01,
+#'                 correlation = 0.1)
 #'
 #' sample_size_threshold(fd,
-#'                       prevalence_null = 0.01, prevalence_alt = 0.02,
-#'                       correlation = 0.01)
+#'                       prevalence_null = 0.02, prevalence_alt = 0.01,
+#'                       correlation = 0.1)
 #'
 #' # Variable design examples ----
 #' 
 #' vd <- variable_design(nb_catch(20,25), pool_target_number(2))
 #' power_threshold(vd, cluster_number = 50,
-#'                 prevalence_null = 0.01, prevalence_alt = 0.02,
-#'                 correlation = 0.01)
+#'                 prevalence_null = 0.02, prevalence_alt = 0.01,
+#'                 correlation = 0.1)
 #'
 #' sample_size_threshold(vd,
-#'                       prevalence_null = 0.01, prevalence_alt = 0.02,
-#'                       correlation = 0.01)
+#'                       prevalence_null = 0.02, prevalence_alt = 0.01,
+#'                       correlation = 0.1)
 power_threshold <- function(x, 
                             cluster_number,
                             prevalence_null, 
@@ -117,7 +117,7 @@ power_threshold.fixed_design <- function(x,
                                          prevalence_alt,
                                          correlation = 0, 
                                          sig_level = 0.05, 
-                                         alternative = 'greater',
+                                         alternative = 'less',
                                          form = 'logitnorm', 
                                          link = 'logit',
                                          ...) {
@@ -215,7 +215,7 @@ power_threshold.variable_design <- function(x,
                                             sensitivity = 1,
                                             specificity = 1,
                                             sig_level = 0.05,
-                                            alternative = 'greater',
+                                            alternative = 'less',
                                             form = 'logitnorm',
                                             link = 'logit',
                                             max_iter = 10000,
