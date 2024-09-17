@@ -2,11 +2,13 @@
 #'
 #' `nb_catch()` and `pois_catch()` are convenience functions for defining the
 #' distribution of catche sizes (aka cluster sizes) for the negative binomial
-#' and Poisson distributions respectively
+#' and Poisson distributions respectively. `fit_catch()` provides a convenient
+#' way to estimate a (negative binomial) catch distribution from data
 #'
 #' @param mean numeric The mean number of units per cluster (catch)
 #' @param variance numeric The variance of the number of units per cluster
 #'   (catch)
+#' @param catch numeric A vector of catch sizes
 #'
 #' @return An object of class `distr` summarising the distribution of
 #'   cluster/catch sizes
@@ -27,6 +29,20 @@ nb_catch <- function(mean,variance){
 #' @export
 pois_catch <- function(mean){
   distr::Pois(lambda = mean)
+}
+
+#' @rdname catch_distributions
+#' @export
+fit_catch <- function(catch, distribution = 'nb'){
+  if(distribution == 'nb'){
+    fit <- fitdistrplus::fitdist(catch, 'nbinom')$estimate
+    nb_catch(mean = fit['mu'], variance = fit['mu']^2/fit['size'] + fit['mu'])
+  }else if(distribution == 'pois'){
+    fit <- fitdistrplus::fitdist(catch, 'pois')$estimate
+    pois_catch(fit['lambda'])
+  }else{
+    stop('only support for two distributions: negative binomial ("nb") and Poisson ("pois")')
+  }
 }
 
 

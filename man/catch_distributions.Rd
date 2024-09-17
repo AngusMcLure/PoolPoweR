@@ -3,17 +3,22 @@
 \name{nb_catch}
 \alias{nb_catch}
 \alias{pois_catch}
+\alias{fit_catch}
 \title{Tools for defining catch-size distributions}
 \usage{
 nb_catch(mean, variance)
 
 pois_catch(mean)
+
+fit_catch(catch, distribution = "nb")
 }
 \arguments{
 \item{mean}{numeric The mean number of units per cluster (catch)}
 
 \item{variance}{numeric The variance of the number of units per cluster
 (catch)}
+
+\item{catch}{numeric A vector of catch sizes}
 }
 \value{
 An object of class `distr` summarising the distribution of
@@ -22,7 +27,8 @@ An object of class `distr` summarising the distribution of
 \description{
 `nb_catch()` and `pois_catch()` are convenience functions for defining the
 distribution of catche sizes (aka cluster sizes) for the negative binomial
-and Poisson distributions respectively
+and Poisson distributions respectively. `fit_catch()` provides a convenient
+way to estimate a (negative binomial) catch distribution from data
 }
 \examples{
 nb_catch(10,20)
