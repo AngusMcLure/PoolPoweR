@@ -54,4 +54,15 @@ print.pool_strat_family <- function(x,...){
   invisible(x)
 }
 
+#' @export
+format.pool_strat_family <- function(x,...){
+  attr(x, 'name')
+}
+
+#' @export
+as.character.pool_strat_family <- function(x,...){
+  attr(x, 'name')
+}
+
+
 

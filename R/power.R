@@ -12,7 +12,7 @@
 #' `sample_size_` family of functions calculate the sample size required for a
 #' pooled survey to achieve the specified power for the given objective.
 #'
-#' @param x sample_design object.
+#' @param design sample_design object.
 #' @param cluster_number numeric The total number of clusters in a cluster
 #'   survey design (should be greater than 1) or 1 surveys where all collection
 #'   happens at a single site or collected via simple random sampling from the
@@ -92,7 +92,7 @@
 
 # _threshold ----
 
-power_threshold <- function(x, 
+power_threshold <- function(design, 
                             cluster_number,
                             prevalence_null, 
                             prevalence_alt,
@@ -107,7 +107,7 @@ power_threshold <- function(x,
 
 #' @method power_threshold fixed_design
 #' @export
-power_threshold.fixed_design <- function(x,
+power_threshold.fixed_design <- function(design,
                                          cluster_number,
                                          prevalence_null, 
                                          prevalence_alt,
@@ -126,7 +126,7 @@ power_threshold.fixed_design <- function(x,
     warning('Estimated power may be unreliable if number of clusters (cluster_number) is less than 10')
   }
   
-  if (correlation == 0 & cluster_number * x$pool_number <= 10) {
+  if (correlation == 0 & cluster_number * design$pool_number <= 10) {
     warning('Estimated power may be unreliable if total number of pools (cluster_number * pool_number) is less than 10')
   }
   
@@ -139,21 +139,21 @@ power_threshold.fixed_design <- function(x,
   
   # Calculate Fisher information
   fia <- cluster_number * gdivinv(thetaa)^2 /
-    solve(fi_pool_cluster(pool_size = x$pool_size,
-                          pool_number = x$pool_number,
+    solve(fi_pool_cluster(pool_size = design$pool_size,
+                          pool_number = design$pool_number,
                           prevalence = thetaa,
                           correlation = correlation,
-                          sensitivity = x$sensitivity,
-                          specificity = x$specificity,
+                          sensitivity = design$sensitivity,
+                          specificity = design$specificity,
                           form = form))[1,1]
   
   fi0 <- cluster_number * gdivinv(theta0)^2/
-    solve(fi_pool_cluster(pool_size = x$pool_size,
-                          pool_number = x$pool_number,
+    solve(fi_pool_cluster(pool_size = design$pool_size,
+                          pool_number = design$pool_number,
                           prevalence = theta0,  #should this be theta0 or thetaa?
                           correlation = correlation,
-                          sensitivity = x$sensitivity,
-                          specificity = x$specificity,
+                          sensitivity = design$sensitivity,
+                          specificity = design$specificity,
                           form = form))[1,1]
   
   power <- switch(alternative,
@@ -165,22 +165,10 @@ power_threshold.fixed_design <- function(x,
   )
   
   # Prepare output
-  total_pools <- cluster_number * x$pool_number
-  total_units <- # leaving verbose as cluster_number to be added to fixed_design
-    cluster_number * 
-    x$pool_number * 
-    x$pool_size
-  
-  text <- paste(
-    "A survey design using", 
-    ifelse(is_perfect_test(x), "a perfect", "an imperfect"), 
-    "diagnostic test on pooled samples with the above parameters has a statistical power of", 
-    round(power, 3)
-  )
-  
-  power_size_results(  
-    sensitivity = x$sensitivity,
-    specificity = x$specificity,
+  power_size_results(
+    # sample design
+    design = design,
+    cluster_number = cluster_number,
     # prevalence
     prev_null = theta0,
     prev_alt = thetaa,
@@ -188,22 +176,14 @@ power_threshold.fixed_design <- function(x,
     # statistical test
     sig_level = sig_level,
     power = power,
-    alternative = alternative,
-    # sample design
-    pool_size = x$pool_size,
-    pool_number = x$pool_number,
-    cluster_number = cluster_number,
-    total_pools = total_pools,
-    total_units = total_units,
-    # parsing
-    text = text
+    alternative = alternative
   )
   
 }
 
 #' @method power_threshold variable_design
 #' @export
-power_threshold.variable_design <- function(x,
+power_threshold.variable_design <- function(design,
                                             cluster_number,
                                             prevalence_null,
                                             prevalence_alt,
@@ -217,12 +197,12 @@ power_threshold.variable_design <- function(x,
                                             ...){
 
   
-  if(!inherits(x$pool_strat, 'pool_strat')){
+  if(!inherits(design$pool_strat, 'pool_strat')){
     stop('pool design must include a valid pooling strategy of class `pool_strat`',
     ' (not just a pooling strategy family)')}
   
-  exp_pools <- ev(\(catch) sum(x$pool_strat(catch)$pool_number),
-                  x$catch_dist, max_iter, rel_tol) * cluster_number
+  exp_pools <- ev(\(catch) sum(design$pool_strat(catch)$pool_number),
+                  design$catch_dist) * cluster_number
   
   if(correlation > 0 & cluster_number <= 1){
     stop('The number of clusters (cluster_number) must be (substantially) greater than 1 if there is non-zero correlation between units in a cluster')
@@ -247,23 +227,23 @@ power_threshold.variable_design <- function(x,
   gdivinv <- gdivinv_switch(link)
   
   fia <- cluster_number * gdivinv(thetaa)^2 /
-    solve(fi_pool_cluster_random(catch_dist = x$catch_dist, 
-                                 pool_strat = x$pool_strat, 
+    solve(fi_pool_cluster_random(catch_dist = design$catch_dist, 
+                                 pool_strat = design$pool_strat, 
                                  prevalence = thetaa,
                                  correlation = correlation,
-                                 sensitivity = x$sensitivity,
-                                 specificity = x$specificity,
+                                 sensitivity = design$sensitivity,
+                                 specificity = design$specificity,
                                  form = form,
                                  max_iter = max_iter,
                                  rel_tol = rel_tol-6))[1,1]
   
   fi0 <- cluster_number * gdivinv(theta0)^2 /
-    solve(fi_pool_cluster_random(catch_dist = x$catch_dist, 
-                                 pool_strat = x$pool_strat, 
+    solve(fi_pool_cluster_random(catch_dist = design$catch_dist, 
+                                 pool_strat = design$pool_strat, 
                                  prevalence = theta0,  #should this be theta0 or thetaa?
                                  correlation = correlation,
-                                 sensitivity = x$sensitivity,
-                                 specificity = x$specificity,
+                                 sensitivity = design$sensitivity,
+                                 specificity = design$specificity,
                                  form = form,
                                  max_iter = max_iter,
                                  rel_tol = rel_tol-6))[1,1]
@@ -275,18 +255,12 @@ power_threshold.variable_design <- function(x,
                     stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)),
                   stop('invalid alternative. options are less, greater, and two.sided')
   )
+
   
-  # Prepare output
-  text = paste(
-    "A survey design using", 
-    is_perfect_test_temp(x$sensitivity, x$specificity), 
-    "diagnostic test on pooled samples with the above parameters has a statistical power of",
-    round(power, 3)
-  )
-  
-  power_size_results(  
-    sensitivity = x$sensitivity,
-    specificity = x$specificity,
+  power_size_results( 
+    # sample design
+    design = design,
+    cluster_number = cluster_number,
     # prevalence
     prev_null = theta0,
     prev_alt = thetaa,
@@ -294,19 +268,13 @@ power_threshold.variable_design <- function(x,
     # statistical test
     sig_level = sig_level,
     power = power,
-    alternative = alternative,
-    # sample design
-    catch_dist = x$catch_dist,
-    pool_strat = as.character(x$pool_strat),
-    cluster_number = cluster_number,
-    # parsing
-    text = text
+    alternative = alternative
   )
 }
 
 #' @rdname power_threshold
 #' @export
-sample_size_threshold <- function(x, 
+sample_size_threshold <- function(design, 
                                   prevalence_null, 
                                   prevalence_alt,
                                   correlation,
@@ -321,7 +289,7 @@ sample_size_threshold <- function(x,
 
 #' @method sample_size_threshold fixed_design 
 #' @export
-sample_size_threshold.fixed_design <- function(x,
+sample_size_threshold.fixed_design <- function(design,
                                                prevalence_null,
                                                prevalence_alt,
                                                correlation = 0,
@@ -351,40 +319,31 @@ sample_size_threshold.fixed_design <- function(x,
   gdivinv <- gdivinv_switch(link)
   
   fia <- gdivinv(thetaa)^2 /
-    solve(fi_pool_cluster(pool_size = x$pool_size,
-                          pool_number = x$pool_number,
+    solve(fi_pool_cluster(pool_size = design$pool_size,
+                          pool_number = design$pool_number,
                           prevalence = thetaa,
                           correlation = correlation,
-                          sensitivity = x$sensitivity,
-                          specificity = x$specificity,
+                          sensitivity = design$sensitivity,
+                          specificity = design$specificity,
                           form = form))[1,1]
   fi0 <- gdivinv(theta0)^2 /
-    solve(fi_pool_cluster(pool_size = x$pool_size,
-                          pool_number = x$pool_number,
+    solve(fi_pool_cluster(pool_size = design$pool_size,
+                          pool_number = design$pool_number,
                           prevalence = theta0,
                           correlation = correlation,
-                          sensitivity = x$sensitivity,
-                          specificity = x$specificity,
+                          sensitivity = design$sensitivity,
+                          specificity = design$specificity,
                           form = form))[1,1]
   
   # Note that the below is correct for either kind of one-sided test, but not for two sided tests
   total_clusters_raw <- ((stats::qnorm(power)/sqrt(fia) + stats::qnorm(1 - sig_level)/sqrt(fi0))/(g(theta0) - g(thetaa)))^2
   
   total_clusters <- ceiling(total_clusters_raw)
-  total_pools <- total_clusters * x$pool_number
-  # sample_design$total_units is per-cluster
-  total_units <- total_pools * x$pool_size
-  text <- paste0(
-    "A survey design using ", is_perfect_test_temp(x$sensitivity, x$specificity), 
-    " diagnostic test on pooled samples with the above parameters requires a total of ",
-    total_clusters, " clusters, ", 
-    total_pools, " total pools, and ", 
-    total_units, " total units."
-  )
   
-  power_size_results(  
-    sensitivity = x$sensitivity,
-    specificity = x$specificity,
+  power_size_results(
+    # sample design
+    design = design,
+    cluster_number = total_clusters,
     # prevalence
     prev_null = theta0,
     prev_alt = thetaa,
@@ -392,15 +351,7 @@ sample_size_threshold.fixed_design <- function(x,
     # statistical test
     sig_level = sig_level,
     power = power,
-    alternative = alternative,
-    # sample design
-    pool_size = x$pool_size,
-    pool_number = x$pool_number,
-    cluster_number = total_clusters,
-    total_pools = total_pools,
-    total_units = total_units,
-    # parsing
-    text = text
+    alternative = alternative
   )
 }
 
@@ -409,7 +360,7 @@ sample_size_threshold.fixed_design <- function(x,
 #' @method sample_size_threshold variable_design 
 #' @export
 
-sample_size_threshold.variable_design <- function(x,
+sample_size_threshold.variable_design <- function(design,
                                                   prevalence_null,
                                                   prevalence_alt,
                                                   correlation = 0,
@@ -422,7 +373,7 @@ sample_size_threshold.variable_design <- function(x,
                                                   rel_tol = 1e-6,
                                                   ...){
   
-  if(!inherits(x$pool_strat, 'pool_strat')){
+  if(!inherits(design$pool_strat, 'pool_strat')){
     stop('pool design must include a valid pooling strategy of class `pool_strat`',
          ' (not just a pooling strategy family)')}
   
@@ -446,22 +397,22 @@ sample_size_threshold.variable_design <- function(x,
   gdivinv <- gdivinv_switch(link)
   
   fia <- gdivinv(thetaa)^2 /
-    solve(fi_pool_cluster_random(catch_dist = x$catch_dist, 
-                                 pool_strat = x$pool_strat, 
+    solve(fi_pool_cluster_random(catch_dist = design$catch_dist, 
+                                 pool_strat = design$pool_strat, 
                                  prevalence = thetaa,
                                  correlation = correlation,
-                                 sensitivity = x$sensitivity,
-                                 specificity = x$specificity,
+                                 sensitivity = design$sensitivity,
+                                 specificity = design$specificity,
                                  form = form,
                                  max_iter = max_iter,
                                  rel_tol = rel_tol-6))[1,1]
   fi0 <- gdivinv(theta0)^2 /
-    solve(fi_pool_cluster_random(catch_dist = x$catch_dist, 
-                                 pool_strat = x$pool_strat, 
+    solve(fi_pool_cluster_random(catch_dist = design$catch_dist, 
+                                 pool_strat = design$pool_strat, 
                                  prevalence = theta0,  #should this be theta0 or thetaa?
                                  correlation = correlation,
-                                 sensitivity = x$sensitivity,
-                                 specificity = x$specificity,
+                                 sensitivity = design$sensitivity,
+                                 specificity = design$specificity,
                                  form = form,
                                  max_iter = max_iter,
                                  rel_tol = rel_tol-6))[1,1]
@@ -470,22 +421,11 @@ sample_size_threshold.variable_design <- function(x,
   total_cluster_raw <- ((stats::qnorm(power)/sqrt(fia) + stats::qnorm(1 - sig_level)/sqrt(fi0))/(g(theta0) - g(thetaa)))^2
   
   total_clusters <- ceiling(total_cluster_raw)
-  exp_total_units <- round(distrEx::E(x$catch_dist) * total_clusters,1)
-  exp_total_pools <- round(ev(\(catch) sum(x$pool_strat(catch)$pool_number),
-                              x$catch_dist, max_iter, rel_tol) * total_clusters, 1)
-  
-  # Prepare output
-  text = paste0(
-    "A survey design using ", is_perfect_test_temp(x$sensitivity, x$specificity), 
-    " diagnostic test on pooled samples with the above parameters requires a total of ",
-    total_clusters, " clusters, ", 
-    exp_total_pools, " expected total pools, and ", 
-    exp_total_units, " expected total units."
-  )
   
   power_size_results(  
-    sensitivity = x$sensitivity,
-    specificity = x$specificity,
+    # sample design
+    design = design,
+    cluster_number = total_clusters,
     # prevalence
     prev_null = theta0,
     prev_alt = thetaa,
@@ -494,14 +434,6 @@ sample_size_threshold.variable_design <- function(x,
     sig_level = sig_level,
     power = power,
     alternative = alternative,
-    # sample design
-    catch_dist = x$catch_dist,
-    pool_strat = as.character(x$pool_strat),
-    cluster_number = total_clusters,
-    exp_total_pools = exp_total_pools,
-    exp_total_units = exp_total_units,
-    # parsing
-    text = text
   )
 }
 
@@ -510,7 +442,33 @@ sample_size_threshold.variable_design <- function(x,
 
 #' @rdname power_threshold
 #' @export
-sample_size_detect <- function(x, 
+
+power_detect <- function(design,
+                         cluster_number,
+                         prevalence,
+                         correlation = 0,
+                         form = 'logitnorm',
+                         ...) {
+  
+  power <- 1 - detection_errors(design, cluster_number, prevalence,
+                                correlation, form, ...)$typeII
+  
+  power_size_results(
+    # sample design
+    design = design,
+    cluster_number = cluster_number,
+    # prevalence
+    prev = prevalence,
+    correlation = correlation,
+    # statistical test
+    power = power
+  )
+  
+}
+
+#' @rdname power_threshold
+#' @export
+sample_size_detect <- function(design, 
                                prevalence,
                                correlation,
                                power, 
@@ -522,7 +480,7 @@ sample_size_detect <- function(x,
 #' @method sample_size_detect fixed_design
 #' @export
 
-sample_size_detect.fixed_design <- function(x,
+sample_size_detect.fixed_design <- function(design,
                                             prevalence,
                                             correlation = 0,
                                             power = 0.8,
@@ -530,7 +488,7 @@ sample_size_detect.fixed_design <- function(x,
                                             ...) {
   
   # Get detection probability for a single cluster
-  errors <- detection_errors(x,1,prevalence,correlation,form)
+  errors <- detection_errors(design,1,prevalence,correlation,form)
   
   total_clusters_raw <- log1p(-power)/log(errors$typeII)
   
@@ -539,99 +497,49 @@ sample_size_detect.fixed_design <- function(x,
   #sample_size_threshold.fixed_design
   
   total_clusters <- ceiling(total_clusters_raw)
-  total_pools <- total_clusters * x$pool_number
-  # sample_design$total_units is per-cluster
-  total_units <- total_pools * x$pool_size
-  text <- paste0(
-    "A survey design using ", is_perfect_test_temp(x$sensitivity, x$specificity), 
-    " diagnostic test on pooled samples with the above parameters requires a total of ",
-    total_clusters, " clusters, ", 
-    total_pools, " total pools, and ", 
-    total_units, " total units."
-  )
   
   power_size_results(  
-    sensitivity = x$sensitivity,
-    specificity = x$specificity,
+    # sample design
+    design = design,
+    cluster_number = total_clusters,
     # prevalence
-    prev_null = prevalence,
-    prev_alt = NA,
+    prev = prevalence,
     correlation = correlation,
     # statistical test
-    sig_level = NA,
-    power = power,
-    alternative = NA,
-    # sample design
-    pool_size = x$pool_size,
-    pool_number = x$pool_number,
-    cluster_number = total_clusters,
-    total_pools = total_pools,
-    total_units = total_units,
-    # parsing
-    text = text
-  )
+    power = power
+    )
 }
 
 
 #' @method sample_size_detect variable_design 
 #' @export
 
-sample_size_detect.variable_design <- function(x,
+sample_size_detect.variable_design <- function(design,
                                                prevalence,
                                                correlation = 0,
                                                power = 0.8,
-                                               alternative = 'less',
                                                form = 'logitnorm',
-                                               max_iter = 10000,
-                                               rel_tol = 1e-6,
                                                ...){
   
-  if(!inherits(x$pool_strat, 'pool_strat')){
+  if(!inherits(design$pool_strat, 'pool_strat')){
     stop('pool design must include a valid pooling strategy of class `pool_strat`',
          ' (not just a pooling strategy family)')}
   
   # Get detection probability for a single cluster
-  errors <- detection_errors(x,1,prevalence,correlation,form)
+  errors <- detection_errors(design,1,prevalence,correlation,form)
   
   total_clusters_raw <- log1p(-power)/log(errors$typeII)
   
-  #Could be modularised? Everything below here is almost identical (except for
-  #how prevalence, alternative, and sig_level are returned) to
-  #sample_size_threshold.variable_design
-  
-  
   total_clusters <- ceiling(total_cluster_raw)
-  exp_total_units <- round(distrEx::E(x$catch_dist) * total_clusters,1)
-  exp_total_pools <- round(ev(\(catch) sum(x$pool_strat(catch)$pool_number),
-                              x$catch_dist, max_iter, rel_tol) * total_clusters, 1)
   
-  # Prepare output
-  text = paste0(
-    "A survey design using ", is_perfect_test_temp(x$sensitivity, x$specificity), 
-    " diagnostic test on pooled samples with the above parameters requires a total of ",
-    total_clusters, " clusters, ", 
-    exp_total_pools, " expected total pools, and ", 
-    exp_total_units, " expected total units."
-  )
-  
-  power_size_results(  
-    sensitivity = x$sensitivity,
-    specificity = x$specificity,
+  power_size_results(
+    # sample design
+    design = design,
+    cluster_number = total_clusters,
     # prevalence
-    prev_null = prevalence,
-    prev_alt = NA,
+    prev = prevalence,
     correlation = correlation,
     # statistical test
-    sig_level = NA,
-    power = power,
-    alternative = NA,
-    # sample design
-    catch_dist = x$catch_dist,
-    pool_strat = as.character(x$pool_strat),
-    cluster_number = total_clusters,
-    exp_total_pools = exp_total_pools,
-    exp_total_units = exp_total_units,
-    # parsing
-    text = text
+    power = power
   )
 }

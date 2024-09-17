@@ -33,13 +33,14 @@ mu_sigma_linknorm <- function(.mean, .var,link,invlink){
   f <- function(x){
     mu <- x[1]
     sigma <- abs(x[2])
-    fExp <- function(x) invlink(x) * stats::dnorm(x, mean = mu, sd = sigma)
-    ..exp <- stats::integrate(fExp, -Inf, Inf, abs.tol = abs.tol)$value
-    fVar <- function(x) (invlink(x) - ..exp)^2 * stats::dnorm(x, mean = mu,sd = sigma)
-    ..var <- stats::integrate(fVar, -Inf, Inf, abs.tol = abs.tol)$value
+    fExp <- function(x) invlink(x+mu) * stats::dnorm(x,sd = sigma)
+    ..exp <- stats::integrate(fExp, -10 * sigma, 10 * sigma, abs.tol = abs.tol)$value
+    fVar <- function(x) (invlink(x+mu) - ..exp)^2 * stats::dnorm(x,sd = sigma)
+    ..var <- stats::integrate(fVar, -10 * sigma, 10 * sigma, abs.tol = abs.tol)$value
     sum(abs(c(..exp,..var)/c(.mean,.var) - 1))
   }
-  out <- stats::optim(init,f,control = list(reltol = .Machine$double.eps ^ 0.7))$par
+  out <- stats::optim(init,f,method = "SANN")$par
+  out <- stats::optim(out, f, control = list(abstol  = 0, reltol = .Machine$double.eps ^ 0.8))$par
   out[2] <- abs(out[2])
   out
 }

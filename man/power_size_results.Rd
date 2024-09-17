@@ -5,62 +5,31 @@
 \title{S3 class for power and sample size calculation outputs with pooled tests}
 \usage{
 power_size_results(
-  sensitivity,
-  specificity,
-  prev_null,
-  prev_alt,
-  correlation,
-  sig_level,
-  power,
-  alternative,
-  pool_size = NA,
-  pool_number = NA,
-  catch_dist = NA,
-  pool_strat = NA,
+  design,
   cluster_number,
-  total_pools = NA,
-  total_units = NA,
-  exp_total_pools = NA,
-  exp_total_units = NA,
-  text
+  prev_null = NULL,
+  prev_alt = NULL,
+  prev = NULL,
+  correlation,
+  sig_level = NULL,
+  power,
+  alternative = NULL
 )
 }
 \arguments{
-\item{sensitivity}{required}
-
-\item{specificity}{required}
-
-\item{prev_null}{required}
-
-\item{prev_alt}{required}
-
-\item{correlation}{required}
-
-\item{sig_level}{required}
-
-\item{power}{required}
-
-\item{alternative}{required}
-
-\item{pool_size}{required for power_pool and sample_size_pool or NA}
-
-\item{pool_number}{required for power_pool and sample_size_pool or NA}
-
-\item{catch_dist}{required for power_pool_random and sample_size_pool_random or NA}
-
-\item{pool_strat}{required for power_pool_random and sample_size_pool_random or NA}
+\item{design}{required; sample design}
 
 \item{cluster_number}{required}
 
-\item{total_pools}{NA if sample_size_pool_random}
+\item{prev_null, prev_alt, prev}{either prev, or prev_null and prev_alt required}
 
-\item{total_units}{required for power_pool and sample_size_pool or NA}
+\item{correlation}{required}
 
-\item{exp_total_pools}{required for sample_size_pool_random or NA}
+\item{sig_level}{}
 
-\item{exp_total_units}{required for sample_size_pool_random or NA}
+\item{power}{required}
 
-\item{text}{chr Explanatory summary text to be printed at the end}
+\item{alternative}{}
 }
 \value{
 An object of class \code{power_size_results} containing selected
@@ -71,17 +40,4 @@ As many variables are shared across groups of functions (e.g. `power_pool`
 and `sample_size_pool`), this class and print method ensures that outputs are
 stored and displayed consistently, summarising calculations results and the
 inputs for context.
-}
-\examples{
-# For power_pool()
-result <- power_size_results(
-  sensitivity = 1, specificity = 1, prev_null = 0.01, prev_alt = 0.02,
-  correlation = 0, sig_level = 0.05, power = 0.76, # rounded in e.g. only
-  alternative = "greater", pool_size = 10, pool_number = 2, 
-  cluster_number = 50, total_pools = 100, total_units = 1000,
-  text = "... has a statistical power of 0.762"
-)
-
-print(result) # pretty print
-result$stat_test$power
 }

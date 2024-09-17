@@ -5,102 +5,109 @@
 #' stored and displayed consistently, summarising calculations results and the
 #' inputs for context.
 #' 
-#' @param sensitivity required
-#' @param specificity required
-#' @param prev_null required
-#' @param prev_alt required
+#' @param design required; sample design
+#' @param prev_null,prev_alt,prev either prev, or prev_null and prev_alt required
 #' @param correlation required
-#' @param sig_level required
+#' @param sig_level 
 #' @param power required
-#' @param alternative required
-#' @param pool_size required for power_pool and sample_size_pool or NA
-#' @param pool_number required for power_pool and sample_size_pool or NA
-#' @param catch_dist required for power_pool_random and sample_size_pool_random or NA
-#' @param pool_strat required for power_pool_random and sample_size_pool_random or NA
+#' @param alternative 
 #' @param cluster_number required 
-#' @param total_pools NA if sample_size_pool_random
-#' @param total_units required for power_pool and sample_size_pool or NA
-#' @param exp_total_pools required for sample_size_pool_random or NA
-#' @param exp_total_units required for sample_size_pool_random or NA
-#' @param text chr Explanatory summary text to be printed at the end
 #'
 #' @return An object of class \code{power_size_results} containing selected
 #'   input parameters and results.
 #' @export
 #'
-#' @examples
-#' # For power_pool()
-#' result <- power_size_results(
-#'   sensitivity = 1, specificity = 1, prev_null = 0.01, prev_alt = 0.02,
-#'   correlation = 0, sig_level = 0.05, power = 0.76, # rounded in e.g. only
-#'   alternative = "greater", pool_size = 10, pool_number = 2, 
-#'   cluster_number = 50, total_pools = 100, total_units = 1000,
-#'   text = "... has a statistical power of 0.762"
-#' )
-#' 
-#' print(result) # pretty print
-#' result$stat_test$power
-power_size_results <- function(sensitivity, specificity, prev_null, prev_alt,
-                               correlation, sig_level, power, alternative,
-                               pool_size = NA, pool_number = NA, catch_dist = NA, 
-                               pool_strat = NA, cluster_number, total_pools = NA, 
-                               total_units = NA, exp_total_pools = NA, 
-                               exp_total_units = NA, text) {
+
+
+power_size_results <- function(design,
+                               cluster_number,
+                               prev_null = NULL,
+                               prev_alt = NULL,
+                               prev = NULL,
+                               correlation,
+                               sig_level = NULL,
+                               power,
+                               alternative = NULL) {
   
   # Group parameters to different lists for printing
   diag_test <- list(
     title = "DIAGNOSTIC TEST",
-    sensitivity = sensitivity,
-    specificity = specificity
+    sensitivity = design$sensitivity,
+    specificity = design$specificity
   )
   
   prev <- list(
-    title = "PREVALENCE",
-    prev_null = prev_null,
-    prev_alt = prev_alt,
+    title = "POPULATION",
+    `prevalence (null)` = prev_null,
+    `prevalence (alternative)` = prev_alt,
+    `prevalence` = prev,
     correlation = correlation
   )
   
-  stat_test <- list(
-    title = "STATISTICAL TEST",
-    sig_level = sig_level,
+  stat <- list(
+    title = "STATISTICAL PROPERTIES",
+    `significance level` = sig_level,
     power = power,
     alternative = alternative
   )
   
-  # TODO: refactor so temp_design is passed as an arg to class
-  if (!is.na(pool_size) && !is.na(pool_number)) { # power_pool, sample_size_pool
-    temp_design <- list(
-      pool_size = pool_size,
-      pool_number = pool_number,
-      total_pools = total_pools,
-      total_units = total_units
+  #
+  if(inherits(design,'fixed_design')){
+    
+    total_pools <- cluster_number * design$pool_number
+    total_units <- cluster_number * design$pool_number * design$pool_size
+    
+    survey_design <- list(
+      title = "SURVEY DESIGN",
+      design = design,
+      `pool size` = design$pool_size,
+      `pools per cluster` = design$pool_number,
+      `total pools` = total_pools,
+      `total units` = total_units,
+      `clusters` = cluster_number
     )
-  } else if (!is.na(exp_total_pools) && !is.na(exp_total_units)) { # sample_size_pool_random
-    temp_design <- list(
-      exp_total_pools = exp_total_pools,
-      exp_total_units = exp_total_units
+    
+    text <- paste0(
+      "A survey design using ", is_perfect_test_temp(design$sensitivity, design$specificity), 
+      " diagnostic test on pooled samples with the above parameters requires a total of ",
+      cluster_number, " clusters, ", 
+      total_pools, " total pools, and ", 
+      total_units, " total units."
     )
-  } else { # power_pool_random
-   temp_design <- list(
-      catch_mean = distrEx::E(catch_dist),
-      catch_variance = distrEx::var(catch_dist),
-      pool_strat = pool_strat
+  }else if(inherits(design,'variable_design')){
+    
+    exp_total_units <- round(distrEx::E(design$catch_dist) * cluster_number, 1)
+    exp_total_pools <- round(ev(\(catch) sum(design$pool_strat(catch)$pool_number),
+                                design$catch_dist) * cluster_number, 1)
+    
+    # Prepare output
+    
+    survey_design <- list(
+      title = "SURVEY DESIGN",
+      design = design,
+      `expected catch per site` = design$catch_mean,
+      `pooling strategy` = design$pool_strat,
+      `clusters` = cluster_number,
+      `total expected pools` = exp_total_pools,
+      `total expected units` = exp_total_units
     )
+    
+    text <- paste0(
+      "A survey design using ", is_perfect_test_temp(design$sensitivity, design$specificity), 
+      " diagnostic test on pooled samples with the above parameters requires a total of ",
+      cluster_number, " clusters, ", 
+      exp_total_pools, " expected total pools, and ", 
+      exp_total_units, " expected total units."
+    )
+    
   }
-  
-  sample_design <- c(
-    list(title = "SAMPLE DESIGN"),
-    temp_design,
-    list(cluster_number = cluster_number)
-  )
   
   results <- structure(
     list(
       diag_test = diag_test,
       prev = prev,
-      stat_test = stat_test,
-      sample_design = sample_design,
+      stat = stat,
+      survey_design = survey_design,
       text = text 
     ),
     class = "power_size_results"
@@ -108,13 +115,18 @@ power_size_results <- function(sensitivity, specificity, prev_null, prev_alt,
   return(results)
 }
 
+
 #' @method print power_size_results
 #' @export
 print.power_size_results <- function(x, ...) {
-  # Remove 'text' from instance for printing
-  text_idx <- which(names(x) == "text")
-  text <- x[[text_idx]]
-  x <- x[-text_idx]
+  
+  text <- x$text
+  design <- x$survey_design$design
+  
+  # Remove 'text' and 'design' from instance for printing
+  x <- x[names(x) != 'text']
+  xsd <- x[['survey_design']]
+  x[['survey_design']] <- xsd[names(xsd) != 'design']
   
   for (list in x) {
     cat(paste("\n", list$title, "\n"))
@@ -124,12 +136,14 @@ print.power_size_results <- function(x, ...) {
       } else {
         value = list[[name]]
       }
-      cat(paste(format(name, width = 15L, justify = "right"), value, sep = " = "
-), sep = "\n"
-      )
+      if(!is.null(value)){
+        cat(paste(format(name, width = 25L, justify = "right"),
+                  value, sep = " = "),
+            sep = "\n")
+      }
     } 
   }
-  cat("\n", text)
+  #cat("\n", text)
   invisible(x)
 }
 
@@ -139,7 +153,7 @@ g_switch <- function(link) {
          cloglog = cloglog,
          log = log,
          identity = function(x){x}
-         )
+  )
 }
 
 gdivinv_switch <- function(link) {
@@ -157,5 +171,4 @@ is_perfect_test_temp <- function(sensitivity, specificity) {
   }
   return("an imperfect")
 }
-
 

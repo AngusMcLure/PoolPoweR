@@ -3,12 +3,13 @@
 \name{power_threshold}
 \alias{power_threshold}
 \alias{sample_size_threshold}
+\alias{power_detect}
 \alias{sample_size_detect}
 \title{Power and sample size calculations for detecting presence and estimating
 population prevalence from pooled samples}
 \usage{
 power_threshold(
-  x,
+  design,
   cluster_number,
   prevalence_null,
   prevalence_alt,
@@ -21,7 +22,7 @@ power_threshold(
 )
 
 sample_size_threshold(
-  x,
+  design,
   prevalence_null,
   prevalence_alt,
   correlation,
@@ -33,10 +34,19 @@ sample_size_threshold(
   ...
 )
 
-sample_size_detect(x, prevalence, correlation, power, form, ...)
+power_detect(
+  design,
+  cluster_number,
+  prevalence,
+  correlation = 0,
+  form = "logitnorm",
+  ...
+)
+
+sample_size_detect(design, prevalence, correlation, power, form, ...)
 }
 \arguments{
-\item{x}{sample_design object.}
+\item{design}{sample_design object.}
 
 \item{cluster_number}{numeric The total number of clusters in a cluster
 survey design (should be greater than 1) or 1 surveys where all collection

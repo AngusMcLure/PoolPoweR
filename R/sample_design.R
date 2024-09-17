@@ -137,10 +137,15 @@ variable_design <- function(catch_dist,
   
   #Note there is currently no check that the pool_strat_family matches
   #pool_strat if both are supplied
+  
+  catch_mean <- distrEx::E(catch_dist)
+  catch_var <- distrEx::var(catch_dist)
 
   structure(
     list(
       catch_dist = catch_dist,
+      catch_mean = catch_mean,
+      catch_variance = catch_var,
       pool_strat = pool_strat,
       pool_strat_family = pool_strat_family,
       sensitivity = sensitivity,
@@ -150,6 +155,38 @@ variable_design <- function(catch_dist,
   )
 }
 
+#' @method print fixed_design
+#' @export
+
+print.fixed_design <- function(x,...){
+  
+  cat('A sample design with a fixed (pre-determined) number of pools per cluster and units per cluster: \n')
+  for(name in names(x)) {
+    value <- x[[name]]
+    cat(paste(format(name, width = 15L, justify = "right"),
+              value, sep = " = "),
+        sep = "\n")
+  }
+  invisible(x)
+}
+
+#' @method print variable_design
+#' @export
+
+print.variable_design <- function(x,...){
+  cat('A sample design with a variable (random) number units per cluster: \n')
+  
+  x[['catch_dist']] <- paste(capture.output(x$catch_dist), collapse = "; ")
+  
+  for(name in names(x)) {
+    value <- x[[name]]
+    cat(paste(format(name, width = 17L, justify = "right"),
+              value, sep = " = "),
+        sep = "\n")
+  }
+
+  invisible(x)
+}
 
 null_pools <- function(pool_size, pool_number) {
   if (is.null(pool_size) && is.null(pool_number)) {
