@@ -13,7 +13,7 @@
 #' (`design_effect(fixed_design, ...)`) or variable sample sizes 
 #' (`design_effect(variable_design, ...)`).
 #'
-#' @param x a sample_design object 
+#' @param design a sample_design object 
 #' @param prevalence numeric The proportion of units that carry the marker of
 #'   interest (i.e. true positive). Must be be a numeric value between 0 and 1,
 #'   inclusive of both.
@@ -36,7 +36,7 @@
 #' 
 #' vd <- variable_design(nb_catch(10, 13), pool_target_number(20))
 #' design_effect(vd, prevalence = 0.01, correlation = 0.05)
-design_effect <- function(x, prevalence, correlation, form) {
+design_effect <- function(design, prevalence, correlation, form) {
   check_in_range2(prevalence)
   check_in_range2(correlation)
   # No input check for form as done in downstream functions/methods
@@ -46,29 +46,29 @@ design_effect <- function(x, prevalence, correlation, form) {
 #' @rdname design_effect
 #' @method design_effect fixed_design
 #' @export
-design_effect.fixed_design <- function(x,
+design_effect.fixed_design <- function(design,
                                        prevalence,
                                        correlation,
                                        form = "logitnorm") {
   
-  x$pool_number * x$pool_size * fi_pool(pool_size = 1, prevalence, x$sensitivity, x$specificity) *
+  design$pool_number * design$pool_size * fi_pool(pool_size = 1, prevalence, design$sensitivity, design$specificity) *
     solve(fi_pool_cluster(
-      x$pool_size, x$pool_number, prevalence,
-      correlation, x$sensitivity, x$specificity, form)
+      design$pool_size, design$pool_number, prevalence,
+      correlation, design$sensitivity, design$specificity, form)
     )[1, 1]
 }
 
 #' @rdname design_effect
 #' @method design_effect variable_design
 #' @export
-design_effect.variable_design <- function(x,
+design_effect.variable_design <- function(design,
                                           prevalence,
                                           correlation,
                                           form = "logitnorm") {
-  catch_mean <- distrEx::E(x$catch_dist)
-  catch_mean * fi_pool(pool_size = 1, prevalence, x$sensitivity, x$specificity) *
+  catch_mean <- distrEx::E(design$catch_dist)
+  catch_mean * fi_pool(pool_size = 1, prevalence, design$sensitivity, design$specificity) *
     solve(fi_pool_cluster_random(
-      x$catch_dist, x$pool_strat, prevalence,
-      correlation, x$sensitivity, x$specificity, form)
+      design$catch_dist, design$pool_strat, prevalence,
+      correlation, design$sensitivity, design$specificity, form)
     )[1, 1]
 }

@@ -5,9 +5,9 @@
 #' typeII error (false non-detection or 1-power of detection) for pool-tested
 #' surveys with a known number and size of pools.
 #'
-#' @param x a sample_design object
+#' @param design a sample_design object
 #' @param cluster_number numeric The number of clusters. The same sample design,
-#'   x, is assumed to be used at each cluster
+#'   `design`, is assumed to be used at each cluster
 #' @param prevalence numeric The proportion of units that carry the marker of
 #'   interest (i.e. true positive) that you want wish to assess your survey
 #'   against
@@ -44,7 +44,7 @@
 #' 
 
 
-detection_errors <- function(x, cluster_number, prevalence,
+detection_errors <- function(design, cluster_number, prevalence,
                              correlation = 0, form = 'logitnorm') {
   check_in_range2(prevalence)
   check_in_range2(correlation)
@@ -56,14 +56,14 @@ detection_errors <- function(x, cluster_number, prevalence,
 #' @rdname detection_errors
 #' @export
  
-detection_errors.fixed_design <- function(x, cluster_number,
+detection_errors.fixed_design <- function(design, cluster_number,
                                           prevalence, correlation = 0,
                                           form = 'logitnorm'){
   
-  pool_size <- x$pool_size
-  pool_number <- x$pool_number
-  sensitivity <- x$sensitivity
-  specificity <- x$specificity
+  pool_size <- design$pool_size
+  pool_number <- design$pool_number
+  sensitivity <- design$sensitivity
+  specificity <- design$specificity
   
   if(correlation == 0){ #Non-cluster surveys
     pool_number <- pool_number * cluster_number

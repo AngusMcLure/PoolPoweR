@@ -6,14 +6,14 @@
 \alias{design_effect.variable_design}
 \title{Calculate the design effect for pooled testing.}
 \usage{
-design_effect(x, prevalence, correlation, form)
+design_effect(design, prevalence, correlation, form)
 
-\method{design_effect}{fixed_design}(x, prevalence, correlation, form = "logitnorm")
+\method{design_effect}{fixed_design}(design, prevalence, correlation, form = "logitnorm")
 
-\method{design_effect}{variable_design}(x, prevalence, correlation, form = "logitnorm")
+\method{design_effect}{variable_design}(design, prevalence, correlation, form = "logitnorm")
 }
 \arguments{
-\item{x}{a sample_design object}
+\item{design}{a sample_design object}
 
 \item{prevalence}{numeric The proportion of units that carry the marker of
 interest (i.e. true positive). Must be be a numeric value between 0 and 1,

@@ -236,7 +236,7 @@ optimise_s_prevalence <- function(pool_number = 1,
 #' @param max_s numeric The maximum number of units per pool (pool size).
 #' @param ... Additional arguments passed to methods.
 #' @export
-optimise_prevalence <- function(x, ...) {
+optimise_prevalence <- function(design, ...) {
   UseMethod("optimise_prevalence")
 }
 
@@ -246,7 +246,7 @@ optimise_prevalence <- function(x, ...) {
 #' @param max_N numeric The maximum number of pools per cluster (pool number).
 #' @method optimise_prevalence fixed_design_optimise_sN
 #' @export
-optimise_prevalence.fixed_design_optimise_sN <- function(x, 
+optimise_prevalence.fixed_design_optimise_sN <- function(design, 
                                                          prevalence,
                                                          cost_unit,
                                                          cost_pool,
@@ -268,7 +268,7 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
   if (is.na(correlation) || correlation == 0) { 
     opt <- optimise_s_prevalence(
       pool_number = 1, prevalence, cost_unit, cost_pool, cost_cluster,
-      correlation = NA, x$sensitivity, x$specificity, max_s, form
+      correlation = NA, design$sensitivity, design$specificity, max_s, form
     )
 
     na_or_inf <- ifelse(is.na(correlation), NA, Inf)
@@ -277,8 +277,8 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
       pool_size = opt$s,
       pool_number = na_or_inf,
       total_units = na_or_inf,
-      sensitivity = x$sensitivity,
-      specificity = x$specificity
+      sensitivity = design$sensitivity,
+      specificity = design$specificity
     )
     
     out <- optimised_results(
@@ -299,7 +299,7 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
   # while (N < max_N) {
   #   opt_new <- optimise_s_prevalence(
   #     pool_number = N + 1, prevalence, cost_unit, cost_pool, cost_cluster,
-  #     correlation, x$sensitivity, x$specificity, max_s, form
+  #     correlation, design$sensitivity, design$specificity, max_s, form
   #   )
   #   if (opt_new$cost > opt$cost) {
   #     break
@@ -312,7 +312,7 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
   N <- min(5, max_N)
   opt <- optimise_s_prevalence(
         pool_number = N, prevalence, cost_unit, cost_pool, cost_cluster,
-        correlation, x$sensitivity, x$specificity, max_s, form
+        correlation, design$sensitivity, design$specificity, max_s, form
       )
   
   
@@ -323,7 +323,7 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
     if(.s < 1 | .N < 2 | .s%%1) return(NA)
     cost_fi_cluster(.s, .N,
                     prevalence, correlation,
-                    x$sensitivity,x$specificity,
+                    design$sensitivity,design$specificity,
                     cost_unit, cost_pool,cost_cluster,
                     form = form)
   }
@@ -335,7 +335,7 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
     if(.s < 1 | .N < 2 | .N%%1) return(NA)
     cost_fi_cluster(.s, .N,
                     prevalence, correlation,
-                    x$sensitivity,x$specificity,
+                    design$sensitivity,design$specificity,
                     cost_unit, cost_pool,cost_cluster,
                     form = form)
   }
@@ -370,8 +370,8 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
   fd <- fixed_design(
     pool_size = opt_s,
     pool_number = opt_N,
-    sensitivity = x$sensitivity,
-    specificity = x$specificity
+    sensitivity = design$sensitivity,
+    specificity = design$specificity
   )
   
   optimised_results(
@@ -386,7 +386,7 @@ optimise_prevalence.fixed_design_optimise_sN <- function(x,
 
 #' @rdname optimise_s_prevalence
 #' @export
-optimise_prevalence.variable_design <- function(x,prevalence,
+optimise_prevalence.variable_design <- function(design,prevalence,
                                                 cost_unit, cost_pool, cost_cluster,
                                                 cost_period = NULL,
                                                 correlation = NA,
@@ -398,10 +398,10 @@ optimise_prevalence.variable_design <- function(x,prevalence,
   # Currently all the pooling strategy families only have integer arguments, so
   # this is fine, but this might need to be generalised in the future
   
-  pool_strat_family <- x$pool_strat_family
-  sensitivity <- x$sensitivity
-  specificity <- x$specificity
-  catch <- x$catch_dist
+  pool_strat_family <- design$pool_strat_family
+  sensitivity <- design$sensitivity
+  specificity <- design$specificity
+  catch <- design$catch_dist
   
   strat_par_names <- names(formals(pool_strat_family))
   

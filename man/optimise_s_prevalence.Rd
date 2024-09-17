@@ -20,7 +20,7 @@ optimise_s_prevalence(
 )
 
 \method{optimise_prevalence}{variable_design}(
-  x,
+  design,
   prevalence,
   cost_unit,
   cost_pool,

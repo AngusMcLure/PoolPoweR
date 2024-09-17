@@ -5,10 +5,10 @@
 \alias{optimise_prevalence.fixed_design_optimise_sN}
 \title{Optimise prevalence}
 \usage{
-optimise_prevalence(x, ...)
+optimise_prevalence(design, ...)
 
 \method{optimise_prevalence}{fixed_design_optimise_sN}(
-  x,
+  design,
   prevalence,
   cost_unit,
   cost_pool,
@@ -21,7 +21,7 @@ optimise_prevalence(x, ...)
 )
 }
 \arguments{
-\item{x}{a sample_design object}
+\item{design}{a sample_design object}
 
 \item{...}{Additional arguments passed to methods.}
 

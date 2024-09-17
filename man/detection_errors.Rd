@@ -7,7 +7,7 @@
 pooled samples}
 \usage{
 detection_errors(
-  x,
+  design,
   cluster_number,
   prevalence,
   correlation = 0,
@@ -15,7 +15,7 @@ detection_errors(
 )
 
 \method{detection_errors}{fixed_design}(
-  x,
+  design,
   cluster_number,
   prevalence,
   correlation = 0,
@@ -23,10 +23,10 @@ detection_errors(
 )
 }
 \arguments{
-\item{x}{a sample_design object}
+\item{design}{a sample_design object}
 
 \item{cluster_number}{numeric The number of clusters. The same sample design,
-x, is assumed to be used at each cluster}
+`design`, is assumed to be used at each cluster}
 
 \item{prevalence}{numeric The proportion of units that carry the marker of
 interest (i.e. true positive) that you want wish to assess your survey
