@@ -21,7 +21,7 @@
 #' pois_catch(10)
 
 nb_catch <- function(mean,variance){
-  if(mean>variance){stop('variance must be greater than or equal to mean')}
+  if(mean>=variance){stop('variance must be greater than mean')}
   distr::Nbinom(size = mean^2/(variance - mean), prob = mean/variance)
 }
 

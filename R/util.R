@@ -37,12 +37,19 @@ mu_sigma_linknorm <- function(.mean, .var,link,invlink){
     ..exp <- stats::integrate(fExp, -10 * sigma, 10 * sigma, abs.tol = abs.tol)$value
     fVar <- function(x) (invlink(x+mu) - ..exp)^2 * stats::dnorm(x,sd = sigma)
     ..var <- stats::integrate(fVar, -10 * sigma, 10 * sigma, abs.tol = abs.tol)$value
-    sum(abs(c(..exp,..var)/c(.mean,.var) - 1))
+    abs(c(..exp,..var)/c(.mean,.var) - 1)
+    #c(..exp - .mean, ..var - .var)
   }
-  out <- stats::optim(init,f,method = "SANN")$par
-  out <- stats::optim(out, f, control = list(abstol  = 0, reltol = .Machine$double.eps ^ 0.8))$par
-  out[2] <- abs(out[2])
-  out
+  # out <- stats::optim(init,f,method = "SANN", control = list(maxit = 1000))$par
+  # out <- stats::optim(out, f, control = list(abstol  = 0, reltol = .Machine$double.eps ^ 0.8))$par
+  
+  sol <- nleqslv::nleqslv(init, f, control = list(xtol = 0, ftol = 1e-9))
+  
+  if(sol$termcd != 1){
+    stop('No solution for .mean = ', .mean, ' .var = ', .var, ' and provided link')
+  }
+
+  sol$x
 }
 
 
