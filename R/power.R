@@ -116,6 +116,7 @@ power_threshold.fixed_design <- function(design,
                                          alternative = 'less',
                                          form = 'logitnorm', 
                                          link = 'logit',
+                                         replicates = 1,
                                          ...) {
   # Input checks
   if (correlation > 0 & cluster_number <= 1) {
@@ -130,6 +131,8 @@ power_threshold.fixed_design <- function(design,
     warning('Estimated power may be unreliable if total number of pools (cluster_number * pool_number) is less than 10')
   }
   
+  check_geq2(replicates,1)
+  
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
   
@@ -138,29 +141,33 @@ power_threshold.fixed_design <- function(design,
   gdivinv <- gdivinv_switch(link)
   
   # Calculate Fisher information
-  fia <- cluster_number * gdivinv(thetaa)^2 /
-    solve(fi_pool_cluster(pool_size = design$pool_size,
-                          pool_number = design$pool_number,
-                          prevalence = thetaa,
-                          correlation = correlation,
-                          sensitivity = design$sensitivity,
-                          specificity = design$specificity,
-                          form = form))[1,1]
+  fia <- cluster_number *
+    fi_pool_cluster(pool_size = design$pool_size,
+                    pool_number = design$pool_number,
+                    prevalence = thetaa,
+                    correlation = correlation,
+                    sensitivity = design$sensitivity,
+                    specificity = design$specificity,
+                    form = form)
   
-  fi0 <- cluster_number * gdivinv(theta0)^2/
-    solve(fi_pool_cluster(pool_size = design$pool_size,
-                          pool_number = design$pool_number,
-                          prevalence = theta0,  #should this be theta0 or thetaa?
-                          correlation = correlation,
-                          sensitivity = design$sensitivity,
-                          specificity = design$specificity,
-                          form = form))[1,1]
+  sea <- sqrt(sv(fia, replicates)[1,1] / gdivinv(thetaa)^2)
+  
+  fi0 <- cluster_number *
+    fi_pool_cluster(pool_size = design$pool_size,
+                    pool_number = design$pool_number,
+                    prevalence = theta0,
+                    correlation = correlation,
+                    sensitivity = design$sensitivity,
+                    specificity = design$specificity,
+                    form = form)
+  
+  se0 <- sqrt(sv(fi0, replicates)[1,1]/gdivinv(theta0)^2)
   
   power <- switch(alternative,
-                  less = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
-                  greater = stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
-                  two.sided = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)) +
-                    stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)),
+                  less      = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level)   * se0) / sea),
+                  greater   = stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level)   * se0) / sea),
+                  two.sided = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level/2) * se0) / sea) +
+                              stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level/2) * se0) / sea),
                   stop('invalid alternative. options are less, greater, and two.sided')
   )
   
@@ -192,6 +199,7 @@ power_threshold.variable_design <- function(design,
                                             alternative = 'less',
                                             form = 'logitnorm',
                                             link = 'logit',
+                                            replicates = 1,
                                             max_iter = 10000,
                                             rel_tol = 1e-6,
                                             ...){
@@ -219,6 +227,9 @@ power_threshold.variable_design <- function(design,
             '. Estimated power may be unreliable if total number of pools is less than 10')
   }
   
+  check_geq2(replicates,1)
+  
+  
   thetaa <- prevalence_alt
   theta0 <- prevalence_null
   
@@ -226,33 +237,37 @@ power_threshold.variable_design <- function(design,
   g <- g_switch(link)
   gdivinv <- gdivinv_switch(link)
   
-  fia <- cluster_number * gdivinv(thetaa)^2 /
-    solve(fi_pool_cluster_random(catch_dist = design$catch_dist, 
-                                 pool_strat = design$pool_strat, 
-                                 prevalence = thetaa,
-                                 correlation = correlation,
-                                 sensitivity = design$sensitivity,
-                                 specificity = design$specificity,
-                                 form = form,
-                                 max_iter = max_iter,
-                                 rel_tol = rel_tol-6))[1,1]
+  fia <- cluster_number *
+    fi_pool_cluster_random(catch_dist = design$catch_dist, 
+                           pool_strat = design$pool_strat, 
+                           prevalence = thetaa,
+                           correlation = correlation,
+                           sensitivity = design$sensitivity,
+                           specificity = design$specificity,
+                           form = form,
+                           max_iter = max_iter,
+                           rel_tol = rel_tol)
   
-  fi0 <- cluster_number * gdivinv(theta0)^2 /
-    solve(fi_pool_cluster_random(catch_dist = design$catch_dist, 
-                                 pool_strat = design$pool_strat, 
-                                 prevalence = theta0,  #should this be theta0 or thetaa?
-                                 correlation = correlation,
-                                 sensitivity = design$sensitivity,
-                                 specificity = design$specificity,
-                                 form = form,
-                                 max_iter = max_iter,
-                                 rel_tol = rel_tol-6))[1,1]
+  sea <- sqrt(sv(fia, replicates)[1,1] / gdivinv(thetaa)^2)
+  
+  fi0 <- cluster_number *
+    fi_pool_cluster_random(catch_dist = design$catch_dist, 
+                           pool_strat = design$pool_strat, 
+                           prevalence = theta0,  #should this be theta0 or thetaa?
+                           correlation = correlation,
+                           sensitivity = design$sensitivity,
+                           specificity = design$specificity,
+                           form = form,
+                           max_iter = max_iter,
+                           rel_tol = rel_tol)
+  
+  se0 <- sqrt(sv(fi0, replicates)[1,1]/gdivinv(theta0)^2)
   
   power <- switch(alternative,
-                  less    = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
-                  greater = stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level)/sqrt(fi0)) * sqrt(fia)),
-                  two.sided = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)) +
-                    stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level/2)/sqrt(fi0)) * sqrt(fia)),
+                  less      = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level)   * se0) / sea),
+                  greater   = stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level)   * se0) / sea),
+                  two.sided = stats::pnorm(((g(theta0) - g(thetaa))  - stats::qnorm(1-sig_level/2) * se0) / sea) +
+                              stats::pnorm(((g(thetaa) - g(theta0))  - stats::qnorm(1-sig_level/2) * se0) / sea),
                   stop('invalid alternative. options are less, greater, and two.sided')
   )
 

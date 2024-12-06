@@ -581,4 +581,35 @@ fi_pool_cluster_random <- function(catch_dist,
   return(ev(total_fi, catch_dist, max_iter, rel_tol))
 }
 
+#sample variance from the FI, generalised to the case where the same sampling
+#design is replicated in n populations, for which prevalence will be estimated
+#separately, but the correlation is assumed to be the same across all areas. For
+#the case of replicates = 1 this reduces to the inverse of the FI matrix. In the
+#case where replicates = Inf this reduces to matrix(c(1/FI[1,1],0,0,0), nrow =
+#2). If not a matrix (i.e. the case when there is no correlation to estimate),
+#this reduces to 1/FI and replicates is (silently) ignored
+sv <- function(FI, replicates){
+  
+  if(!is.matrix(FI)){
+    return(1/FI)
+  }else{
+    
+  SV <- FI
+  
+  a <- FI[1,1]
+  b <- -FI[1,2]
+  #c <- FI[2,2]
+  n <- replicates
+  
+  denom <- n * det(FI)
+  #denom <- n * (a * c - b^2)
+  
+  SV[1,1] <- (1 + b^2/denom)/a
+  SV[1,2] <- SV[2,1] <- b/denom
+  SV[2,2] <- a/denom
+  SV
+  }
+  
+}
+
 
