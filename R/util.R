@@ -68,7 +68,6 @@ mu_sigma_linknorm <- function(.mean, .var,link,invlink){
     stop('No solution for .mean = ', .mean, ' .var = ', .var, ' and provided link. ',
          'Convergence flag is ', sol$termcd, ' and f(x) = ', f(sol$x),'.')
   }
-  print(restarts)
 
   sol$x
 }
