@@ -25,6 +25,7 @@ log_one_minus_phi <- function(p, s, sens, spec){
 # Calculating parameters for link-normal style distributions
 
 mu_sigma_linknorm <- function(.mean, .var,link,invlink){
+  max_restarts <- 10
   if(.var >= .mean * (1- .mean)){
     stop('a distribution on [0,1] cannot have a variance this large')
   }
@@ -45,9 +46,29 @@ mu_sigma_linknorm <- function(.mean, .var,link,invlink){
   
   sol <- nleqslv::nleqslv(init, f, control = list(xtol = 0, ftol = 1e-9))
   
-  if(sol$termcd != 1){
-    stop('No solution for .mean = ', .mean, ' .var = ', .var, ' and provided link')
+  # sol$termcd == 1 means convergence. Anything else means convergence issues.
+  
+  # sol$termcd == 3 means algorithm has gotten stuck, which can usually fixed by
+  # restarting with slightly perturbed initial conditions. In this case we
+  # restart max_restart times before giving up
+  
+  restarts <- 0
+  while(restarts < max_restarts){
+    if(sol$termcd == 3){
+      sol <- nleqslv::nleqslv(sol$x * (runif(2, 0.95, 1.05)),
+                              f, control = list(xtol = 0, ftol = 1e-9))
+      restarts <- restarts + 1
+    }else{
+      break
+    }
   }
+
+  
+  if(sol$termcd != 1){
+    stop('No solution for .mean = ', .mean, ' .var = ', .var, ' and provided link. ',
+         'Convergence flag is ', sol$termcd, ' and f(x) = ', f(sol$x),'.')
+  }
+  print(restarts)
 
   sol$x
 }
