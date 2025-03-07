@@ -8,7 +8,7 @@
   
 Power and sample size calculations, and design optimisaiton tools for surveys using pool testing (AKA group testing).
 
-For a code-free user interface to this package see [PoolTools](https://fredjaya.shinyapps.io/pooltools/).
+For a code-free user interface to this package see [PoolTools](https://poolbox.shinyapps.io/PoolTools).
 
 This package is under active development, with new functionality added often. Though we are confident that implemented code is mostly correct and have provided extensive documentation and tests within the package, the names of functions, inputs, and outputs may change over time.
 
