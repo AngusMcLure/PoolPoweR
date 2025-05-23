@@ -97,7 +97,7 @@ For a perfectly specific test, positive predictive value is always 1. For an imp
 
 Design effect increases with $\theta$ but most rapidly when sensitivity is low and pools/groups are large.
 
-<img src="./Figures/FigDesignEffectSupp.png" style="zoom:50%;" /> 
+<img src="../Figures/FigDesignEffectSupp.png" style="zoom:50%;" /> 
 
 ***Figure []*** Design effect comparing pool-testing to individual testing for different sized pools, different prevalence, and a range of test sensitivity and specificity. Note that in comparing pooled and individual testing, both the pooled and individual tests are assumed to have the same sensitivity and specificity.
 
@@ -177,7 +177,7 @@ However the optimal pool size does not increase without bound for increasing $c_
 
 While specificity has a dramatic effect on the optimal $s$ especially for low $\theta$, there is no matching dramatic effect for sensitivity. If sensitivity were to decline substantially with increasing pool size it may have a greater effect of choice of pool/group size but we do not consider this case. However, reducing sensitivity does decrease Fisher information 
 
-![](./Figures/FigOptimals.png) 
+![](../Figures/FigOptimals.png) 
 
 ***Figure []*** Pool size that optimises unit cost of Fisher information as a function of prevalence (x-axis), sensitivity (rows), specificity (columns) and the relative cost of testing a pool ($c_p$) and collecting a unit ($c_u$). $c_p/c_u = 0$ and $c_p/c_u =$ Inf indicate the two extreme scenarios where testing pools or collecting units are free (or a sunk cost).   
 
@@ -493,11 +493,11 @@ While this behaviour is counter-intuitive and suggest major problems with using 
 
 [Note also that you don't get this weird behaviour for the simple discrete distribution. Instead it behaves very nicely with $\lim_{\rho \to 1}\Sigma_{1,1}$ appearing to converge to $1/I(\theta)$, i.e. reduces to the simple random sampling case. But the discrete distribution is strange in its own way as will be seen later]
 
-![](./Figures/FisherMatrixbeta.png)
+![](../Figures/FisherMatrixbeta.png)
 
 **Figure []**. Fisher information matrix for $\theta$ and $\rho$ in a cluster sample design with pooled testing with ten units per pool ($s = 10$) and five pools per cluster ($N = 5$). Cluster-level prevalence ($\Theta_j$) is assumed to be beta distributed with mean $\theta = \frac{\alpha}{\alpha + \beta}$ and resultant intra-cluster correlation $\rho = \frac{1}{\alpha + \beta + 1}$. Dotted lines in upper left panel is Fisher information for $\theta$ for a simple random survey with the same pool size and total pools, $I(\theta)$. Dotted lines in the upper right panel is $\frac{1}{I(\theta)}$.  
 
-![](./Figures/Variancebeta.png)
+![](../Figures/Variancebeta.png)
 
 **Figure []** Upper left element of inverse Fisher information matrix for $\theta$ and $\rho$ in a cluster sample design with pooled testing with large pools ($50 \leq s\leq 2000$) and two pools per cluster ($N = 2$). Cluster-level prevalence ($\Theta_j$) is assumed to be beta distributed with mean $\theta = \frac{\alpha}{\alpha + \beta}$ and resultant intra-cluster correlation $\rho = \frac{1}{\alpha + \beta + 1}$. Dotted lines is inverse of Fisher information for $\theta$ for a simple random survey with the same pool size and total pools, $\frac{1}{I(\theta)}$.  
 
@@ -538,7 +538,7 @@ The logit-normal distribution arises naturally in random effect and mixed effect
 
 The Fisher information matrix and its inverse display similar quantitative and qualitative results for logit-normal distributed $\Theta_j$ as for beta distributed $\Theta_j$ (compare below with figure from previous section).
 
-![](./Figures/FisherMatrixlogitnorm.png)
+![](../Figures/FisherMatrixlogitnorm.png)
 
 **Figure []**. Fisher information matrix for $\theta$ and $\rho$ in a cluster sample design with pooled testing with ten units per pool ($s = 10$) and five pools per cluster ($N = 5$). Cluster-level prevalence ($\Theta_j$) is assumed to be logit-normally distributed with mean $\theta$ and resultant intra-cluster correlation $\rho$. Dotted lines in upper left panel is Fisher information for $\theta$ for a simple random survey with the same pool size and total pools, $I(\theta)$. Dotted lines in the upper right panel is $\frac{1}{I(\theta)}$.  
 
@@ -571,25 +571,43 @@ However in general may we wish to simultaneously optimise both the size ($s$) of
 The final figure in this section shows the design effect as a function of correlation and number of units per site, pool size, and prevalence. Increasing prevalence increases the design effect unless individual testing used in which case there is no effect (this is for beta case — much more strange for discrete case ). Increasing the number of units caught at a site for a given pool size increases the design effect for moderately correlation ($\rho = 0.1$), has no effect when there is no correlation (and this is known), but has a more complicated relationship for very low correlation ($\rho = 0.01$).
 
 
-![](./Figures/unit info cluster alt beta.png)
+![](../Figures/unit info cluster alt beta.png)
 
-***Figure []*** Unit cost of information for prevalence estimation surveys with pooled testing and cluster or simple random surveys. Survey designs considered are simple random sampling ($\rho =$ NA) and cluster surveys with known zero clustering at site level ($\rho = 0$) or unknown degree of clustering ($\rho = 0.01, 0.1$). Tests are assumed to be perfectly specific and sensitive. The component survey costs are costs per cluster/location ($c_l = 40$; cluster sample designs only), costs per pool/test $c_p = 4$, and costs per unit collected $c_u = 1$. Fisher information calculations for cluster surveys with non-zero clustering assume prevalence is beta-distributed across sampling locations.
+***Figure []*** Unit cost of information for prevalence estimation surveys with pooled testing and cluster or simple random surveys. Survey designs considered are simple random sampling ($\rho =$ NA) and cluster surveys with known zero clustering at site level ($\rho = 0$) or unknown degree of clustering ($\rho = 0.01, 0.1$). Tests are assumed to be perfectly specific and sensitive. The component survey costs are costs per cluster/location ($c_l = 40$; cluster sample designs only), costs per pool/test ($c_p = 4$), and costs per unit collected ($c_u = 1$). Fisher information calculations for cluster surveys with non-zero clustering assume prevalence is beta-distributed across sampling locations.
 
-![](./Figures/unit info cluster alt discrete.png)
+![](../Figures/unit info cluster alt discrete.png)
 
 ***Figure []*** Same as previous figure but Fisher information calculations for cluster surveys with non-zero clustering assume prevalence follows a simple discrete distribution across sampling locations.
 
-![](./Figures/optimal cluster.png)
+![](../Figures/optimal cluster.png)
 
 ***Figure []*** Pool sizes that minimises cost of information in prevalence estimation surveys (solid line) and the range of pool sizes that are no more than 10% more costly than the optimal (shaded area bounded by dotted lines). Survey designs considered are simple random sampling ($\rho =$ NA) and cluster surveys with known zero clustering at site level ($\rho = 0$) or unknown degree of clustering ($\rho = 0.01, 0.1$). Tests are assumed to be perfectly specific and sensitive. The component survey costs are the same as previous figure.  Fisher information calculations for cluster surveys with non-zero clustering assume prevalence is beta-distributed across sampling locations. Note: the range of near-optimal pool sizes are only given for $\rho = 0$ and $\rho = 0.1$ to avoid over-plotting.
 
-![](./Figures/optimal cluster sN.png)
+![](../Figures/optimal cluster sN.png)
 
 ***Figure []*** The pool sizes ($s$), number of pools per sampling site ($N$), and units per location ($N \cdot s$) that minimises cost of information in prevalence estimation surveys. Survey designs considered are simple random sampling ($\rho =$ NA) and cluster surveys with known zero clustering at site level ($\rho = 0$) or unknown degree of clustering ($\rho = 0.01, 0.1$). Tests are assumed to be perfectly specific and sensitive. The cost per pool ($c_p$) and cost per location ($c_l$) vary across columns. Fisher information calculations for cluster surveys with non-zero clustering assume prevalence is beta-distributed across sampling locations. Note: optimal $N$ is infinite for for $\rho = 0$ at which point the cost information and optimal $s$ reduce to that of simple random survey.
 
- ![](./Figures/FigDesignEffectCorrbeta.png)
+ ![](../Figures/FigDesignEffectCorrbeta.png)
 
-***Figure []*** Design effect as a function of prevalence, within-site correlation, pool size and number of units per site. The dotted horizontal line indicates the reference design effect: simple random sampling with individual testing. All tests are assumed to be perfectly sensitive and specific. In each column the total units per site ($sN$) is fixed so $N$ is inversely proportional to $s$.  Variation of prevalence across sampling locations is modelled with the beta distribution. Note the different y-axis scales in each row. 
+***Figure []*** Design effect as a function of prevalence, within-site correlation, pool size and number of units per site. The dotted horizontal line indicates the reference design effect: simple random sampling with individual testing. All tests are assumed to be perfectly sensitive and specific. In each column the total units per site ($sN$) is fixed so $N$ is inversely proportional to $s$.  Variation of prevalence across sampling locations is modelled with the beta distribution. Note the different y-axis scales in each row.
+
+
+
+### What if $\rho$ is unknown but assumed to be constant across multiple independent samples?
+
+I don't have extensive notes here, but above we can see that a lot of the loss of statistical power associated with the problem of estimating $\rho$. For ease of exposition let $I_\theta = I(\theta, \rho|N, S)_{1,1}$, $I_\rho = I(\theta, \rho|N, S)_{2,2}$ and $I_{\theta \rho} = I(\theta, \rho|N, S)_{1,2} = I(\theta, \rho|N, S)_{2,1}$.
+
+For unknown $\rho$, the variance for out estimate of $\theta$, $\frac{I_\rho}{I_\theta I_\rho - {I_{\theta,\rho}}^2} \equiv \frac{1}{I_\theta} + \frac{{I_{\theta\rho}}^2}{I_\theta(I_\theta I_\rho - {I_{\theta\rho}}^2)} $. For known $\rho$ it is $\frac{1}{I_\theta}$.  
+
+If the problem of estimating $\rho$ is spread across $n$ independent samples for different populations, each using an identical cluster survey design, and for each sample we want to estimate the prevalence (could be different between populations), and correlation (unknown but assumed the same across populations) then the variance of the MLE for prevalence for each of the populations is:
+$$
+\frac{1}{I_\theta} + \frac{{I_{\theta\rho}}^2}{nI_\theta(I_\theta I_\rho - {I_{\theta\rho}}^2)}
+$$
+This reduces to the two cases above for $n=1$ and $n=\infty$.
+
+None of this unique to group-testing in any way — the same thing happens any time you have a common quantity that is estimated across samples from many populations. There is probably some name for this theorem/formula that a statistician would know! However, this can dramatically reduce sample size requirements so it's worth including somewhere if the focus is sample size estimates.
+
+
 
 ### Power size calculations based on Fisher information
 
