@@ -6,7 +6,7 @@
   [![codecov](https://codecov.io/gh/AngusMcLure/PoolPoweR/graph/badge.svg?token=OCUMCG50JU)](https://codecov.io/gh/AngusMcLure/PoolPoweR)
   <!-- badges: end -->  
   
-Power and sample size calculations, and design optimisaiton tools for surveys using pool testing (AKA group testing).
+Power and sample size calculations, and design optimisation tools for surveys using pool testing (AKA group testing).
 
 For a code-free user interface to this package see [PoolTools](https://poolbox.shinyapps.io/PoolTools).
 
