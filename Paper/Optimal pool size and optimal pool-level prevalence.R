@@ -1,10 +1,9 @@
 library(tidyverse)
 
-#Loads in the local version of PoolPoweR.
-#Use commented out version if running on a different machine or wanting to replicate exact versioning
-
-devtools::install_github('AngusMcLure/PoolPoweR',)
-devtools::load_all("C:/Users/u4859599/Documents/GitHub/PoolPoweR/")
+#Install then load specific GitHub commit. Use commented out version if loading local version
+devtools::install_github('AngusMcLure/PoolPoweR@74c0031a1d579e2d62ef357bc6909f85e17d474d')
+library(PoolPoweR)
+#devtools::load_all("C:/Users/u4859599/Documents/GitHub/PoolPoweR/")
 
 
 
