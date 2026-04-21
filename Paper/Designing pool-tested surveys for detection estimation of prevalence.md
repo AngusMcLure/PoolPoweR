@@ -12,8 +12,8 @@ We consider a survey where units are collected from a population using simple ra
 $$
 \begin{align*}
 \phi_s(\theta)
-:&= (1-\psi)(1-\theta)^s + \varphi (1 - (1-\theta)^s)\\
-&=\varphi + (1-\varphi-\psi)(1-\theta)^s
+& \coloneqq  (1-\psi)(1-\theta)^s + \varphi (1 - (1-\theta)^s)\\
+& \ =\varphi + (1-\varphi-\psi)(1-\theta)^s
 \end{align*}
 $$
 
@@ -27,25 +27,16 @@ Considering the Fisher information for $\theta$ for the simple case where $\unde
 $$
 \begin{align*}
 I(\theta|1, s,\varphi,\psi)
-= \frac{s^2(1-\theta)^{2s-2}(1-\varphi - \psi)^2}{\phi_{s}(\theta)(1-\phi_{s}(\theta))}\\
+= \frac{s^2(1-\theta)^{2s-2}(1-\varphi - \psi)^2}{\phi_{s}(\theta)(1-\phi_{s}(\theta))}.\\
 \end{align*}
 $$
-Since the results of pools/groups are independent given $\theta$, the Fisher information for $\theta$ from such a survey is the sum over Fisher information from each pool:
-$$
-\begin{align*}
-I(\theta|\underline{N}, \underline{s},\varphi,\psi)
-&= \sum_{k = 1}^K N_k I(\theta|1,s_k,\varphi,\psi)\\
-&= (1-\varphi-\psi)^2\sum_{k = 1}^K N_k \frac{s_k^2(1-\theta)^{2s_k-2}}{\phi_{s_k}(\theta)(1-\phi_{s_k}(\theta))}\\
-\end{align*}
-$$
-For large $n$ the maximum likelihood estimator of $\theta$ is normally distributed with variance $I(\theta|\underline{N},\underline{s},\varphi, \psi)^{-1}$.
+The Fisher information is well defined for all $\theta$ if the test is imperfectly specific ($\psi < 1$), but diverges as $\theta \to 0$ for a perfectly specific test:
 
-The Fisher information is well defined for all $\theta$ if the test is imperfectly specific, but diverges as $\theta \to 0$ for a perfectly specific test:
 $$
 \lim_{\theta \to 0} I(\theta |1,s,\varphi, \psi) =
 \begin{cases}
- \frac{s^2 (1-\varphi - \psi)^2}{(1-\psi)\psi}  &  0<\psi<1\\
-\infty & \psi =1
+ \frac{s^2 (1-\varphi - \psi)^2}{\psi(1-\psi)}  &  0<\psi<1\\
+\infty & \psi = 1
 \end{cases}
 $$
 
@@ -53,7 +44,7 @@ The behaviour of the Fisher information as $\theta \to 1$ depends on test sensit
 $$
 \lim_{\theta \to 1} I(\theta|1,s,\varphi,\psi) =
 \begin{cases}
-\frac{ (1-\varphi - \psi)^2}{(1-\varphi)\varphi} &  s=1, \ \ \ 0<\varphi<1\\
+\frac{ (1-\varphi - \psi)^2}{\varphi(1-\varphi)} &  s=1, \ \ \ 0<\varphi<1\\
 0 & s>1, \ \ \  0<\varphi<1\\
 \infty & s = 1, \ \ \ \varphi = 1 \\
 4\psi & s= 2, \ \ \ \varphi = 1 \\
@@ -61,6 +52,16 @@ $$
 \end{cases}
 $$
 The point to note here is that a group test yields more than an individual test when prevalence is low but far less information than individual tests when prevalence is high.
+
+For general $\underline{N}$ and $\underline{s}$, since the results of pools/groups are independent given $\theta$, the Fisher information for $\theta$ from such a survey is the sum over Fisher information from each pool:
+$$
+\begin{align*}
+I(\theta|\underline{N}, \underline{s},\varphi,\psi)
+&= \sum_{k = 1}^K N_k I(\theta|1,s_k,\varphi,\psi)\\
+&= (1-\varphi-\psi)^2\sum_{k = 1}^K N_k \frac{s_k^2(1-\theta)^{2s_k-2}}{\phi_{s_k}(\theta)(1-\phi_{s_k}(\theta))}\\
+\end{align*}
+$$
+For large $\underline{N}$ the maximum likelihood estimator of $\theta$ is normally distributed with variance $I(\theta|\underline{N},\underline{s},\varphi, \psi)^{-1}$. 
 
 #### Design effect
 
